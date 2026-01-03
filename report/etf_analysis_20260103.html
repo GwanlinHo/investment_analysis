@@ -1,0 +1,406 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>ETF 技術指標分析</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            h1 { text-align: center; }
+            h2 { color: #2c3e50; border-bottom: 2px solid #2c3e50; padding-bottom: 5px;}
+            p { color: #34495e; }
+            table { font-size: 13px; border-collapse: collapse; width: 100%; margin-bottom: 30px; }
+            th, td { padding: 4px 8px; text-align: center; line-height: 1.2; border: 1px solid #ddd; }
+            th { background-color: #f2f2f2; }
+            ul { line-height: 1.6; color: #34495e; }
+            li { margin-bottom: 5px; }
+        </style>
+    </head>
+    <body>
+        <h1>ETF 技術指標分析 - 2026-01-03</h1>
+        <h2>&lt;&lt;美股主要指數&gt;&gt;</h2><p>VIX:恐慌指數, GSPC:標普, SOX:費半, IXIC:納斯達克, DJI:道瓊, NYFNAG:尖牙, N225:日經, XAU:黃金</p><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: center;">
+      <th>Code</th>
+      <th>Price</th>
+      <th>Pri(%)</th>
+      <th>Vol(%)</th>
+      <th>K9</th>
+      <th>D9</th>
+      <th>BIAS5</th>
+      <th>BIAS20</th>
+      <th>BIAS60</th>
+      <th>ADX</th>
+      <th>+DI</th>
+      <th>-DI</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>^VIX</td>
+      <td><span style="color:green">14.51</span></td>
+      <td><span style="color:green">-2.94%</span></td>
+      <td><span style="color:green">0.00%</span></td>
+      <td><span style="color:black">27.07 ▲</span></td>
+      <td><span style="color:black">21.85 ▲</span></td>
+      <td><span style="color:black">1.34 ▼</span></td>
+      <td><span style="color:black">-5.37 ▼</span></td>
+      <td><span style="color:black">-18.45 ▼</span></td>
+      <td><span style="color:black">22.82 ▼</span></td>
+      <td><span style="color:red">17.20 ▲</span></td>
+      <td><span style="color:black">15.04 ▼</span></td>
+    </tr>
+    <tr>
+      <td>^GSPC</td>
+      <td><span style="color:red">6858.47</span></td>
+      <td><span style="color:red">0.19%</span></td>
+      <td><span style="color:black">92.73%▲</span></td>
+      <td><span style="color:black">60.89 ▼</span></td>
+      <td><span style="color:black">69.84 ▼</span></td>
+      <td><span style="color:black">-0.42 ▲</span></td>
+      <td><span style="color:black">0.03 ▲</span></td>
+      <td><span style="color:black">1.10 ▲</span></td>
+      <td><span style="color:black">16.87 ▼</span></td>
+      <td><span style="color:black">16.58 ▼</span></td>
+      <td><span style="color:red">26.70 ▲</span></td>
+    </tr>
+    <tr>
+      <td>^SOX</td>
+      <td><span style="color:red">7367.47</span></td>
+      <td><span style="color:red">4.01%</span></td>
+      <td><span style="color:green">0.00%</span></td>
+      <td><span style="color:black">79.83 ▲</span></td>
+      <td><span style="color:black">73.95 ▲</span></td>
+      <td><span style="color:black">2.31 ▲</span></td>
+      <td><span style="color:black">2.84 ▲</span></td>
+      <td><span style="color:black">5.47 ▲</span></td>
+      <td><span style="color:black">23.55 ▼</span></td>
+      <td><span style="color:black">21.65 ▲</span></td>
+      <td><span style="color:red">29.70 ▼</span></td>
+    </tr>
+    <tr>
+      <td>^IXIC</td>
+      <td><span style="color:green">23235.63</span></td>
+      <td><span style="color:green">-0.03%</span></td>
+      <td><span style="color:black">96.02%▲</span></td>
+      <td><span style="color:black">52.70 ▼</span></td>
+      <td><span style="color:black">65.45 ▼</span></td>
+      <td><span style="color:black">-0.67 ▲</span></td>
+      <td><span style="color:black">-0.57 ▲</span></td>
+      <td><span style="color:black">0.30 ▼</span></td>
+      <td><span style="color:black">20.03 ▼</span></td>
+      <td><span style="color:black">17.17 ▲</span></td>
+      <td><span style="color:red">28.33 ▼</span></td>
+    </tr>
+    <tr>
+      <td>^DJI</td>
+      <td><span style="color:red">48382.39</span></td>
+      <td><span style="color:red">0.66%</span></td>
+      <td><span style="color:black">98.68%▲</span></td>
+      <td><span style="color:black">53.36 ▲</span></td>
+      <td><span style="color:black">58.49 ▼</span></td>
+      <td><span style="color:black">-0.03 ▲</span></td>
+      <td><span style="color:black">0.34 ▲</span></td>
+      <td><span style="color:black">2.16 ▲</span></td>
+      <td><span style="color:red">28.59 ▼</span></td>
+      <td><span style="color:black">11.71 ▼</span></td>
+      <td><span style="color:red">22.60 ▲</span></td>
+    </tr>
+    <tr>
+      <td>^NYFANG</td>
+      <td><span style="color:green">15577.30</span></td>
+      <td><span style="color:green">-1.48%</span></td>
+      <td><span style="color:green">0.00%</span></td>
+      <td><span style="color:black">42.42 ▼</span></td>
+      <td><span style="color:black">49.81 ▼</span></td>
+      <td><span style="color:black">-1.84 ▼</span></td>
+      <td><span style="color:black">-3.16 ▼</span></td>
+      <td><span style="color:black">-4.57 ▼</span></td>
+      <td><span style="color:red">49.63 ▲</span></td>
+      <td><span style="color:black">13.23 ▲</span></td>
+      <td><span style="color:red">41.73 ▲</span></td>
+    </tr>
+    <tr>
+      <td>^N225</td>
+      <td><span style="color:green">50339.48</span></td>
+      <td><span style="color:green">-0.37%</span></td>
+      <td><span style="color:black">84.27%▼</span></td>
+      <td><span style="color:black">76.61 ▼</span></td>
+      <td><span style="color:black">70.60 ▲</span></td>
+      <td><span style="color:black">-0.27 ▼</span></td>
+      <td><span style="color:black">0.18 ▼</span></td>
+      <td><span style="color:black">1.23 ▼</span></td>
+      <td><span style="color:black">13.94 ▼</span></td>
+      <td><span style="color:black">24.64 ▼</span></td>
+      <td><span style="color:red">29.00 ▲</span></td>
+    </tr>
+    <tr>
+      <td>^XAU</td>
+      <td><span style="color:red">342.59</span></td>
+      <td><span style="color:red">0.09%</span></td>
+      <td><span style="color:green">0.00%</span></td>
+      <td><span style="color:black">42.75 ▼</span></td>
+      <td><span style="color:black">58.01 ▼</span></td>
+      <td><span style="color:black">-1.52 ▲</span></td>
+      <td><span style="color:black">0.92 ▼</span></td>
+      <td><span style="color:black">10.45 ▼</span></td>
+      <td><span style="color:red">47.34 ▼</span></td>
+      <td><span style="color:black">19.99 ▼</span></td>
+      <td><span style="color:red">22.36 ▲</span></td>
+    </tr>
+  </tbody>
+</table><h2>&lt;&lt;台股ETF&gt;&gt;</h2><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: center;">
+      <th>Code</th>
+      <th>Price</th>
+      <th>Pri(%)</th>
+      <th>Vol(%)</th>
+      <th>K9</th>
+      <th>D9</th>
+      <th>BIAS5</th>
+      <th>BIAS20</th>
+      <th>BIAS60</th>
+      <th>ADX</th>
+      <th>+DI</th>
+      <th>-DI</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>00770.TW</td>
+      <td><span style="color:black">58.10</span></td>
+      <td><span style="color:black">0.00%</span></td>
+      <td><span style="color:red">180.27%▲</span></td>
+      <td><span style="color:black">76.97 ▼</span></td>
+      <td><span style="color:black">74.69 ▲</span></td>
+      <td><span style="color:black">-0.29 ▲</span></td>
+      <td><span style="color:black">0.09 ▲</span></td>
+      <td><span style="color:black">1.88 ▼</span></td>
+      <td><span style="color:black">23.48 ▼</span></td>
+      <td><span style="color:black">24.86 ▲</span></td>
+      <td><span style="color:red">44.07 ▼</span></td>
+    </tr>
+    <tr>
+      <td>00924.TW</td>
+      <td><span style="color:red">29.26</span></td>
+      <td><span style="color:red">0.07%</span></td>
+      <td><span style="color:black">85.96%▲</span></td>
+      <td><span style="color:black">73.76 ▼</span></td>
+      <td><span style="color:black">76.01 ▼</span></td>
+      <td><span style="color:black">-0.31 ▲</span></td>
+      <td><span style="color:black">0.50 ▲</span></td>
+      <td><span style="color:black">2.16 ▼</span></td>
+      <td><span style="color:black">18.76 ▼</span></td>
+      <td><span style="color:black">31.93 ▲</span></td>
+      <td><span style="color:red">36.75 ▼</span></td>
+    </tr>
+    <tr>
+      <td>00757.TW</td>
+      <td><span style="color:red">118.20</span></td>
+      <td><span style="color:red">0.04%</span></td>
+      <td><span style="color:red">240.88%▲</span></td>
+      <td><span style="color:black">51.19 ▼</span></td>
+      <td><span style="color:black">52.66 ▼</span></td>
+      <td><span style="color:black">-0.42 ▲</span></td>
+      <td><span style="color:black">-1.43 ▲</span></td>
+      <td><span style="color:black">-2.02 ▲</span></td>
+      <td><span style="color:red">42.28 ▲</span></td>
+      <td><span style="color:black">27.43 ▲</span></td>
+      <td><span style="color:red">51.14 ▼</span></td>
+    </tr>
+    <tr>
+      <td>006208.TW</td>
+      <td><span style="color:red">152.95</span></td>
+      <td><span style="color:red">1.90%</span></td>
+      <td><span style="color:red">151.77%▼</span></td>
+      <td><span style="color:red">93.60 ▲</span></td>
+      <td><span style="color:red">84.69 ▲</span></td>
+      <td><span style="color:black">2.11 ▲</span></td>
+      <td><span style="color:black">5.00 ▲</span></td>
+      <td><span style="color:black">6.66 ▲</span></td>
+      <td><span style="color:red">27.66 ▼</span></td>
+      <td><span style="color:red">46.95 ▲</span></td>
+      <td><span style="color:black">16.87 ▼</span></td>
+    </tr>
+    <tr>
+      <td>00631L.TW</td>
+      <td><span style="color:red">375.25</span></td>
+      <td><span style="color:red">3.40%</span></td>
+      <td><span style="color:black">98.29%▲</span></td>
+      <td><span style="color:red">93.45 ▲</span></td>
+      <td><span style="color:red">84.62 ▲</span></td>
+      <td><span style="color:black">3.41 ▲</span></td>
+      <td><span style="color:red">8.16 ▲</span></td>
+      <td><span style="color:black">11.18 ▲</span></td>
+      <td><span style="color:black">21.13 ▼</span></td>
+      <td><span style="color:red">44.25 ▲</span></td>
+      <td><span style="color:black">19.93 ▼</span></td>
+    </tr>
+    <tr>
+      <td>2330.TW</td>
+      <td><span style="color:red">1585.00</span></td>
+      <td><span style="color:red">2.26%</span></td>
+      <td><span style="color:red">148.16%▲</span></td>
+      <td><span style="color:red">93.70 ▲</span></td>
+      <td><span style="color:red">83.27 ▲</span></td>
+      <td><span style="color:black">2.99 ▲</span></td>
+      <td><span style="color:black">6.98 ▲</span></td>
+      <td><span style="color:black">8.70 ▲</span></td>
+      <td><span style="color:black">24.32 ▲</span></td>
+      <td><span style="color:red">42.86 ▲</span></td>
+      <td><span style="color:black">15.71 ▼</span></td>
+    </tr>
+    <tr>
+      <td>00733.TW</td>
+      <td><span style="color:red">46.68</span></td>
+      <td><span style="color:red">1.81%</span></td>
+      <td><span style="color:red">529.59%▲</span></td>
+      <td><span style="color:black">76.98 ▲</span></td>
+      <td><span style="color:black">66.55 ▲</span></td>
+      <td><span style="color:black">1.35 ▲</span></td>
+      <td><span style="color:black">1.93 ▲</span></td>
+      <td><span style="color:black">0.97 ▲</span></td>
+      <td><span style="color:black">19.32 ▼</span></td>
+      <td><span style="color:red">30.88 ▲</span></td>
+      <td><span style="color:black">20.37 ▼</span></td>
+    </tr>
+    <tr>
+      <td>00661.TW</td>
+      <td><span style="color:red">65.50</span></td>
+      <td><span style="color:red">1.08%</span></td>
+      <td><span style="color:black">89.12%▲</span></td>
+      <td><span style="color:red">82.05 ▲</span></td>
+      <td><span style="color:black">74.00 ▲</span></td>
+      <td><span style="color:black">0.61 ▲</span></td>
+      <td><span style="color:black">1.30 ▲</span></td>
+      <td><span style="color:black">2.04 ▲</span></td>
+      <td><span style="color:black">12.67 ▼</span></td>
+      <td><span style="color:red">36.90 ▲</span></td>
+      <td><span style="color:black">32.14 ▼</span></td>
+    </tr>
+  </tbody>
+</table><h2>&lt;&lt;美債ETF&gt;&gt;</h2><p>00937B(群益BBB20Y)，00725B(國泰BBB10Y),00679B(元大美債20Y)，00687B(國泰美債20Y)，00719B(元大美債1-3Y)</p><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: center;">
+      <th>Code</th>
+      <th>Price</th>
+      <th>Pri(%)</th>
+      <th>Vol(%)</th>
+      <th>K9</th>
+      <th>D9</th>
+      <th>BIAS5</th>
+      <th>BIAS20</th>
+      <th>BIAS60</th>
+      <th>ADX</th>
+      <th>+DI</th>
+      <th>-DI</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>HYG</td>
+      <td><span style="color:red">80.67</span></td>
+      <td><span style="color:red">0.05%</span></td>
+      <td><span style="color:black">89.58%▲</span></td>
+      <td><span style="color:red">83.67 ▼</span></td>
+      <td><span style="color:red">84.50 ▼</span></td>
+      <td><span style="color:black">0.03 ▲</span></td>
+      <td><span style="color:black">0.33 ▲</span></td>
+      <td><span style="color:black">0.95 ▲</span></td>
+      <td><span style="color:black">17.69 ▼</span></td>
+      <td><span style="color:red">24.83 ▼</span></td>
+      <td><span style="color:black">15.03 ▲</span></td>
+    </tr>
+    <tr>
+      <td>00937B.TWO</td>
+      <td><span style="color:green">15.02</span></td>
+      <td><span style="color:green">-0.40%</span></td>
+      <td><span style="color:red">121.56%▲</span></td>
+      <td><span style="color:black">42.85 ▼</span></td>
+      <td><span style="color:black">58.68 ▼</span></td>
+      <td><span style="color:black">-0.35 ▼</span></td>
+      <td><span style="color:black">-0.20 ▼</span></td>
+      <td><span style="color:black">0.05 ▼</span></td>
+      <td><span style="color:black">15.51 ▼</span></td>
+      <td><span style="color:red">29.84 ▼</span></td>
+      <td><span style="color:black">29.52 ▲</span></td>
+    </tr>
+    <tr>
+      <td>00725B.TWO</td>
+      <td><span style="color:green">35.59</span></td>
+      <td><span style="color:green">-0.39%</span></td>
+      <td><span style="color:red">142.93%▲</span></td>
+      <td><span style="color:black">38.85 ▼</span></td>
+      <td><span style="color:black">56.60 ▼</span></td>
+      <td><span style="color:black">-0.34 ▼</span></td>
+      <td><span style="color:black">-0.18 ▼</span></td>
+      <td><span style="color:black">0.10 ▼</span></td>
+      <td><span style="color:black">15.35 ▼</span></td>
+      <td><span style="color:red">30.22 ▼</span></td>
+      <td><span style="color:black">25.82 ▲</span></td>
+    </tr>
+    <tr>
+      <td>00679B.TWO</td>
+      <td><span style="color:green">27.05</span></td>
+      <td><span style="color:green">-0.70%</span></td>
+      <td><span style="color:red">120.16%▲</span></td>
+      <td><span style="color:black">23.99 ▼</span></td>
+      <td><span style="color:black">39.71 ▼</span></td>
+      <td><span style="color:black">-0.57 ▼</span></td>
+      <td><span style="color:black">-0.54 ▼</span></td>
+      <td><span style="color:black">-0.82 ▼</span></td>
+      <td><span style="color:black">23.64 ▼</span></td>
+      <td><span style="color:red">28.33 ▼</span></td>
+      <td><span style="color:black">27.22 ▲</span></td>
+    </tr>
+    <tr>
+      <td>00687B.TWO</td>
+      <td><span style="color:green">28.11</span></td>
+      <td><span style="color:green">-0.67%</span></td>
+      <td><span style="color:black">98.84%▼</span></td>
+      <td><span style="color:black">26.95 ▼</span></td>
+      <td><span style="color:black">41.25 ▼</span></td>
+      <td><span style="color:black">-0.53 ▼</span></td>
+      <td><span style="color:black">-0.51 ▼</span></td>
+      <td><span style="color:black">-0.78 ▼</span></td>
+      <td><span style="color:black">23.46 ▼</span></td>
+      <td><span style="color:red">28.63 ▼</span></td>
+      <td><span style="color:black">26.95 ▲</span></td>
+    </tr>
+    <tr>
+      <td>00719B.TWO</td>
+      <td><span style="color:green">31.15</span></td>
+      <td><span style="color:green">-0.03%</span></td>
+      <td><span style="color:red">131.51%▲</span></td>
+      <td><span style="color:black">32.66 ▼</span></td>
+      <td><span style="color:black">43.96 ▼</span></td>
+      <td><span style="color:black">0.04 ▼</span></td>
+      <td><span style="color:black">0.31 ▼</span></td>
+      <td><span style="color:black">1.54 ▼</span></td>
+      <td><span style="color:red">29.47 ▲</span></td>
+      <td><span style="color:red">40.30 ▲</span></td>
+      <td><span style="color:black">14.18 ▲</span></td>
+    </tr>
+  </tbody>
+</table>
+<h2>綜合技術分析 (Technical Analysis)</h2>
+<ul>
+    <li><b>美股趨勢 (US Market):</b> 市場呈現強烈「Risk On」風險偏好。費半指數 (SOX) 大漲 4.01% 領軍，受惠於 AI 題材持續發酵。VIX 恐慌指數下跌至 14.51，顯示市場情緒樂觀。道瓊與標普續創新高。</li>
+    <li><b>台股觀察 (Taiwan Market):</b> 台積電 (2330) 跟隨美股半導體強勢，上漲 2.26% 收 1585 元。槓桿型 ETF (00631L) 漲幅達 3.4%，顯示資金積極進場。技術面 KD 指標多在高檔鈍化，動能強勁。</li>
+    <li><b>債市表現 (Bonds):</b> 美債 ETF (00679B, 00687B) 下跌約 0.7%，KD 指標偏弱，資金從避險資產撤出轉向股市。</li>
+</ul>
+
+<h2>重要全球財經新聞 (Global Financial News - Week of Jan 3, 2026)</h2>
+<ul>
+    <li><b>英國股市創歷史新高:</b> 倫敦富時 100 指數 (FTSE 100) 於 2026 年 1 月 2 日首次突破 10,000 點大關，顯示歐洲市場強勁。</li>
+    <li><b>聯準會降息效應:</b> 美國聯準會於 2025 年 12 月降息 1 碼至 3.50%-3.75%，持續支撐 2026 年初的股市漲勢。</li>
+    <li><b>AI 浪潮持續:</b> 人工智慧相關類股在 2026 年初繼續領漲美股，推動納斯達克與費半指數走高。</li>
+    <li><b>全球失業率預測:</b> 聯合國預測 2026 年全球失業率將小幅下降至 4.9%，勞動市場維持韌性。</li>
+    <li><b>美國房貸利率:</b> 2026 年初 30 年期固定房貸利率平均為 5.99%，房市壓力稍獲緩解。</li>
+    <li><b>匯市動態:</b> 歐元兌美元 (EUR/USD) 回落至 1.17；美元指數在經歷 2025 年跌勢後試圖回穩。</li>
+    <li><b>全球央行寬鬆:</b> 歐洲央行 (ECB) 與加拿大央行 (BoC) 延續降息循環，全球流動性充沛。</li>
+    <li><b>中國經濟展望:</b> 中國經濟仍面臨挑戰，主要依賴出口成長，與墨西哥等國的貿易緊張局勢升溫。</li>
+    <li><b>大宗商品:</b> 黃金 (XAU) 略微震盪，收於 342.59 (ETF價格)，市場資金更青睞高成長科技股。</li>
+    <li><b>美債殖利率:</b> 隨聯準會政策明朗化，美債殖利率曲線動態調整，長天期債券近期面臨獲利了結賣壓。</li>
+</ul>
+    </body>
+    </html>
