@@ -33,7 +33,7 @@ STOCK_GROUPS = [
 ]
 
 # --- 重點關注標的 (用於頂部摘要) ---
-KEY_INDICATORS = ["^GSPC", "^SOX", "2330.TW", "^VIX", "00687B.TWO"]
+KEY_INDICATORS = ["^VIX", "^GSPC", "^SOX", "^NYFANG", "2330.TW", "00719B.TWO"]
 
 # --- 代碼中文名稱對照表 ---
 SYMBOL_NAME_MAP = {
@@ -394,8 +394,8 @@ def generate_html_report(report_data, date_str, summary_data, yield_curve_plot_b
             .date-tag {{ display: inline-block; background: #e8eaf6; color: var(--accent-color); padding: 4px 12px; border-radius: 20px; font-size: 14px; margin-top: 10px; font-weight: 500; }}
 
             /* Market Summary Bar */
-            .summary-bar {{ display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 40px; }}
-            .summary-card {{ background: var(--card-bg); padding: 10px 15px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-width: 110px; text-align: center; border-bottom: 3px solid transparent; }}
+            .summary-bar {{ display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 40px; }}
+            .summary-card {{ background: var(--card-bg); padding: 10px 15px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; border-bottom: 3px solid transparent; }}
             .summary-title {{ font-size: 12px; color: var(--text-secondary); font-weight: 600; margin-bottom: 3px; }}
             .summary-price {{ font-size: 16px; font-weight: 800; color: var(--text-primary); }}
             .summary-change {{ font-size: 12px; font-weight: 600; margin-top: 2px; }}
@@ -415,15 +415,15 @@ def generate_html_report(report_data, date_str, summary_data, yield_curve_plot_b
             /* Table Styles */
             .table-responsive {{ overflow-x: auto; }}
             table {{ width: 100%; border-collapse: collapse; font-size: 14px; white-space: nowrap; }}
-            th {{ background-color: #f8f9fa; color: #495057; font-weight: 600; padding: 12px 15px; text-align: right; border-bottom: 2px solid var(--border-color); }}
+            th {{ background-color: #f8f9fa; color: #495057; font-weight: 600; padding: 8px 4px; text-align: right; border-bottom: 2px solid var(--border-color); }}
             th:first-child {{ text-align: left; }}
-            th:nth-child(4) {{ text-align: center; }} /* Signal column center */
-            td {{ padding: 12px 15px; border-bottom: 1px solid var(--border-color); text-align: right; }}
+            th:nth-child(4) {{ text-align: center; width: 70px; }} /* Signal column center */
+            td {{ padding: 8px 4px; border-bottom: 1px solid var(--border-color); text-align: right; }}
             td:first-child {{ text-align: left; font-weight: 600; color: var(--accent-color); }}
             tr:hover {{ background-color: #f1f3f5; }}
             
             /* Badges */
-            .badge {{ padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; color: white; display: inline-block; min-width: 80px; text-align: center; }}
+            .badge {{ padding: 4px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; color: white; display: inline-block; min-width: 64px; text-align: center; }}
             .bullish-strong {{ background-color: #e53935; }}
             .bullish-weak {{ background-color: #ef9a9a; color: #b71c1c; }}
             .bearish-strong {{ background-color: #43a047; }}
@@ -447,7 +447,7 @@ def generate_html_report(report_data, date_str, summary_data, yield_curve_plot_b
 
             @media (max-width: 768px) {{
                 .charts-grid {{ grid-template-columns: 1fr; }}
-                .summary-card {{ width: 45%; }}
+                .summary-bar {{ grid-template-columns: repeat(2, 1fr); }}
             }}
         </style>
     </head>
