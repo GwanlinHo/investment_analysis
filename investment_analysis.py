@@ -449,7 +449,7 @@ def generate_html_report(report_data, date_str, summary_data, yield_curve_plot_b
     </body>
     </html>
     """
-    filename = f"report/etf_tech_analysis_{date_str.replace('-', '')}.html"
+    filename = f"report/invest_analysis_{date_str.replace('-', '')}.html"
     try:
         os.makedirs(os.path.dirname(filename), exist_ok=True)
         with open(filename, 'w', encoding='utf-8') as f:

@@ -23,7 +23,7 @@
 
 *   `investment_analysis.py`: 核心 Python 腳本。負責抓取 `yfinance` 數據、計算指標、繪圖並生成 HTML 報告框架。
 *   `config.json`: 設定檔。管理追蹤清單、群組分類與中文名稱對照。
-*   `report/`: 存放生成的 HTML 日報 (檔名格式：`etf_tech_analysis_YYYYMMDD.html`)。
+*   `report/`: 存放生成的 HTML 日報 (檔名格式：`invest_analysis_YYYYMMDD.html`)。
 *   `README.md`: 專案說明文件。
 
 ---
