@@ -9,57 +9,36 @@ from io import BytesIO
 import matplotlib.pyplot as plt
 import mplfinance as mpf
 
+import json
+
 # --- 全域設定 ---
 warnings.filterwarnings("ignore")
 TZ = pytz.timezone('Asia/Taipei')
 
-# --- 股票群組設定 ---
-STOCK_GROUPS = [
-    {
-        "title": "美股主要指數",
-        "symbols": ["^VIX", "^GSPC", "^SOX", "^IXIC", "^DJI", "^NYFANG", "^N225", "^XAU"],
-        "description": ""
-    },
-    {
-        "title": "台股 ETF & 權值標的",
-        "symbols": ["00770.TW", "00924.TW", "00757.TW", "006208.TW", "00631L.TW", "2330.TW", "00733.TW", "00661.TW"],
-        "description": ""
-    },
-    {
-        "title": "債券 ETF (避險/領息)",
-        "symbols": ["HYG", "00937B.TWO", "00725B.TWO", "00679B.TWO", "00687B.TWO", "00719B.TWO"],
-        "description": ""
-    }
-]
+# --- 讀取設定檔 ---
+CONFIG_FILE = "config.json"
 
-# --- 重點關注標的 (用於頂部摘要) ---
-KEY_INDICATORS = ["^VIX", "^GSPC", "^SOX", "^NYFANG", "2330.TW", "00719B.TWO"]
-
-# --- 代碼中文名稱對照表 ---
-SYMBOL_NAME_MAP = {
-    "^VIX": "恐慌指數",
-    "^GSPC": "標普 500",
-    "^SOX": "費城半導體",
-    "^IXIC": "納斯達克",
-    "^DJI": "道瓊工業",
-    "^NYFANG": "尖牙股指數",
-    "^N225": "日經 225",
-    "^XAU": "黃金現貨",
-    "00770.TW": "國泰北美科技",
-    "00924.TW": "復華S&P500成長",
-    "00757.TW": "統一FANG+",
-    "006208.TW": "富邦台50",
-    "00631L.TW": "元大台灣50正2",
-    "2330.TW": "台積電",
-    "00733.TW": "富邦臺灣中小",
-    "00661.TW": "元大日經225",
-    "HYG": "HYG高收益債",
-    "00937B.TWO": "群益ESG投等債20+",
-    "00725B.TWO": "國泰10Y+金融債",
-    "00679B.TWO": "元大美債20年",
-    "00687B.TWO": "國泰20年美債",
-    "00719B.TWO": "元大美債1-3"
-}
+try:
+    with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
+        config = json.load(f)
+        STOCK_GROUPS = config.get("stock_groups", [])
+        KEY_INDICATORS = config.get("key_indicators", [])
+        SYMBOL_NAME_MAP = config.get("symbol_name_map", {})
+except FileNotFoundError:
+    print(f"❌ 錯誤：找不到設定檔 {CONFIG_FILE}。")
+    STOCK_GROUPS = []
+    KEY_INDICATORS = []
+    SYMBOL_NAME_MAP = {}
+except json.JSONDecodeError:
+    print(f"❌ 錯誤：設定檔 {CONFIG_FILE} 格式不正確。")
+    STOCK_GROUPS = []
+    KEY_INDICATORS = []
+    SYMBOL_NAME_MAP = {}
+except Exception as e:
+    print(f"❌ 讀取設定檔時發生未預期的錯誤: {e}")
+    STOCK_GROUPS = []
+    KEY_INDICATORS = []
+    SYMBOL_NAME_MAP = {}
 
 # --- 資料獲取 ---
 def get_stock_data(symbols, start_date, end_date):
