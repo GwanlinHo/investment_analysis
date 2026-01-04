@@ -47,6 +47,57 @@
 
 ---
 
+## 🤖 AI Agent 協作指南 (AI Agent Collaboration Guide)
+
+本專案的核心價值在於**「自動化程式碼」與「AI 認知能力」的結合**。雖然 Python 腳本可以精準計算數據，但無法解讀市場情緒或蒐集最新新聞。因此，我們設計了一套讓 AI Agent 接手後續工作的流程。
+
+### 1. Gemini CLI 協作模式 (預設)
+
+本專案已內建 Gemini CLI 的整合設定。
+
+*   **觸發機制**：
+    您只需要在 Gemini CLI 中輸入關鍵字：**`investment analysis`** (或 `run etf analysis`)。
+*   **背後原理**：
+    專案中的 `GEMINI.md` (或 `.gemini/GEMINI.md`) 扮演了「系統提示詞 (System Prompt)」的角色。當 AI 讀取到此檔案時，它會知道當使用者輸入特定關鍵字時，必須依序執行以下動作：
+    1.  **執行 Shell 指令**：`python3 investment_analysis.py`。
+    2.  **讀取檔案**：讀取生成的 HTML 內容。
+    3.  **聯網搜尋**：使用 Google Search 尋找當日美股、台股與匯市的真實新聞（且被要求必須附上來源連結）。
+    4.  **角色扮演分析**：切換成 ISTP (技術)、ISTJ (價值)、INTJ (宏觀) 三種人格進行分析。
+    5.  **寫入檔案**：將新聞與分析寫回 HTML 檔案中。
+    6.  **Git 操作**：自動 Commit 並 Push 到遠端。
+
+### 2. 適配其他 AI Agent (如 Claude Code, Codex, Cursor)
+
+這套「以檔案為基礎的上下文注入 (File-based Context Injection)」概念可以輕易移植到其他 AI 程式設計工具。
+
+如果您使用的是 **Claude Code (Anthropic)**、**GitHub Copilot CLI** 或 **Cursor**，請參考以下修改方式：
+
+#### 核心概念
+所有 AI Agent 工具都遵循 **`Input (指令) -> Context (上下文規則) -> Action (工具調用)`** 的邏輯。您需要將 `GEMINI.md` 中的邏輯「翻譯」給您的工具聽。
+
+#### 實作範例
+
+*   **Claude Code**:
+    *   在專案根目錄建立 `CLAUDE.md`。
+    *   將 `GEMINI.md` 中的 Workflow 內容複製進去。
+    *   Claude Code 會在啟動時讀取此檔案，並理解當您要求「分析投資」時該做什麼。
+    *   *提示*：Claude Code 同樣具備 `run_command` (執行腳本) 與 `bash` 能力，邏輯完全通用。
+
+*   **Cursor / VS Code Copilot**:
+    *   建立 `.cursorrules` 檔案 (針對 Cursor)。
+    *   將規則寫入：「當使用者要求『產生投資報告』時，請執行 `python3 investment_analysis.py`，然後搜尋網路新聞...」。
+    *   *注意*：這些 IDE 內建的 Agent 可能需要您手動按確認才能執行 Terminal 指令或寫入檔案，自動化程度可能不如 CLI 工具高。
+
+*   **自定義 LLM CLI**:
+    *   將 `GEMINI.md` 的內容作為 System Prompt 的一部分傳送給模型。
+    *   確保您的 CLI 環境有掛載 `Web Search` (搜尋新聞用) 與 `File I/O` (讀寫檔案用) 的工具權限。
+
+### 總結
+不論使用何種工具，關鍵在於**「定義工作流 (Workflow)」**：
+> **執行計算腳本 (Python) -> 獲取外部資訊 (Web Search) -> 綜合分析 (LLM Inference) -> 產出結果 (File Write)**
+
+---
+
 ## 安裝與設定
 
 ### 1. 環境需求
