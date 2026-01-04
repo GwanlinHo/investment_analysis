@@ -1,4 +1,3 @@
-
 import yfinance as yf
 import pandas as pd
 import datetime
@@ -17,21 +16,50 @@ TZ = pytz.timezone('Asia/Taipei')
 # --- 股票群組設定 ---
 STOCK_GROUPS = [
     {
-        "title": "<<美股主要指數>>",
+        "title": "美股主要指數",
         "symbols": ["^VIX", "^GSPC", "^SOX", "^IXIC", "^DJI", "^NYFANG", "^N225", "^XAU"],
-        "description": "VIX:恐慌指數, GSPC:標普, SOX:費半, IXIC:納斯達克, DJI:道瓊, NYFNAG:尖牙, N225:日經, XAU:黃金現貨"
+        "description": ""
     },
     {
-        "title": "<<台股ETF>>",
+        "title": "台股 ETF & 權值標的",
         "symbols": ["00770.TW", "00924.TW", "00757.TW", "006208.TW", "00631L.TW", "2330.TW", "00733.TW", "00661.TW"],
-        "description": "包含主要台股ETF及台積電"
+        "description": ""
     },
     {
-        "title": "<<債券ETF>>",
+        "title": "債券 ETF (避險/領息)",
         "symbols": ["HYG", "00937B.TWO", "00725B.TWO", "00679B.TWO", "00687B.TWO", "00719B.TWO"],
-        "description": "HYG:高收益公司債, 00937B(群益BBB20Y), 00725B(國泰BBB10Y), 00679B(元大美債20Y), 00687B(國泰美債20Y), 00719B(元大美債1-3Y)"
+        "description": ""
     }
 ]
+
+# --- 重點關注標的 (用於頂部摘要) ---
+KEY_INDICATORS = ["^GSPC", "^SOX", "2330.TW", "^VIX", "00687B.TWO"]
+
+# --- 代碼中文名稱對照表 ---
+SYMBOL_NAME_MAP = {
+    "^VIX": "恐慌指數",
+    "^GSPC": "標普 500",
+    "^SOX": "費城半導體",
+    "^IXIC": "納斯達克",
+    "^DJI": "道瓊工業",
+    "^NYFANG": "尖牙股指數",
+    "^N225": "日經 225",
+    "^XAU": "黃金現貨",
+    "00770.TW": "國泰北美科技",
+    "00924.TW": "復華S&P500成長",
+    "00757.TW": "統一FANG+",
+    "006208.TW": "富邦台50",
+    "00631L.TW": "元大台灣50正2",
+    "2330.TW": "台積電",
+    "00733.TW": "富邦臺灣中小",
+    "00661.TW": "元大日經225",
+    "HYG": "HYG高收益債",
+    "00937B.TWO": "群益ESG投等債20+",
+    "00725B.TWO": "國泰10Y+金融債",
+    "00679B.TWO": "元大美債20年",
+    "00687B.TWO": "國泰20年美債",
+    "00719B.TWO": "元大美債1-3"
+}
 
 # --- 資料獲取 ---
 def get_stock_data(symbols, start_date, end_date):
@@ -39,9 +67,10 @@ def get_stock_data(symbols, start_date, end_date):
     data = {}
     for symbol in symbols:
         try:
+            # yfinance download
             df = yf.download(symbol, start=start_date, end=end_date, progress=False, auto_adjust=True)
             if df.empty or len(df) < 2:
-                print(f"警告：無法獲取 {symbol} 的有效資料，將跳過。")
+                print(f"⚠️ 警告：無法獲取 {symbol} 的有效資料，將跳過。")
                 continue
             
             # 處理 yfinance 可能回傳的 MultiIndex 欄位
@@ -51,7 +80,7 @@ def get_stock_data(symbols, start_date, end_date):
             df = df[~df.index.duplicated(keep='first')]
             data[symbol] = df
         except Exception as e:
-            print(f"抓取 {symbol} 資料時發生錯誤: {e}")
+            print(f"❌ 抓取 {symbol} 資料時發生錯誤: {e}")
     return data
 
 # --- 技術指標計算 ---
@@ -65,12 +94,12 @@ def calculate_all_indicators(df):
     df['K'] = rsv.ewm(com=2, adjust=False).mean()
     df['D'] = df['K'].ewm(com=2, adjust=False).mean()
     
-    # BIAS
+    # BIAS (乖離率)
     for period in [5, 20, 60]:
         ma = df['Close'].rolling(window=period).mean()
         df[f'BIAS_{period}'] = ((df['Close'] - ma) / ma) * 100
         
-    # DMI
+    # DMI (動向指標)
     df['+DM'] = df['High'].diff().clip(lower=0)
     df['-DM'] = -df['Low'].diff().clip(upper=0)
     tr = pd.concat([df['High'] - df['Low'], abs(df['High'] - df['Close'].shift()), abs(df['Low'] - df['Close'].shift())], axis=1).max(axis=1)
@@ -91,16 +120,51 @@ def calculate_all_indicators(df):
     
     return df
 
-# --- HTML 與繪圖 ---
-def get_value_style(value, high, low):
-    """根據閾值返回顏色"""
+# --- HTML 樣式與輔助函式 ---
+
+def determine_trend(k, d, bias20, change_pct):
+    """簡易趨勢判斷"""
+    signal = ""
+    style_class = "neutral"
+    
+    # 強勢多頭：K > D 且 月線乖離 > 0
+    if k > d and bias20 > 0:
+        signal = "多頭排列"
+        style_class = "bullish-strong"
+    # 弱勢反彈：K > D 但 月線乖離 < 0
+    elif k > d and bias20 < 0:
+        signal = "反彈"
+        style_class = "bullish-weak"
+    # 強勢空頭：K < D 且 月線乖離 < 0
+    elif k < d and bias20 < 0:
+        signal = "空頭修正"
+        style_class = "bearish-strong"
+    # 高檔拉回：K < D 但 月線乖離 > 0
+    elif k < d and bias20 > 0:
+        signal = "回檔整理"
+        style_class = "bearish-weak"
+        
+    return signal, style_class
+
+def get_color_class(value, high=0, low=0, inverse=False):
+    """
+    返回 CSS class
+    inverse=True 用於 VIX 或反向指標 (跌是好的)
+    預設: > high (Red/Up), < low (Green/Down)
+    """
     if pd.isna(value): return ""
-    if value > high: return "color:red;"
-    if value < low: return "color:green;"
+    
+    if not inverse:
+        if value > high: return "text-up"
+        if value < low: return "text-down"
+    else:
+        if value > high: return "text-down" # 數值高是不好的
+        if value < low: return "text-up"    # 數值低是好的
+        
     return ""
 
 def format_data_row(symbol, latest, prev):
-    """格式化單行HTML表格資料"""
+    """格式化單行 HTML 表格資料"""
     def get_scalar(data, key):
         val = data.get(key)
         if isinstance(val, pd.Series):
@@ -118,44 +182,68 @@ def format_data_row(symbol, latest, prev):
     adx = get_scalar(latest, "ADX")
     plus_di = get_scalar(latest, "+DI")
     minus_di = get_scalar(latest, "-DI")
+    
+    trend_signal, trend_class = determine_trend(k, d, bias20, change_pct)
+    
+    # 判斷是否為 VIX 相關 (代碼含 VIX 或反向)
+    is_inverse = "VIX" in symbol
+    
+    # 獲取顯示名稱
+    display_name = SYMBOL_NAME_MAP.get(symbol, symbol)
+    # 組合顯示 HTML: 中文名稱在上，代碼在下(小字)
+    symbol_html = f"<div>{display_name}</div><div style='font-size: 11px; color: #888;'>{symbol}</div>"
 
-    return [
-        symbol,
-        f'<span style="{get_value_style(change_pct, 0, 0)}">{close:.2f}</span>',
-        f'<span style="{get_value_style(change_pct, 0, 0)}">{change_pct:.2f}%</span>',
-        f'<span style="{get_value_style(vol_change, 100, 50)}">{vol_change:.1f}%</span>',
-        f'<span style="{get_value_style(k, 80, 20)}">{k:.1f}</span>',
-        f'<span style="{get_value_style(d, 80, 20)}">{d:.1f}</span>',
-        f'<span style="{get_value_style(bias5, 4, -4)}">{bias5:.1f}</span>',
-        f'<span style="{get_value_style(bias20, 7, -7)}">{bias20:.1f}</span>',
-        f'<span style="{get_value_style(bias60, 15, -15)}">{bias60:.1f}</span>',
-        f'<span style="{get_value_style(adx, 25, 0)}">{adx:.1f}</span>',
-        f'<span style="{get_value_style(plus_di, minus_di, float("-inf"))}">{plus_di:.1f}</span>',
-        f'<span style="{get_value_style(minus_di, plus_di, float("-inf"))}">{minus_di:.1f}</span>',
-    ]
+    return f"""
+    <tr>
+      <td class="symbol-cell">{symbol_html}</td>
+      <td class="number-cell {get_color_class(change_pct, 0, 0, is_inverse)}"><strong>{close:,.2f}</strong></td>
+      <td class="number-cell {get_color_class(change_pct, 0, 0, is_inverse)}">{change_pct:+.2f}%</td>
+      <td class="trend-cell"><span class="badge {trend_class}">{trend_signal}</span></td>
+      <td class="number-cell {get_color_class(vol_change, 100, 50)}">{vol_change:.1f}%</td>
+      <td class="number-cell {get_color_class(k, 80, 20)}">{k:.1f}</td>
+      <td class="number-cell {get_color_class(d, 80, 20)}">{d:.1f}</td>
+      <td class="number-cell {get_color_class(bias5, 3, -3)}">{bias5:.1f}</td>
+      <td class="number-cell {get_color_class(bias20, 5, -5)}">{bias20:.1f}</td>
+      <td class="number-cell {get_color_class(bias60, 10, -10)}">{bias60:.1f}</td>
+      <td class="number-cell {get_color_class(adx, 25, 0)}">{adx:.1f}</td>
+      <td class="number-cell {get_color_class(plus_di, minus_di, float("-inf"))}">{plus_di:.1f}</td>
+      <td class="number-cell {get_color_class(minus_di, plus_di, float("-inf"))}">{minus_di:.1f}</td>
+    </tr>
+    """
 
-def create_ma_plot_base64(df, symbol):
+def create_ma_plot_base64(df, symbol, title=None):
     """建立K線圖(含MA與成交量)並返回Base64字串"""
-    # 定義自訂樣式：紅漲綠跌 (Taiwan Style)
-    mc = mpf.make_marketcolors(up='r', down='g', edge='inherit', wick='inherit', volume='in')
-    s = mpf.make_mpf_style(marketcolors=mc, gridstyle='--', gridaxis='both')
+    # 定義自訂樣式：紅漲綠跌 (Taiwan Style), 背景白色
+    mc = mpf.make_marketcolors(up='#e53935', down='#43a047', edge='inherit', wick='inherit', volume='in', inherit=True)
+    s = mpf.make_mpf_style(base_mpf_style='yahoo', marketcolors=mc, gridstyle=':', gridcolor='#e0e0e0', facecolor='white')
 
     buf = BytesIO()
     
-    # 繪製 K 線圖、均線 (5, 20, 60) 與成交量
+    # 如果沒有提供標題，就用代碼
+    plot_title = title if title else symbol
+    
     try:
+        # 增加 dpi 提升清晰度
+        # 注意: mpf.plot 的 title 參數有時會被 tight_layout 裁切，這裡我們不直接用 mpf 的 title，
+        # 而是讓前端 HTML 負責顯示標題，圖表本身保持乾淨，或者僅在圖表內部顯示簡單資訊。
+        # 但為了符合使用者需求，我們這裡不傳入 title 給 mpf (因為 HTML 已經有標題了)，
+        # 這裡的修改主要是為了函式簽名的一致性，或者如果我們想在圖中加標題的話。
+        # 實際上，我們在 HTML 的 chart-card 已經有顯示標題了。
+        # 為了讓圖片更單純，我們保持原樣，但在 main 呼叫時會用到這個函式。
+        
         mpf.plot(df, type='candle', mav=(5, 20, 60), volume=True, 
-                 style=s, figsize=(10, 5), 
-                 savefig=dict(fname=buf, format='png', bbox_inches='tight', pad_inches=0.1),
+                 style=s, figsize=(10, 6), 
+                 savefig=dict(fname=buf, format='png', bbox_inches='tight', pad_inches=0.1, dpi=100),
                  ylabel='', ylabel_lower='',
-                 xrotation=30,
-                 datetime_format='%Y-%m-%d',
-                 tight_layout=True)
+                 xrotation=0,
+                 datetime_format='%m-%d',
+                 tight_layout=True,
+                 panel_ratios=(4,1))
         
         buf.seek(0)
         return base64.b64encode(buf.read()).decode('utf-8')
     except Exception as e:
-        print(f"繪製 {symbol} K線圖時發生錯誤: {e}")
+        print(f"❌ 繪製 {symbol} K線圖時發生錯誤: {e}")
         return None
 
 def create_yield_curve_plot_base64():
@@ -163,169 +251,311 @@ def create_yield_curve_plot_base64():
     print("  - 正在產生美國公債殖利率圖表...")
     try:
         end_date = datetime.datetime.now()
-        start_date = end_date - datetime.timedelta(days=10*365)
+        start_date = end_date - datetime.timedelta(days=5*365) # 5 years
         
-        print(f"    - 抓取 ^TNX 資料從 {start_date.strftime('%Y-%m-%d')} 到 {end_date.strftime('%Y-%m-%d')}")
-        ten_year_df = yf.download("^TNX", start=start_date, end=end_date, progress=False, auto_adjust=True)
-        print(f"    - ^TNX 資料獲取完畢，共 {len(ten_year_df)} 筆。")
-
-        print(f"    - 抓取 ^IRX 資料從 {start_date.strftime('%Y-%m-%d')} 到 {end_date.strftime('%Y-%m-%d')}")
+        # 抓取三種殖利率
         three_month_df = yf.download("^IRX", start=start_date, end=end_date, progress=False, auto_adjust=True)
-        print(f"    - ^IRX 資料獲取完畢，共 {len(three_month_df)} 筆。")
+        ten_year_df = yf.download("^TNX", start=start_date, end=end_date, progress=False, auto_adjust=True)
+        thirty_year_df = yf.download("^TYX", start=start_date, end=end_date, progress=False, auto_adjust=True)
 
-        if ten_year_df.empty or three_month_df.empty:
-            print("警告：無法獲取公債殖利率資料，將跳過圖表產生。")
-            if ten_year_df.empty:
-                print("    - ^TNX 資料為空。")
-            if three_month_df.empty:
-                print("    - ^IRX 資料為空。")
+        if three_month_df.empty or ten_year_df.empty or thirty_year_df.empty:
+            print("  ⚠️ 無法獲取完整的殖利率資料。")
             return None
 
-        print("    - 正在繪製殖利率圖表...")
-        plt.figure(figsize=(10, 2.25)) # 調整圖表高度
-        plt.plot(ten_year_df.index, ten_year_df['Close'], label='10-Year Treasury Yield (^TNX)', color='blue', linewidth=1.0)
-        plt.plot(three_month_df.index, three_month_df['Close'], label='3-Month Treasury Yield (^IRX)', color='red', linewidth=1.0)
+        # 使用 matplotlib 風格
+        plt.style.use('bmh')
+        plt.figure(figsize=(12, 6))
         
-        plt.title('US Treasury Yield Curve (10Y vs 3M)', fontsize=14)
+        # 繪製 3個月期 (短債)
+        plt.plot(three_month_df.index, three_month_df['Close'], label='3-Month Yield (^IRX)', color='#e53935', linewidth=1.2, alpha=0.8)
+        
+        # 繪製 10年期 (中長債基準)
+        plt.plot(ten_year_df.index, ten_year_df['Close'], label='10-Year Yield (^TNX)', color='#1976d2', linewidth=1.5)
+        
+        # 繪製 30年期 (長債)
+        plt.plot(thirty_year_df.index, thirty_year_df['Close'], label='30-Year Yield (^TYX)', color='#8e24aa', linewidth=1.5)
+        
         plt.ylabel('Yield (%)', fontsize=10)
-        plt.legend(fontsize=9, loc='upper left')
-        plt.grid(True, which='both', linestyle='--', linewidth=0.4)
-        plt.xticks(rotation=30, ha='right', fontsize=8)
-        plt.yticks(fontsize=8)
-        plt.tight_layout(pad=0.5)
+        plt.legend(fontsize=9, loc='upper left', frameon=True, facecolor='white')
+        plt.grid(True, which='both', linestyle='--', linewidth=0.5, alpha=0.7)
+        plt.tight_layout()
         
         buf = BytesIO()
-        plt.savefig(buf, format='png', bbox_inches='tight', pad_inches=0.1)
+        plt.savefig(buf, format='png', bbox_inches='tight', dpi=100)
         plt.close()
-        print("    - 殖利率圖表繪製完畢。")
         return base64.b64encode(buf.getvalue()).decode('utf-8')
     except Exception as e:
-        print(f"產生殖利率圖表時發生錯誤: {e}")
+        print(f"❌ 產生殖利率圖表時發生錯誤: {e}")
         return None
 
-def generate_html_report(report_data, date_str, yield_curve_plot_b64=None):
+def generate_html_report(report_data, date_str, summary_data, yield_curve_plot_b64=None):
     """生成最終的HTML報告"""
-    tables_html = ""
-    plots_html = ""
-
-    for group_data in report_data:
-        tables_html += f"<h2>{group_data['title']}</h2>"
-        if group_data['description']:
-            tables_html += f"<p>{group_data['description']}</p>"
-        tables_html += group_data['table_html']
-        
-        plots_html += f"<h2>{group_data['title']} - K線圖</h2>" # Add a title for the plots section of each group
-        plots_html += '<div class="plots-grid">'
-        for symbol, b64_plot in group_data['plots'].items():
-            plots_html += f'''
-            <div class="plot-container">
-                <h3>{symbol}</h3>
-                <img src="data:image/png;base64,{b64_plot}" alt="{symbol} Plot">
-            </div>
-            '''
-        plots_html += '</div>'
-
-    content_html = tables_html + plots_html
-
-    if yield_curve_plot_b64:
-        print("  - 正在將殖利率圖表加入HTML報告...")
-        content_html += f'''
-        <h2>美國長短期國庫券殖利率 (10年)</h2>
-        <div class="yield-plot-container">
-             <img src="data:image/png;base64,{yield_curve_plot_b64}" alt="Yield Curve Plot">
+    
+    # 建構市場速覽 HTML
+    summary_html = ""
+    for item in summary_data:
+        color_class = get_color_class(item['change'], 0, 0, inverse=("VIX" in item['symbol']))
+        icon = "▲" if item['change'] > 0 else "▼" if item['change'] < 0 else "-"
+        summary_html += f'''
+        <div class="summary-card">
+            <div class="summary-title">{item['symbol']}</div>
+            <div class="summary-price">{item['close']:.2f}</div>
+            <div class="summary-change {color_class}">{icon} {item['change']:.2f}%</div>
         </div>
         '''
-        print("  - 殖利率圖表已成功加入HTML。")
+
+    content_html = ""
+    for group_data in report_data:
+        # Group Title
+        content_html += f'''
+        <div class="group-section">
+            <h2 class="group-title">{group_data['title']}</h2>
+            
+            <!-- Table Card -->
+            <div class="card table-card">
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>名稱</th>
+                                <th>價格</th>
+                                <th>漲跌%</th>
+                                <th>技術訊號</th>
+                                <th>量比%</th>
+                                <th>K9</th>
+                                <th>D9</th>
+                                <th>5日乖離</th>
+                                <th>20日乖離</th>
+                                <th>60日乖離</th>
+                                <th>ADX</th>
+                                <th>+DI</th>
+                                <th>-DI</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {group_data['table_rows']}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Charts Grid -->
+            <h3 class="subsection-title">K線圖概覽</h3>
+            <div class="charts-grid">
+        '''
+        
+        for symbol, b64_plot in group_data['plots'].items():
+            content_html += f'''
+                <div class="card chart-card">
+                    <div class="chart-header">{symbol}</div>
+                    <img src="data:image/png;base64,{b64_plot}" alt="{symbol} Plot" loading="lazy">
+                </div>
+            '''
+        content_html += '</div></div>'
+
+    # Yield Curve Section
+    if yield_curve_plot_b64:
+        content_html += f'''
+        <div class="group-section">
+            <h2 class="group-title">總體經濟指標</h2>
+            <div class="card chart-card" style="max-width: 900px; margin: 0 auto;">
+                 <div class="chart-header">美國長短期國庫券殖利率</div>
+                 <img src="data:image/png;base64,{yield_curve_plot_b64}" alt="Yield Curve Plot">
+            </div>
+        </div>
+        '''
 
     html_template = f"""
-    <html>
+    <!DOCTYPE html>
+    <html lang="zh-Hant">
     <head>
         <meta charset="UTF-8">
-        <title>綜合技術分析報告</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>投資技術分析日報 | {date_str}</title>
         <style>
-            body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 15px; background-color: #f9f9f9; color: #333; }}
-            h1 {{ text-align: center; color: #1a237e; margin-bottom: 15px; font-size: 24px; }}
-            h2 {{ color: #2c3e50; border-bottom: 2px solid #2c3e50; padding-bottom: 3px; margin-top: 25px; margin-bottom: 10px; font-size: 18px; }}
-            h3 {{ text-align: center; color: #444; margin: 5px 0; font-size: 14px; font-weight: bold; }}
-            p {{ color: #555; font-size: 13px; margin-top: 0; margin-bottom: 10px; }}
-            table {{ font-size: 13px; border-collapse: collapse; width: 100%; margin-bottom: 20px; }}
-            th, td {{ padding: 4px 6px; text-align: center; border: 1px solid #ddd; }}
-            th {{ background-color: #e8eaf6; font-weight: bold; }}
-            tr:nth-child(even) {{ background-color: #f7f7f7; }}
-            .plots-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 15px; margin-top: 20px; }}
-            .plot-container {{ border: 1px solid #ddd; border-radius: 6px; padding: 10px; background-color: #fff; page-break-inside: avoid; }}
-            .yield-plot-container {{ border: 1px solid #ddd; border-radius: 6px; padding: 10px; background-color: #fff; margin-top: 20px; }}
-            img {{ max-width: 100%; height: auto; display: block; margin: 0 auto; }}
+            :root {{
+                --bg-color: #f4f6f8;
+                --text-primary: #333;
+                --text-secondary: #666;
+                --card-bg: #ffffff;
+                --up-color: #e53935;
+                --down-color: #43a047;
+                --accent-color: #1a237e;
+                --border-color: #e0e0e0;
+            }}
+            body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; background-color: var(--bg-color); color: var(--text-primary); line-height: 1.6; }}
+            
+            /* Container */
+            .container {{ max-width: 1200px; margin: 0 auto; padding: 20px; }}
+            
+            /* Header */
+            header {{ text-align: center; margin-bottom: 30px; padding: 20px 0; }}
+            h1 {{ margin: 0; color: var(--accent-color); font-size: 28px; font-weight: 700; letter-spacing: 1px; }}
+            .date-tag {{ display: inline-block; background: #e8eaf6; color: var(--accent-color); padding: 4px 12px; border-radius: 20px; font-size: 14px; margin-top: 10px; font-weight: 500; }}
+
+            /* Market Summary Bar */
+            .summary-bar {{ display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 40px; }}
+            .summary-card {{ background: var(--card-bg); padding: 10px 15px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-width: 110px; text-align: center; border-bottom: 3px solid transparent; }}
+            .summary-title {{ font-size: 12px; color: var(--text-secondary); font-weight: 600; margin-bottom: 3px; }}
+            .summary-price {{ font-size: 16px; font-weight: 800; color: var(--text-primary); }}
+            .summary-change {{ font-size: 12px; font-weight: 600; margin-top: 2px; }}
+
+            /* Common Utils */
+            .text-up {{ color: var(--up-color); }}
+            .text-down {{ color: var(--down-color); }}
+            .card {{ background: var(--card-bg); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 20px; margin-bottom: 25px; overflow: hidden; }}
+            
+            /* Group Section */
+            .group-section {{ margin-bottom: 50px; }}
+            .group-title {{ font-size: 22px; color: #2c3e50; border-left: 5px solid var(--accent-color); padding-left: 15px; margin-bottom: 8px; font-weight: 700; }}
+            .group-desc {{ color: var(--text-secondary); font-size: 14px; margin-bottom: 20px; padding-left: 20px; }}
+            .subsection-title {{ text-align: center; font-size: 18px; color: var(--text-secondary); margin: 30px 0 20px; position: relative; }}
+            .subsection-title:after {{ content: ''; display: block; width: 50px; height: 3px; background: #ddd; margin: 10px auto 0; }}
+
+            /* Table Styles */
+            .table-responsive {{ overflow-x: auto; }}
+            table {{ width: 100%; border-collapse: collapse; font-size: 14px; white-space: nowrap; }}
+            th {{ background-color: #f8f9fa; color: #495057; font-weight: 600; padding: 12px 15px; text-align: right; border-bottom: 2px solid var(--border-color); }}
+            th:first-child {{ text-align: left; }}
+            th:nth-child(4) {{ text-align: center; }} /* Signal column center */
+            td {{ padding: 12px 15px; border-bottom: 1px solid var(--border-color); text-align: right; }}
+            td:first-child {{ text-align: left; font-weight: 600; color: var(--accent-color); }}
+            tr:hover {{ background-color: #f1f3f5; }}
+            
+            /* Badges */
+            .badge {{ padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; color: white; display: inline-block; min-width: 80px; text-align: center; }}
+            .bullish-strong {{ background-color: #e53935; }}
+            .bullish-weak {{ background-color: #ef9a9a; color: #b71c1c; }}
+            .bearish-strong {{ background-color: #43a047; }}
+            .bearish-weak {{ background-color: #a5d6a7; color: #1b5e20; }}
+            .neutral {{ background-color: #9e9e9e; }}
+            .trend-cell {{ text-align: center; }}
+
+            /* Charts Grid */
+            .charts-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 25px; }}
+            .chart-card {{ padding: 15px; display: flex; flex-direction: column; align-items: center; }}
+            .chart-header {{ width: 100%; text-align: left; font-weight: 700; font-size: 16px; margin-bottom: 10px; color: #34495e; border-bottom: 1px solid #eee; padding-bottom: 5px; }}
+            img {{ max-width: 100%; height: auto; }}
+
+            /* Text Analysis Section (Placeholder Styles) */
+            #text-analysis-report {{ margin-top: 50px; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }}
+            #text-analysis-report h2 {{ color: var(--accent-color); border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 25px; }}
+            #text-analysis-report h3 {{ color: #444; margin-top: 30px; font-size: 18px; }}
+            #text-analysis-report p {{ font-size: 16px; line-height: 1.8; color: #444; margin-bottom: 15px; }}
+            #text-analysis-report ul {{ padding-left: 20px; }}
+            #text-analysis-report li {{ margin-bottom: 10px; color: #555; }}
+
+            @media (max-width: 768px) {{
+                .charts-grid {{ grid-template-columns: 1fr; }}
+                .summary-card {{ width: 45%; }}
+            }}
         </style>
     </head>
     <body>
-        <h1>綜合技術分析報告 - {date_str}</h1>
-        {content_html}
-    <div id="text-analysis-report"></div>
+        <div class="container">
+            <header>
+                <h1>綜合技術分析報告</h1>
+                <div class="date-tag">{date_str}</div>
+            </header>
+
+            <div class="summary-bar">
+                {summary_html}
+            </div>
+
+            {content_html}
+
+            <!-- AI Generated Content Will Be Injected Here -->
+            <div id="text-analysis-report"></div>
+        </div>
     </body>
     </html>
     """
-    filename = f"etf_tech_analysis_{date_str.replace('-', '')}.html"
+    filename = f"report/etf_tech_analysis_{date_str.replace('-', '')}.html"
     try:
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
         with open(filename, 'w', encoding='utf-8') as f:
             f.write(html_template)
-        print(f"報告已成功生成：{os.path.abspath(filename)}")
+        print(f"✅ 報告已成功生成：{os.path.abspath(filename)}")
     except IOError as e:
-        print(f"寫入檔案時發生錯誤: {e}")
+        print(f"❌ 寫入檔案時發生錯誤: {e}")
 
 # --- 主程式 ---
 def main():
     """主執行函式"""
     utc_now = datetime.datetime.utcnow()
+    # 抓取足夠長的時間以計算 60MA
     start_date = utc_now - datetime.timedelta(days=250)
     current_date_str = utc_now.astimezone(TZ).strftime('%Y-%m-%d')
     
     report_data = []
-    table_columns = ["代碼", "價格", "漲跌%", "成交量%", "K9", "D9", "BIAS5", "BIAS20", "BIAS60", "ADX", "+DI", "-DI"]
+    summary_data_list = []
+
+    print(f"🚀 開始執行分析工作... ({current_date_str})")
 
     for group in STOCK_GROUPS:
-        print(f"--- 正在處理群組: {group['title']} ---")
+        print(f"\n--- 正在處理群組: {group['title']} ---")
         stock_data = get_stock_data(group["symbols"], start_date, utc_now)
         
         if not stock_data:
-            print(f"群組 {group['title']} 沒有可處理的資料。")
+            print(f"  ⚠️ 群組 {group['title']} 沒有可處理的資料。")
             continue
 
-        table_rows = []
+        table_rows_html = ""
         plots = {}
+        
         for symbol, df in stock_data.items():
-            print(f"  - 計算指標: {symbol}")
+            print(f"  - 分析: {symbol}")
             df_indicators = calculate_all_indicators(df)
             
             if df_indicators.empty or len(df_indicators) < 2:
-                print(f"  - 跳過 {symbol}，指標計算後資料不足。")
                 continue
 
             latest = df_indicators.iloc[-1]
             prev = df_indicators.iloc[-2]
-            table_rows.append(format_data_row(symbol, latest, prev))
             
-            print(f"  - 產生圖表: {symbol}")
-            plots[symbol] = create_ma_plot_base64(df_indicators.tail(120), symbol)
+            # 生成表格行
+            table_rows_html += format_data_row(symbol, latest, prev)
+            
+            # 產生圖表
+            # 雖然 create_ma_plot_base64 內部目前沒有用到 title 畫在圖上(交給 HTML header)，
+            # 但為了保持介面一致性，我們傳入中文名稱
+            display_name = SYMBOL_NAME_MAP.get(symbol, symbol)
+            plots[display_name] = create_ma_plot_base64(df_indicators.tail(120), symbol, display_name)
 
-        if not table_rows:
-            continue
+            # 收集摘要數據 (如果該股票在 KEY_INDICATORS 中)
+            if symbol in KEY_INDICATORS:
+                summary_data_list.append({
+                    'symbol': display_name,
+                    'close': latest['Close'],
+                    'change': latest['Change %']
+                })
         
-        df_result = pd.DataFrame(table_rows, columns=table_columns)
+        if not table_rows_html:
+            continue
         
         report_data.append({
             "title": group['title'],
             "description": group['description'],
-            "table_html": df_result.to_html(index=False, escape=False, justify="center"),
+            "table_rows": table_rows_html,
             "plots": plots
         })
 
+    # 確保摘要數據按照設定的順序排列 (如果抓到的話)
+    ordered_summary = []
+    for key in KEY_INDICATORS:
+        target_name = SYMBOL_NAME_MAP.get(key, key)
+        for item in summary_data_list:
+            if item['symbol'] == target_name:
+                ordered_summary.append(item)
+                break
+    
+    # 產生總經殖利率圖
     yield_curve_plot = create_yield_curve_plot_base64()
 
     if report_data:
-        generate_html_report(report_data, current_date_str, yield_curve_plot)
+        generate_html_report(report_data, current_date_str, ordered_summary, yield_curve_plot)
     else:
-        print("沒有任何資料可生成報告。")
+        print("❌ 沒有任何資料可生成報告。")
 
 if __name__ == "__main__":
     main()
