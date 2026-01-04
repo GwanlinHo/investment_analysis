@@ -32,7 +32,7 @@
 
 本專案建議搭配 AI Agent (如 Gemini CLI) 使用以獲得完整體驗，流程如下：
 
-1.  **執行腳本**：執行 `investment_analysis.py`。
+1.  **執行腳本**：讓AI Agent(或手動)執行 `investment_analysis.py`。
     *   程式讀取 `config.json`。
     *   抓取歷史股價數據。
     *   計算指標並判斷趨勢訊號（如：多頭排列、空頭修正）。
@@ -40,74 +40,29 @@
     *   生成包含數據表格與圖表的 HTML 檔案。
 2.  **AI 分析與注入** (由 AI Agent 完成)：
     *   讀取生成的 HTML 報告。
-    *   搜尋當日最新的財經新聞。
+    *   搜尋最新的財經新聞。
     *   根據數據與新聞撰寫「三位大師」的評論。
     *   將評論與新聞注入 HTML 中的 `#text-analysis-report` 區塊。
-3.  **版本控制**：將報告推送到 GitHub 儲存庫。
-
----
-
-## 🤖 AI Agent 協作指南 (AI Agent Collaboration Guide)
-
-本專案的核心價值在於**「自動化程式碼」與「AI 認知能力」的結合**。雖然 Python 腳本可以精準計算數據，但無法解讀市場情緒或蒐集最新新聞。因此，我們設計了一套讓 AI Agent 接手後續工作的流程。
-
-### 1. Gemini CLI 協作模式 (預設)
-
-本專案已內建 Gemini CLI 的整合設定。
-
-*   **觸發機制**：
-    您只需要在 Gemini CLI 中輸入關鍵字：**`investment analysis`** (或 `run etf analysis`)。
-*   **背後原理**：
-    專案中的 `GEMINI.md` (或 `.gemini/GEMINI.md`) 扮演了「系統提示詞 (System Prompt)」的角色。當 AI 讀取到此檔案時，它會知道當使用者輸入特定關鍵字時，必須依序執行以下動作：
-    1.  **執行 Shell 指令**：`python3 investment_analysis.py`。
-    2.  **讀取檔案**：讀取生成的 HTML 內容。
-    3.  **聯網搜尋**：使用 Google Search 尋找當日美股、台股與匯市的真實新聞（且被要求必須附上來源連結）。
-    4.  **角色扮演分析**：切換成 ISTP (技術)、ISTJ (價值)、INTJ (宏觀) 三種人格進行分析。
-    5.  **寫入檔案**：將新聞與分析寫回 HTML 檔案中。
-    6.  **Git 操作**：自動 Commit 並 Push 到遠端。
-
-### 2. 適配其他 AI Agent (如 Claude Code, Codex, Cursor)
-
-這套「以檔案為基礎的上下文注入 (File-based Context Injection)」概念可以輕易移植到其他 AI 程式設計工具。
-
-如果您使用的是 **Claude Code (Anthropic)**、**GitHub Copilot CLI** 或 **Cursor**，請參考以下修改方式：
-
-#### 核心概念
-所有 AI Agent 工具都遵循 **`Input (指令) -> Context (上下文規則) -> Action (工具調用)`** 的邏輯。您需要將 `GEMINI.md` 中的邏輯「翻譯」給您的工具聽。
-
-#### 實作範例
-
-*   **Claude Code**:
-    *   在專案根目錄建立 `CLAUDE.md`。
-    *   將 `GEMINI.md` 中的 Workflow 內容複製進去。
-    *   Claude Code 會在啟動時讀取此檔案，並理解當您要求「分析投資」時該做什麼。
-    *   *提示*：Claude Code 同樣具備 `run_command` (執行腳本) 與 `bash` 能力，邏輯完全通用。
-
-*   **Cursor / VS Code Copilot**:
-    *   建立 `.cursorrules` 檔案 (針對 Cursor)。
-    *   將規則寫入：「當使用者要求『產生投資報告』時，請執行 `python3 investment_analysis.py`，然後搜尋網路新聞...」。
-    *   *注意*：這些 IDE 內建的 Agent 可能需要您手動按確認才能執行 Terminal 指令或寫入檔案，自動化程度可能不如 CLI 工具高。
-
-*   **自定義 LLM CLI**:
-    *   將 `GEMINI.md` 的內容作為 System Prompt 的一部分傳送給模型。
-    *   確保您的 CLI 環境有掛載 `Web Search` (搜尋新聞用) 與 `File I/O` (讀寫檔案用) 的工具權限。
-
-### 總結
-不論使用何種工具，關鍵在於**「定義工作流 (Workflow)」**：
-> **執行計算腳本 (Python) -> 獲取外部資訊 (Web Search) -> 綜合分析 (LLM Inference) -> 產出結果 (File Write)**
 
 ---
 
 ## 安裝與設定
 
-### 1. 環境需求
+### 1. 複製專案
+請將專案複製到您的本地工作區域：
+```bash
+git clone https://github.com/GwanlinHo/investment_analysis.git
+cd investment_analysis
+```
+
+### 2. 環境需求
 *   Python 3.8 或以上版本。
 *   必要的 Python 套件：
     ```bash
     pip install yfinance pandas matplotlib mplfinance pytz
     ```
 
-### 2. 設定追蹤清單 (`config.json`)
+### 3. 設定追蹤清單 (`config.json`)
 您可以透過修改 `config.json` 來自定義想追蹤的標的。檔案結構如下：
 
 *   **`stock_groups`**: 定義報告中的分類群組。
@@ -123,16 +78,35 @@
 
 **修改範例**：若要新增追蹤「特斯拉 (TSLA)」，請在 `stock_groups` 的對應陣列中加入 `"TSLA"`，並在 `symbol_name_map` 加入 `"TSLA": "特斯拉"`。
 
-### 3. 執行指令
-在終端機輸入以下指令即可產生基礎報告：
-```bash
-python3 investment_analysis.py
-```
-*注意：手動執行此指令僅會產生包含數據與圖表的報告，不包含 AI 文字分析與新聞摘要。*
+---
+
+## AI Agent 協作指南 (AI Agent Collaboration Guide)
+
+本專案的核心價值在於**「自動化程式碼」與「AI 認知能力」的結合**。讓 Python 腳本收集並且計算數據，讓 AI Agent 蒐集最新的新聞並且解讀市場情緒，並且進行深入的分析。
+
+### 1. Gemini CLI 協作模式 (預設)
+
+本專案已內建 Gemini CLI 的整合設定。
+
+*   **觸發機制**：
+    您只需要在 Gemini CLI 中輸入關鍵字：**`investment analysis`**。
+*   **背後原理**：
+    專案中的 `GEMINI.md` (或 `.gemini/GEMINI.md`) 扮演了「系統提示詞 (System Prompt)」的角色。當 AI 讀取到此檔案時，它會知道當使用者輸入特定關鍵字時，必須依序執行以下動作：
+    1.  **執行 Shell 指令**：`python3 investment_analysis.py`。
+    2.  **讀取檔案**：讀取生成的 HTML 內容。
+    3.  **網路搜尋**：使用 Google Search 尋找近期美股、台股與匯市的真實新聞（且附上來源連結）。
+    4.  **角色扮演分析**：切換成 (1)技術分析(ISTP)、(2)價值分析(ISTJ)、(3)宏觀分析(INTJ) 三種人格進行多角度分析。
+    5.  **寫入檔案**：將新聞與分析結果寫回 HTML 檔案中。
+    6.  **Git 操作**：自動 Commit 並 Push 到遠端。
+
+### 2. 適配其他 AI Agent (如 Claude Code, Codex, Cursor)
+
+這套「以檔案為基礎的上下文注入 (File-based Context Injection)」概念可以輕易移植到其他 AI 程式設計工具。
+
 
 ---
 
-## 📖 報告閱讀指南
+## 報告閱讀指南
 
 生成的 HTML 報告包含以下關鍵資訊：
 
