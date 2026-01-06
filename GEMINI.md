@@ -28,12 +28,12 @@
 1. **更新影片清單 (Update Video List)**
    - 執行 `python fetch_yt_list.py` 以更新 `videolist.md`。
 
-2. **讀取與解析 (Read & Parse)**
-   - 讀取 `videolist.md` 檔案。
-   - 根據清單中的網址解析每則影片。
+2. **多維度內容提取 (Multi-source Extraction)**
+   - **程式化提取**: 優先使用 `yt-dlp` (可透過 Python 腳本 `get_video_details.py`) 抓取影片的 `description` 與 `chapters` 以建立議題骨架。
+   - **語意補完**: 若影片描述欄資訊不足 (例如僅有廣告或連結)，自動針對影片標題執行 `google_web_search`，搜尋第三方筆記、社群討論或專業報導以獲取詳細論述內容。
 
 3. **內容整理 (Summarize)**
-   - 列出每一部影片中提及的每一項財經議題。
+   - 整合中繼資料與搜尋結果，列出每一部影片中提及的每一項財經議題。
    - 詳細說明該議題的重要內容。
    - 需註明創作者與影片名稱。
 
