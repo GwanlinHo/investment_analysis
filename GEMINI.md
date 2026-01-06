@@ -14,3 +14,37 @@
      - **Macro & Industry Master (INTJ):** Analyze interest rates, industry cycles, and geopolitical risks.
   5. Append the analysis and news to the HTML file (replace the `#text-analysis-report` div).
   6. Execute `git add report/ && git commit -m "Update analysis report" && git push` to upload the changes to GitHub.
+
+# Gemini CLI Command Rule: video summary
+
+## Description
+當輸入 `video summary` 指令時，自動抓取最新的 YouTube 影片清單，並整理出影片中的財經議題與詳細內容。
+
+## Trigger
+- command: video summary
+
+## Workflow Steps
+
+1. **更新影片清單 (Update Video List)**
+   - 執行 `python fetch_yt_list.py` 以更新 `videolist.md`。
+
+2. **讀取與解析 (Read & Parse)**
+   - 讀取 `videolist.md` 檔案。
+   - 根據清單中的網址解析每則影片。
+
+3. **內容整理 (Summarize)**
+   - 列出每一部影片中提及的每一項財經議題。
+   - 詳細說明該議題的重要內容。
+   - 需註明創作者與影片名稱。
+
+4. **輸出檔案 (Output)**
+   - 輸出檔案命名規則: `report/video_YYYYMMDD.md`
+   - **輸出格式**:
+     ```markdown
+     # 創作者: [創作者名稱]
+     ## 影片名稱: [影片標題]
+     ## 議題一: [議題標題]
+     [詳細內容]
+     ## 議題二: [議題標題]
+     [詳細內容]
+     ```
