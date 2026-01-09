@@ -433,7 +433,7 @@ def generate_html_report(report_data, date_str, summary_data, yield_curve_plot_b
     <body>
         <div class="container">
             <header>
-                <h1>綜合技術分析報告</h1>
+                <h1>綜合投資分析報告</h1>
                 <div class="date-tag">{date_str}</div>
             </header>
 
