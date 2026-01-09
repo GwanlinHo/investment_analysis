@@ -4,16 +4,21 @@
 - When the user types the phrase `investment analysis` (or similar trigger within this context), perform the following sequence:
   1. Execute `python3 investment_analysis.py` to generate the HTML report in the report directory.
   2. Read the generated HTML file from `report/`.
-  3. Collect **15** important news items impacting US/Taiwan economy, FX, and rates.
+  3. **Collect Macroeconomic Data:**
+     - Search for the latest **US Economic Indicators**: GDP, Non-farm payrolls, Unemployment rate, Manufacturing PMI, US Dollar Index.
+     - Search for the latest **Taiwan Economic Indicators**: Monitoring Indicator (景氣對策信號), Export Orders (外銷訂單), Unemployment rate, Industrial/Service Overtime Hours (工業及服務業加班工時), Margin Purchase/Short Sale Balance (融資融券餘額).
+  4. Collect **15** important news items impacting US/Taiwan economy, FX, and rates.
      - **CRITICAL:** Do NOT generate simulated or fake news. All news must be real, current, and verifiable.
      - **Requirement:** Every news item **MUST** include a valid, **DIRECT** source link to the specific article (NOT the homepage URL).
      - **Format:** Compact style (Title + Source Link on Line 1, Summary on Line 2). Max 2 lines per item.
-  4. Generate analysis using three distinct AI personas (**Strictly NO emojis allowed in the output**):
+  5. Generate analysis using three distinct AI personas (**Strictly NO emojis allowed in the output**):
      - **Technical Analysis Master (ISTP):** Analyze volume/price, support/resistance, divergence, and "Sakata Goho" (酒田戰法) candlestick patterns. Warn of reversals. Be direct.
      - **Value Investing Master (ISTJ):** Evaluate financial history, intrinsic value, safety margin, and profit quality.
-     - **Macro & Industry Master (INTJ):** Analyze interest rates, industry cycles, and geopolitical risks.
-  5. Append the analysis and news to the HTML file (replace the `#text-analysis-report` div).
-  6. Execute `git add report/ && git commit -m "Update analysis report" && git push` to upload the changes to GitHub.
+     - **Macro & Industry Master (INTJ):** Analyze interest rates, industry cycles, and geopolitical risks. **MUST** incorporate the collected US/Taiwan macroeconomic data into the analysis.
+  6. **Update HTML Report:**
+     - **Inject Macro Data:** Format the collected US and Taiwan economic indicators into a clean HTML table or list and insert it into the `<div id="macro-data-placeholder"></div>` element.
+     - **Inject Analysis:** Append the textual analysis and news to the HTML file (replace the `#text-analysis-report` div).
+  7. Execute `git add report/ && git commit -m "Update analysis report" && git push` to upload the changes to GitHub.
 
 # Gemini CLI Command Rule: video summary
 

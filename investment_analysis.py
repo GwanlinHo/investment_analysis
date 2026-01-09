@@ -341,6 +341,7 @@ def generate_html_report(report_data, date_str, summary_data, yield_curve_plot_b
                  <div class="chart-header">美國長短期國庫券殖利率</div>
                  <img src="data:image/png;base64,{yield_curve_plot_b64}" alt="Yield Curve Plot">
             </div>
+            <div id="macro-data-placeholder"></div>
         </div>
         '''
 
