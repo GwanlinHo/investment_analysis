@@ -5,6 +5,7 @@
   1. Execute `python3 investment_analysis.py` to generate the HTML report in the report directory.
   2. Read the generated HTML file from `report/`.
   3. **Collect Macroeconomic Data:**
+     - **CRITICAL RULE:** Always use the latest **OFFICIAL released data** (e.g., from government bureaus like BEA, BLS, NDC). **Do NOT use forecast/estimated data** for the current or future months unless explicitly requested. If the current month's data is not yet out, use the previous month's official data.
      - Search for the latest **US Economic Indicators**: GDP, Non-farm payrolls, Unemployment rate, Manufacturing PMI, US Dollar Index.
      - Search for the latest **Taiwan Economic Indicators**: Monitoring Indicator (景氣對策信號), Export Orders (外銷訂單), Unemployment rate, Industrial/Service Overtime Hours (工業及服務業加班工時), Margin Purchase Balance (融資餘額) and Short Sale Balance (融券餘額) [Query specifically for the "Total Market Balance" and "Daily Change" (increase/decrease)].
   4. Collect **15** important news items impacting US/Taiwan economy, FX, and rates.
@@ -12,16 +13,20 @@
      - **Requirement:** Every news item **MUST** include a valid, **DIRECT** source link to the specific article (NOT the homepage URL).
      - **Format:** Compact style (Title + Source Link on Line 1, Summary on Line 2). Max 2 lines per item.
   5. Generate analysis using three distinct AI personas (**Strictly NO emojis allowed in the output**):
-     - **Technical Analysis Master (ISTP):** Analyze volume/price, support/resistance, divergence, and "Sakata Goho" (酒田戰法) candlestick patterns. Warn of reversals. Be direct.
-     - **Value Investing Master (ISTJ):** Evaluate financial history, intrinsic value, safety margin, and profit quality.
-     - **Macro & Industry Master (INTJ):** Analyze interest rates, industry cycles, and geopolitical risks. **MUST** incorporate the collected US/Taiwan macroeconomic data into the analysis.
+     - **Note:** Adopt the *tone and thinking style* of the specified MBTI types, but **DO NOT** write the MBTI label (e.g., "ISTP") in the report headers or text.
+     - **Technical Analysis Master (Style: ISTP):** Pragmatic, analytical, crisis-ready. Analyze volume/price, support/resistance, divergence, and "Sakata Goho" (酒田戰法) candlestick patterns. Warn of reversals. Be direct.
+     - **Value Investing Master (Style: ISTJ):** Responsible, organized, fact-based. Evaluate financial history, intrinsic value, safety margin, and profit quality. Focus on fundamentals.
+     - **Macro & Industry Master (Style: INTJ):** Strategic, visionary, systems-thinker. Analyze interest rates, industry cycles, and geopolitical risks. **MUST** incorporate the collected US/Taiwan macroeconomic data into the analysis.
   6. **Update HTML Report:**
-     - **Inject Macro Data:** Format the collected US and Taiwan economic indicators into a clean HTML table and insert it into the `<div id="macro-data-placeholder"></div>` element.
+     - **Inject Macro Data:** Format the collected economic indicators into **two separate** HTML tables (one for US, one for Taiwan).
+       - **Target Placeholders:**
+         - Inject US indicators table into `<div id="us-macro-placeholder"></div>`.
+         - Inject Taiwan indicators table into `<div id="tw-macro-placeholder"></div>`.
        - **Formatting Rules:**
-         - **Alignment:** "Indicator Name" column must be **left-aligned**. "Value" and "Date/Note" columns must be **right-aligned**.
+         - **Columns:** "Indicator Name" (Left-aligned), "Value" (Right-aligned), "Date/Note" (Right-aligned). **Do NOT include a 'Region' column.**
          - **Trends:** Do not show plain numbers. Use trend arrows (**▲/▼**) and color coding (Red for positive/up, Green for negative/down).
-         - **Mobile Layout:** Wrap the table in a card container with `overflow-x: auto` to ensure it is scrollable on mobile devices.
-         - **Margin Data:** Display "Margin Purchase Balance" and "Short Sale Balance" as two distinct rows. Show the total balance in the "Value" column with trend coloring. Show the daily change (e.g., "-8.95億") in the "Date/Note" column.
+         - **Mobile Layout:** Ensure tables use standard HTML `<table>` tags. The container divs already handle responsiveness.
+         - **Margin Data (Taiwan):** Display "Margin Purchase Balance" and "Short Sale Balance" as two distinct rows. Show the total balance in the "Value" column with trend coloring. Show the daily change (e.g., "-8.95億") in the "Date/Note" column.
      - **Inject Analysis:** Append the textual analysis and news to the HTML file (replace the `#text-analysis-report` div).
   7. Execute `git add report/ && git commit -m "Update analysis report" && git push` to upload the changes to GitHub.
 
