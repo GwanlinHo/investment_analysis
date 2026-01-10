@@ -6,7 +6,7 @@
   2. Read the generated HTML file from `report/`.
   3. **Collect Macroeconomic Data:**
      - Search for the latest **US Economic Indicators**: GDP, Non-farm payrolls, Unemployment rate, Manufacturing PMI, US Dollar Index.
-     - Search for the latest **Taiwan Economic Indicators**: Monitoring Indicator (景氣對策信號), Export Orders (外銷訂單), Unemployment rate, Industrial/Service Overtime Hours (工業及服務業加班工時), Margin Purchase/Short Sale Balance (融資融券餘額).
+     - Search for the latest **Taiwan Economic Indicators**: Monitoring Indicator (景氣對策信號), Export Orders (外銷訂單), Unemployment rate, Industrial/Service Overtime Hours (工業及服務業加班工時), Margin Purchase Balance (融資餘額) and Short Sale Balance (融券餘額) [Query specifically for the "Total Market Balance" and "Daily Change" (increase/decrease)].
   4. Collect **15** important news items impacting US/Taiwan economy, FX, and rates.
      - **CRITICAL:** Do NOT generate simulated or fake news. All news must be real, current, and verifiable.
      - **Requirement:** Every news item **MUST** include a valid, **DIRECT** source link to the specific article (NOT the homepage URL).
@@ -16,7 +16,12 @@
      - **Value Investing Master (ISTJ):** Evaluate financial history, intrinsic value, safety margin, and profit quality.
      - **Macro & Industry Master (INTJ):** Analyze interest rates, industry cycles, and geopolitical risks. **MUST** incorporate the collected US/Taiwan macroeconomic data into the analysis.
   6. **Update HTML Report:**
-     - **Inject Macro Data:** Format the collected US and Taiwan economic indicators into a clean HTML table or list and insert it into the `<div id="macro-data-placeholder"></div>` element.
+     - **Inject Macro Data:** Format the collected US and Taiwan economic indicators into a clean HTML table and insert it into the `<div id="macro-data-placeholder"></div>` element.
+       - **Formatting Rules:**
+         - **Alignment:** "Indicator Name" column must be **left-aligned**. "Value" and "Date/Note" columns must be **right-aligned**.
+         - **Trends:** Do not show plain numbers. Use trend arrows (**▲/▼**) and color coding (Red for positive/up, Green for negative/down).
+         - **Mobile Layout:** Wrap the table in a card container with `overflow-x: auto` to ensure it is scrollable on mobile devices.
+         - **Margin Data:** Display "Margin Purchase Balance" and "Short Sale Balance" as two distinct rows. Show the total balance in the "Value" column with trend coloring. Show the daily change (e.g., "-8.95億") in the "Date/Note" column.
      - **Inject Analysis:** Append the textual analysis and news to the HTML file (replace the `#text-analysis-report` div).
   7. Execute `git add report/ && git commit -m "Update analysis report" && git push` to upload the changes to GitHub.
 
