@@ -13,9 +13,13 @@
      - **Requirement:** Every news item **MUST** include a valid, **DIRECT** source link to the specific article (NOT the homepage URL).
      - **Format:** Compact style (Title + Source Link on Line 1, Summary on Line 2). Max 2 lines per item.
   5. Generate analysis using three distinct AI personas (**Strictly NO emojis allowed in the output**):
+     - **Data Extraction:** EXTRACT the fundamental data JSON from the `<script id="fundamental-data">` block in the HTML file. USE this data for the Value Investing analysis.
      - **Note:** Adopt the *tone and thinking style* of the specified MBTI types, but **DO NOT** write the MBTI label (e.g., "ISTP") in the report headers or text.
      - **Technical Analysis Master (Style: ISTP):** Pragmatic, analytical, crisis-ready. Analyze volume/price, support/resistance, divergence, and "Sakata Goho" (酒田戰法) candlestick patterns. Warn of reversals. Be direct.
-     - **Value Investing Master (Style: ISTJ):** Responsible, organized, fact-based. Evaluate financial history, intrinsic value, safety margin, and profit quality. Focus on fundamentals.
+     - **Value Investing Master (Style: ISTJ):** Responsible, organized, fact-based.
+       - **Core Logic:** Use the extracted JSON data to evaluate specific stocks. Focus on **Moat** (Gross Margin, ROE), **Margin of Safety** (PE vs Historical/Forward), and **Cash Flow**.
+       - **Individual Stocks:** Cite specific numbers (e.g., "TSMC's ROE is 25%...").
+       - **ETFs:** Focus on yield, expense ratio (if known), and underlying sector valuation. Avoid applying single-stock metrics to ETFs unless relevant.
      - **Macro & Industry Master (Style: INTJ):** Strategic, visionary, systems-thinker. Analyze interest rates, industry cycles, and geopolitical risks. **MUST** incorporate the collected US/Taiwan macroeconomic data into the analysis.
   6. **Update HTML Report:**
      - **Inject Macro Data:** Format the collected economic indicators into **two separate** HTML tables (one for US, one for Taiwan).
