@@ -62,6 +62,34 @@ def get_stock_data(symbols, start_date, end_date):
             print(f"❌ 抓取 {symbol} 資料時發生錯誤: {e}")
     return data
 
+def get_fundamental_data(symbol):
+    """抓取個股基本面資料"""
+    try:
+        ticker = yf.Ticker(symbol)
+        info = ticker.info
+        
+        # 提取關鍵指標，若無資料則為 None
+        data = {
+            "symbol": symbol,
+            "name": SYMBOL_NAME_MAP.get(symbol, symbol),
+            "pe_trailing": info.get('trailingPE'),
+            "pe_forward": info.get('forwardPE'),
+            "pb_ratio": info.get('priceToBook'),
+            "roe": info.get('returnOnEquity'),
+            "gross_margin": info.get('grossMargins'),
+            "operating_margin": info.get('operatingMargins'),
+            "dividend_yield": info.get('dividendYield'),
+            "payout_ratio": info.get('payoutRatio'),
+            "free_cashflow": info.get('freeCashflow'),
+            "debt_to_equity": info.get('debtToEquity'),
+            "sector": info.get('sector'),
+            "industry": info.get('industry')
+        }
+        return data
+    except Exception as e:
+        print(f"⚠️ 無法獲取 {symbol} 的基本面資料: {e}")
+        return None
+
 # --- 技術指標計算 ---
 def calculate_all_indicators(df):
     """計算所有需要的技術指標"""
@@ -267,9 +295,12 @@ def create_yield_curve_plot_base64():
         print(f"❌ 產生殖利率圖表時發生錯誤: {e}")
         return None
 
-def generate_html_report(report_data, date_str, summary_data, yield_curve_plot_b64=None):
+def generate_html_report(report_data, date_str, summary_data, yield_curve_plot_b64=None, fundamental_data=None):
     """生成最終的HTML報告"""
     
+    # 將基本面數據轉換為 JSON 字串，嵌入 HTML 中供 AI 讀取
+    fundamental_json = json.dumps(fundamental_data, ensure_ascii=False, indent=2) if fundamental_data else "{}"
+
     # 建構市場速覽 HTML
     summary_html = ""
     for item in summary_data:
@@ -285,10 +316,22 @@ def generate_html_report(report_data, date_str, summary_data, yield_curve_plot_b
 
     content_html = ""
     for group_data in report_data:
+        # Determine ID for navigation
+        section_id = ""
+        title = group_data['title']
+        if "美股" in title:
+            section_id = "us-stocks"
+        elif "台股" in title:
+            section_id = "tw-stocks"
+        elif "債券" in title:
+            section_id = "bonds"
+        else:
+            section_id = f"group-{abs(hash(title))}"
+
         # Group Title
         content_html += f'''
-        <div class="group-section">
-            <h2 class="group-title">{group_data['title']}</h2>
+        <div id="{section_id}" class="group-section">
+            <h2 class="group-title">{title}</h2>
             
             <!-- Table Card -->
             <div class="card table-card">
@@ -335,17 +378,30 @@ def generate_html_report(report_data, date_str, summary_data, yield_curve_plot_b
     # Yield Curve Section
     if yield_curve_plot_b64:
         content_html += f'''
-        <div class="group-section">
+        <div id="macro-analysis" class="group-section">
             <h2 class="group-title">總體經濟指標</h2>
             <div class="card chart-card" style="max-width: 900px; margin: 0 auto;">
                  <div class="chart-header">美國長短期國庫券殖利率</div>
                  <img src="data:image/png;base64,{yield_curve_plot_b64}" alt="Yield Curve Plot">
             </div>
             
-            <!-- Macro Data Section (Scrollable) -->
-            <div class="card" style="margin-top: 25px; padding: 20px; overflow-x: auto;">
+            <!-- Macro Data Section -->
+            <div class="card" style="margin-top: 25px; padding: 20px;">
                 <h3 class="subsection-title" style="margin-top: 0; margin-bottom: 20px;">美台重要經濟指標</h3>
-                <div id="macro-data-placeholder"></div>
+                
+                <div style="margin-bottom: 30px;">
+                    <h4 style="color: #333; margin-bottom: 15px; border-left: 4px solid #1a237e; padding-left: 10px;">🇺🇸 美國經濟指標</h4>
+                    <div class="table-responsive">
+                        <div id="us-macro-placeholder"></div>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 style="color: #333; margin-bottom: 15px; border-left: 4px solid #2e7d32; padding-left: 10px;">🇹🇼 台灣經濟指標</h4>
+                    <div class="table-responsive">
+                        <div id="tw-macro-placeholder"></div>
+                    </div>
+                </div>
             </div>
         </div>
         '''
@@ -357,6 +413,14 @@ def generate_html_report(report_data, date_str, summary_data, yield_curve_plot_b
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>投資技術分析日報 | {date_str}</title>
+        <!-- 
+        HIDDEN FUNDAMENTAL DATA FOR AI ANALYSIS
+        The following JSON block contains fundamental data (PE, ROE, etc.) for the analyzed stocks.
+        AI Agents should read this block to perform Value Investing analysis.
+        -->
+        <script id="fundamental-data" type="application/json">
+        {fundamental_json}
+        </script>
         <style>
             :root {{
                 --bg-color: #f4f6f8;
@@ -416,6 +480,14 @@ def generate_html_report(report_data, date_str, summary_data, yield_curve_plot_b
             .neutral {{ background-color: #9e9e9e; }}
             .trend-cell {{ text-align: center; }}
 
+            /* Navigation & Back to Top */
+            html {{ scroll-behavior: smooth; }}
+            .nav-bar {{ display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; }}
+            .nav-btn {{ background: #fff; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 6px 14px; border-radius: 20px; text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.2s; display: flex; align-items: center; gap: 5px; }}
+            .nav-btn:hover {{ background: var(--accent-color); color: white; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }}
+            .back-to-top {{ position: fixed; bottom: 30px; right: 30px; background: var(--accent-color); color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; box-shadow: 0 4px 12px rgba(0,0,0,0.25); transition: transform 0.2s; z-index: 1000; font-size: 20px; opacity: 0.9; }}
+            .back-to-top:hover {{ transform: scale(1.1); opacity: 1; }}
+
             /* Charts Grid */
             .charts-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 25px; }}
             .chart-card {{ padding: 15px; display: flex; flex-direction: column; align-items: center; }}
@@ -438,10 +510,18 @@ def generate_html_report(report_data, date_str, summary_data, yield_curve_plot_b
     </head>
     <body>
         <div class="container">
-            <header>
+            <header id="top">
                 <h1>綜合投資分析報告</h1>
                 <div class="date-tag">{date_str}</div>
             </header>
+
+            <div class="nav-bar">
+                <a href="#us-stocks" class="nav-btn">🇺🇸 美股</a>
+                <a href="#tw-stocks" class="nav-btn">🇹🇼 台股</a>
+                <a href="#bonds" class="nav-btn">🛡️ 債券</a>
+                <a href="#macro-analysis" class="nav-btn">📊 總經資訊</a>
+                <a href="#text-analysis-report" class="nav-btn">🤖 AI分析</a>
+            </div>
 
             <div class="summary-bar">
                 {summary_html}
@@ -451,6 +531,14 @@ def generate_html_report(report_data, date_str, summary_data, yield_curve_plot_b
 
             <!-- AI Generated Content Will Be Injected Here -->
             <div id="text-analysis-report"></div>
+
+            <!-- Disclaimer Footer -->
+            <footer style="text-align: center; margin-top: 50px; padding: 20px; color: #777; font-size: 12px; border-top: 1px solid #eee;">
+                <p>⚠️ 免責聲明：本報告僅供研究參考，不構成任何投資建議。金融市場波動劇烈，投資人應自行評估風險並承擔投資結果。</p>
+                <p>&copy; 2026 Investment Analysis Automation. Generated by AI.</p>
+            </footer>
+            
+            <a href="#top" class="back-to-top" title="回到頁首">↑</a>
         </div>
     </body>
     </html>
@@ -474,6 +562,7 @@ def main():
     
     report_data = []
     summary_data_list = []
+    fundamental_data_list = [] # 儲存基本面數據
 
     print(f"🚀 開始執行分析工作... ({current_date_str})")
 
@@ -502,18 +591,22 @@ def main():
             table_rows_html += format_data_row(symbol, latest, prev)
             
             # 產生圖表
-            # 雖然 create_ma_plot_base64 內部目前沒有用到 title 畫在圖上(交給 HTML header)，
-            # 但為了保持介面一致性，我們傳入中文名稱
             display_name = SYMBOL_NAME_MAP.get(symbol, symbol)
             plots[display_name] = create_ma_plot_base64(df_indicators.tail(120), symbol, display_name)
 
-            # 收集摘要數據 (如果該股票在 KEY_INDICATORS 中)
+            # 收集摘要數據
             if symbol in KEY_INDICATORS:
                 summary_data_list.append({
                     'symbol': display_name,
                     'close': latest['Close'],
                     'change': latest['Change %']
                 })
+            
+            # 抓取基本面數據 (非指數類)
+            if not symbol.startswith('^'):
+                f_data = get_fundamental_data(symbol)
+                if f_data:
+                    fundamental_data_list.append(f_data)
         
         if not table_rows_html:
             continue
@@ -525,7 +618,7 @@ def main():
             "plots": plots
         })
 
-    # 確保摘要數據按照設定的順序排列 (如果抓到的話)
+    # 確保摘要數據按照設定的順序排列
     ordered_summary = []
     for key in KEY_INDICATORS:
         target_name = SYMBOL_NAME_MAP.get(key, key)
@@ -538,7 +631,7 @@ def main():
     yield_curve_plot = create_yield_curve_plot_base64()
 
     if report_data:
-        generate_html_report(report_data, current_date_str, ordered_summary, yield_curve_plot)
+        generate_html_report(report_data, current_date_str, ordered_summary, yield_curve_plot, fundamental_data_list)
     else:
         print("❌ 沒有任何資料可生成報告。")
 
