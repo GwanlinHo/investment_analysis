@@ -48,6 +48,55 @@
 
 ## 運作方式與流程
 
+本專案採用「雙階段處理」架構，結合 Python 的數據處理能力與 AI 的邏輯分析能力。
+
+```mermaid
+graph TD
+    %% 定義樣式
+    classDef script fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
+    classDef file fill:#fff9c4,stroke:#fbc02d,stroke-width:2px;
+    classDef ai fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px;
+    classDef web fill:#e0f2f1,stroke:#2e7d32,stroke-width:2px;
+
+    %% 節點定義
+    User([User Command]) -->|Trigger| PythonScript
+    Config[config.json] -.->|Read Settings| PythonScript
+    
+    subgraph Phase 1: Python Automation
+        PythonScript[investment_analysis.py]:::script
+        MarketData[(Yahoo Finance)]
+        Indicators[[Calculate Indicators]]
+        Charts[[Draw Charts]]
+        
+        PythonScript <-->|Fetch Prices| MarketData
+        PythonScript --> Indicators
+        PythonScript --> Charts
+    end
+
+    Charts -->|Generate| RawReport[Raw HTML Report]:::file
+    
+    subgraph Phase 2: AI Intelligence
+        AI_Agent[AI Agent / Gemini]:::ai
+        WebSearch((Google Search)):::web
+        
+        RawReport -->|Context Input| AI_Agent
+        AI_Agent <-->|Search News| WebSearch
+        
+        subgraph Analysis Generation
+            NewsFocus[Weekly News Focus]
+            AI_Analysis[AI Comprehensive Analysis]
+        end
+        
+        AI_Agent -->|Write| NewsFocus
+        AI_Agent -->|Write| AI_Analysis
+    end
+
+    NewsFocus -->|Inject into| FinalReport[Final HTML Report]:::file
+    AI_Analysis -->|Inject into| FinalReport
+    
+    FinalReport -->|Git Push| GitHub[GitHub Repo]
+```
+
 本專案建議搭配 AI Agent (如 Gemini CLI) 使用以獲得完整體驗。運作流程如下：
 
 1.  **執行腳本**：讓AI Agent(或手動)執行 `investment_analysis.py`。
