@@ -6,8 +6,8 @@
   2. Read the generated HTML file from `report/`.
   3. **Collect Macroeconomic Data:**
      - **CRITICAL RULE:** Always use the latest **OFFICIAL released data** (e.g., from government bureaus like BEA, BLS, NDC). **Do NOT use forecast/estimated data** for the current or future months unless explicitly requested. If the current month's data is not yet out, use the previous month's official data.
-     - Search for the latest **US Economic Indicators**: GDP, Non-farm payrolls, Unemployment rate, Manufacturing PMI, US Dollar Index.
-     - Search for the latest **Taiwan Economic Indicators**: Monitoring Indicator (景氣對策信號), Export Orders (外銷訂單), Unemployment rate, Industrial/Service Overtime Hours (工業及服務業加班工時), Margin Purchase Balance (融資餘額) and Short Sale Balance (融券餘額) [Query specifically for the "Total Market Balance" and "Daily Change" (increase/decrease)].
+     - Search for the latest **US Economic Indicators**: GDP (國內生產總值), Non-farm payrolls (非農就業人數), Unemployment rate (失業率), Manufacturing PMI (製造業採購經理人指數), US Dollar Index (美元指數).
+     - Search for the latest **Taiwan Economic Indicators**: Monitoring Indicator (景氣對策信號), Export Orders (外銷訂單), Unemployment rate (失業率), Industrial/Service Overtime Hours (工業及服務業加班工時), Margin Purchase Balance (融資餘額) and Short Sale Balance (融券餘額) [Query specifically for the "Total Market Balance" and "Daily Change" (increase/decrease)].
   4. Collect **15** important news items impacting US/Taiwan economy, FX, and rates.
      - **CRITICAL:** Do NOT generate simulated or fake news. All news must be real, current, and verifiable.
      - **Requirement:** Every news item **MUST** include a valid, **DIRECT** source link to the specific article (NOT the homepage URL).
@@ -30,6 +30,7 @@
          - Inject US indicators table into `<div id="us-macro-placeholder"></div>`.
          - Inject Taiwan indicators table into `<div id="tw-macro-placeholder"></div>`.
        - **Formatting Rules:**
+         - **Language:** The "Indicator Name" column MUST be written in Traditional Chinese (例如：國內生產總值 (GDP)、非農就業人數、失業率等).
          - **Columns:** "Indicator Name" (Left-aligned), "Value" (Right-aligned), "Date/Note" (Right-aligned). **Do NOT include a 'Region' column.**
          - **Trends:** Do not show plain numbers. Use trend arrows (**▲/▼**) and color coding (Red for positive/up, Green for negative/down).
          - **Mobile Layout:** Ensure tables use standard HTML `<table>` tags. The container divs already handle responsiveness.
