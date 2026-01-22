@@ -412,7 +412,7 @@ def generate_html_report(report_data, date_str, summary_data, yield_curve_plot_b
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>投資技術分析日報 | {date_str}</title>
+        <title>綜合投資分析報告 | {date_str}</title>
         <!-- 
         HIDDEN FUNDAMENTAL DATA FOR AI ANALYSIS
         The following JSON block contains fundamental data (PE, ROE, etc.) for the analyzed stocks.
