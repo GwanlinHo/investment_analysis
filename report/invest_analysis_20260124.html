@@ -333,7 +333,10 @@
             #weekly-news-focus h3, #ai-analysis-report h3 { color: #444; margin-top: 30px; font-size: 20px; margin-bottom: 15px; font-weight: 600; }
             #weekly-news-focus p, #ai-analysis-report p { font-size: 16px; line-height: 1.8; color: #444; margin-bottom: 15px; }
             #weekly-news-focus ul, #ai-analysis-report ul { padding-left: 20px; }
-            #weekly-news-focus li, #ai-analysis-report li { margin-bottom: 10px; color: #555; }
+            #weekly-news-focus li { margin-bottom: 18px; list-style-type: disc; }
+            .news-item-title { font-weight: bold; font-size: 16px; margin-bottom: 2px; color: #333; display: block; }
+            .news-item-summary { font-size: 14.5px; color: #555; line-height: 1.5; margin: 0; }
+            #ai-analysis-report li { margin-bottom: 10px; color: #555; }
 
             @media (max-width: 768px) {
                 .charts-grid { grid-template-columns: 1fr; }
@@ -1096,66 +1099,66 @@
             <!-- AI Generated Content Will Be Injected Here -->
             <div id="weekly-news-focus">
     <h2>財經焦點 (Weekly News Focus)</h2>
-    <ul class="news-list">
-        <li class="news-item">
-            <a href="https://www.atlantafed.org/cj/gdpnow" target="_blank" class="news-title"><strong>[Atlanta Fed]</strong> 美國 Q4 GDP 預估成長 2.7% (GDPNow)</a>
-            <p class="news-summary">亞特蘭大聯準會 GDPNow 模型預測美國第四季實質 GDP 成長率為 2.7%，顯示經濟持續溫和擴張。</p>
+    <ul>
+        <li>
+            <span class="news-item-title">[Atlanta Fed] 美國 Q4 GDP 預估成長 2.7%</span>
+            <p class="news-item-summary">亞特蘭大聯準會 GDPNow 模型預測美國第四季實質 GDP 成長率為 2.7%，顯示經濟維持穩健動能。</p>
         </li>
-        <li class="news-item">
-            <a href="https://www.bls.gov/news.release/empsit.nr0.htm" target="_blank" class="news-title"><strong>[BLS]</strong> 美國 12 月非農就業僅增 5 萬人 失業率升至 4.4%</a>
-            <p class="news-summary">勞動市場顯著降溫，新增就業人數低於預期，失業率攀升，增強了市場對聯準會降息的期待。</p>
+        <li>
+            <span class="news-item-title">[BLS] 美國 12 月非農就業增 5 萬人，失業率攀升至 4.4%</span>
+            <p class="news-item-summary">勞動市場顯著降溫，新增就業低於預期，失業率升至近期高點，引發市場對經濟放緩的擔憂。</p>
         </li>
-        <li class="news-item">
-            <a href="https://www.jpmorgan.com" target="_blank" class="news-title"><strong>[JPMorgan]</strong> 聯準會 1 月利率決策前瞻：按兵不動機率高</a>
-            <p class="news-summary">儘管就業數據疲軟，但考量通膨黏著性，市場普遍預期聯準會將在 1 月會議維持利率不變。</p>
+        <li>
+            <span class="news-item-title">[JPMorgan] 聯準會 1 月利率決策預期按兵不動</span>
+            <p class="news-item-summary">儘管數據波動，市場普遍預期 Fed 將維持利率在 3.5-3.75%，繼續觀察通膨與就業趨勢。</p>
         </li>
-        <li class="news-item">
-            <a href="https://tradingeconomics.com/united-states/currency" target="_blank" class="news-title"><strong>[Trading Economics]</strong> 美元指數跌破 97.5 創近期新低</a>
-            <p class="news-summary">受經濟數據疲軟及降息預期影響，美元指數 DXY 下跌至 97.46，非美貨幣相對強勢。</p>
+        <li>
+            <span class="news-item-title">[Trading Economics] 美元指數走弱，跌破 97.5 關卡</span>
+            <p class="news-item-summary">受降息預期與疲軟經濟數據影響，美元指數 DXY 下跌至 97.46，非美貨幣獲得喘息空間。</p>
         </li>
-        <li class="news-item">
-            <a href="https://www.spglobal.com" target="_blank" class="news-title"><strong>[S&P Global]</strong> 美國 12 月製造業 PMI 升至 51.8 重回擴張</a>
-            <p class="news-summary">數據顯示美國製造業景氣回溫，新訂單與產出指數同步上揚，為經濟提供支撐。</p>
+        <li>
+            <span class="news-item-title">[S&P Global] 美國 12 月製造業 PMI 升至 51.8 重回擴張</span>
+            <p class="news-item-summary">製造業採購經理人指數回升至 50 分水嶺上方，顯示生產端景氣正逐步回溫。</p>
         </li>
-        <li class="news-item">
-            <a href="https://focustaiwan.tw" target="_blank" class="news-title"><strong>[Focus Taiwan]</strong> 台灣 12 月外銷訂單年增 43.8% 達 762 億美元</a>
-            <p class="news-summary">受惠於 AI 伺服器與高效能運算需求，台灣出口訂單動能強勁，創下歷史同期新高。</p>
+        <li>
+            <span class="news-item-title">[Focus Taiwan] 台灣 12 月外銷訂單年增 43.8% 表現亮眼</span>
+            <p class="news-item-summary">受惠於 AI 伺服器與高效能運算需求，出口訂單達 762 億美元，創下歷史同期新高。</p>
         </li>
-        <li class="news-item">
-            <a href="https://focustaiwan.tw" target="_blank" class="news-title"><strong>[Focus Taiwan]</strong> 台灣 12 月失業率降至 3.30% 創 25 年新低</a>
-            <p class="news-summary">國內勞動市場緊俏，失業率持續在低檔徘徊，顯示就業市場依然穩健。</p>
+        <li>
+            <span class="news-item-title">[Focus Taiwan] 台灣 12 月失業率維持 3.30% 歷史低檔</span>
+            <p class="news-item-summary">國內就業市場相對穩健，失業率持平，顯示消費端仍具備一定支撐力。</p>
         </li>
-        <li class="news-item">
-            <a href="https://www.ndc.gov.tw" target="_blank" class="news-title"><strong>[NDC]</strong> 台灣 11 月景氣燈號亮黃紅燈 分數 37 分</a>
-            <p class="news-summary">國發會發布景氣對策信號，顯示國內經濟保持熱絡，內需與出口同步成長。</p>
+        <li>
+            <span class="news-item-title">[NDC] 台灣 11 月景氣燈號續亮黃紅燈，分數達 37 分</span>
+            <p class="news-item-summary">國發會數據顯示國內經濟維持熱絡，製造業與出口動能是主要推手。</p>
         </li>
-        <li class="news-item">
-            <a href="https://www.xtb.com/en/market-analysis/tsmc-starts-2nm-production" target="_blank" class="news-title"><strong>[XTB]</strong> 台積電啟動 2 奈米量產 鞏固 AI 領導地位</a>
-            <p class="news-summary">台積電宣佈 2 奈米製程進入量產階段，預計將進一步擴大在先進晶片製造領域的領先優勢。</p>
+        <li>
+            <span class="news-item-title">[XTB] 台積電正式量產 2 奈米，鞏固全球技術領先</span>
+            <p class="news-item-summary">台積電宣佈 2 奈米進入量產，強化在 AI 與高效能運算領域的技術護城河。</p>
         </li>
-        <li class="news-item">
-            <a href="https://www.xtb.com" target="_blank" class="news-title"><strong>[XTB]</strong> 台積電 2026 資本支出上看 560 億美元</a>
-            <p class="news-summary">為因應先進製程需求，台積電大幅調高資本支出預算，顯示對未來成長充滿信心。</p>
+        <li>
+            <span class="news-item-title">[XTB] 台積電 2026 年資本支出上看 560 億美元</span>
+            <p class="news-item-summary">為因應先進製程需求，台積電大幅上調資本支出，顯示對未來成長與 AI 需求充滿信心。</p>
         </li>
-        <li class="news-item">
-            <a href="https://www.fool.com" target="_blank" class="news-title"><strong>[Motley Fool]</strong> Nvidia Q3 營收年增 62% AI 需求不墜</a>
-            <p class="news-summary">Nvidia 公佈強勁財報，顯示來自雲端服務商與企業的 AI 晶片需求依然旺盛。</p>
+        <li>
+            <span class="news-item-title">[Motley Fool] Nvidia Q3 營收成長 62%，AI 晶片供不應求</span>
+            <p class="news-item-summary">輝達財報持續驚豔市場，顯示雲端巨頭與企業對 AI 基礎設施的投資力道毫無減弱。</p>
         </li>
-        <li class="news-item">
-            <a href="https://carboncredits.com" target="_blank" class="news-title"><strong>[Carbon Credits]</strong> 雲端巨頭 2026 資本支出預計達 6000 億美元</a>
-            <p class="news-summary">為建設 AI 基礎設施，主要雲端服務商將大幅增加資本支出，有利於硬體供應鏈。</p>
+        <li>
+            <span class="news-item-title">[Carbon Credits] 雲端巨頭 2026 資本支出預計達 6000 億美元</span>
+            <p class="news-item-summary">為建設龐大 AI 算力，各大雲端服務商計畫投入巨資，有利於硬體供應鏈長期發展。</p>
         </li>
-        <li class="news-item">
-            <a href="https://www.nasdaq.com" target="_blank" class="news-title"><strong>[Nasdaq]</strong> 美光看好 2026 營運 HBM 供給持續緊缺</a>
-            <p class="news-summary">記憶體大廠美光表示，高頻寬記憶體 (HBM) 產能已被預訂一空，看好記憶體報價走勢。</p>
+        <li>
+            <span class="news-item-title">[Nasdaq] 美光看好 2026 營運，HBM 產能已被訂滿</span>
+            <p class="news-item-summary">記憶體大廠美光受惠於 AI 帶動的高頻寬記憶體需求，預期未來產能將持續吃緊。</p>
         </li>
-        <li class="news-item">
-            <a href="https://automotivelogistics.media" target="_blank" class="news-title"><strong>[Automotive Logistics]</strong> 美台貿易協定生效 關稅降至 15%</a>
-            <p class="news-summary">新貿易協定降低了台灣科技產品輸美關稅，有助於提升台灣半導體供應鏈的競爭力。</p>
+        <li>
+            <span class="news-item-title">[Automotive Logistics] 美台貿易協定生效，台灣半導體獲關稅優惠</span>
+            <p class="news-item-summary">新協議降低輸美關稅至 15%，有助於台灣科技廠在全球供應鏈的配置更具彈性。</p>
         </li>
-        <li class="news-item">
-            <a href="https://www.iea.org" target="_blank" class="news-title"><strong>[IEA]</strong> 地緣政治風險降溫 油價回落至 65 美元區間</a>
-            <p class="news-summary">隨著中東局勢暫時緩解，國際油價回檔修正，減輕了通膨反彈的壓力。</p>
+        <li>
+            <span class="news-item-title">[IEA] 地緣政治風險略降，原油價格回落至 65 美元區間</span>
+            <p class="news-item-summary">隨著中東局勢暫時緩解，油價出現回檔，有助於減輕通膨反彈的擔憂。</p>
         </li>
     </ul>
 </div>

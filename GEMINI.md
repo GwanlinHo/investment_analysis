@@ -14,22 +14,30 @@
      - **Format:** Compact style (Title + Source Link on Line 1, Summary on Line 2). Max 2 lines per item.
   5. Generate analysis content (**STRICTLY NO EMOJIS ALLOWED**):
      - **Part A: Weekly News Focus**
-       - **Search Strategy (Link-Friendly):**
-         - **Objective:** Obtain **valid, clickable deep links** to specific articles. Avoid homepages or search result redirections.
-         - **Sources (International):** Prioritize accessible authoritative sources. Use `site:finance.yahoo.com OR site:cnbc.com OR site:apnews.com OR site:investing.com`.
-           - *Note:* Avoid `wsj.com` or `bloomberg.com` directly due to paywalls; look for their content syndicated on Yahoo Finance instead.
-         - **Sources (Taiwan):** Use `site:focustaiwan.tw OR site:taiwannews.com.tw OR site:cna.com.tw OR site:money.udn.com`.
-       - **Content Verification (CRITICAL):**
-         - **Step 1:** Attempt to use the `web_fetch` tool to read the actual content of the selected news URLs.
-         - **Step 2 (Fallback):** If `web_fetch` fails, you **MUST** use the high-quality snippets/summaries provided in the search results to generate the news item. **Do NOT hallucinate content.**
+       - **Step 1: Multi-Angle Search (Expand the Pool):**
+         - Do NOT rely on a single search query. Execute **3 distinct searches** to gather a broad pool of candidates:
+           1.  **Global/US Macro:** `query="Top market moving financial news US economy Fed rate this week"`
+           2.  **Taiwan/Tech:** `query="Taiwan stock market TSMC export orders major news this week"`
+           3.  **Risks/Earnings:** `query="Major geopolitical risks corporate earnings surprises finance this week"`
+       - **Step 2: Curation & Filtering (Select High Impact):**
+         - From the combined search results, select the **15 most impactful** stories.
+         - **Selection Criteria:** Focus on items that move markets (e.g., rate decisions, CPI/jobs data), affect major industries (e.g., AI, Semis), or signal trend changes. Discard minor corporate news or duplicates.
+         - **Ratio:** Keep roughly 70% Global/US and 30% Taiwan.
+       - **Step 3: Content Generation (Use Search Snippets):**
+         - **Source of Truth:** Use the *Title* and *Snippet* text directly from the Google Search results. This ensures consistency.
+         - **Link:** Use the URL provided in the search result.
        - **Formatting:**
-         - Generate a clean HTML list (`<ul>` with `<li>`).
-         - Each item must include a **hyperlinked title** (opening in a new tab) and a short **summary**.
+         - Format as a clean HTML list (`<ul>` with `<li>`).
+         - **No Hyperlinks:** Do NOT include `<a>` tags for news items.
+         - **Bold Titles:** Wrap the source and title in `<strong>` tags.
+         - **Compact Layout:** Ensure the title and summary are visually close (minimal margin).
          - **Example:**
            ```html
-           <li class="news-item">
-               <a href="https://finance.yahoo.com/news/example-story.html" target="_blank" class="news-title">Fed Holds Rates Steady Amid Strong Jobs Data</a>
-               <p class="news-summary">The Federal Reserve maintained interest rates at 5.25-5.50%, citing robust employment growth as a reason to delay cuts.</p>
+           <li class="news-item" style="margin-bottom: 15px;">
+               <div class="news-content">
+                   <div style="font-weight: bold; margin-bottom: 2px;">[Bloomberg] Fed Signals Rate Cut Delay</div>
+                   <div style="font-size: 14px; color: #555;">Fed Chair Powell indicated that inflation data remains too hot to justify an immediate rate cut.</div>
+               </div>
            </li>
            ```
        - Target div: `#weekly-news-focus`.
