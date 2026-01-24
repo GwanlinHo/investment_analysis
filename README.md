@@ -119,6 +119,29 @@ cd investment_analysis
 
 ---
 
+## 自動化執行 (Automation)
+
+您可以透過設定 `crontab` 來實現定時自動執行分析並上傳報告。
+
+### 1. 建立執行腳本
+建立一個檔案 (例如 `run_analysis.sh`) 並貼入以下內容 (請根據您的環境修改路徑)：
+
+```bash
+#!/bin/bash
+export PATH=$PATH:/home/pi/.config/nvm/versions/node/v22.17.0/bin
+cd /home/pi/WorkDir/investment_analysis/
+gemini -p 'investment analysis' -y
+```
+
+### 2. 設定 Crontab
+執行 `crontab -e` 並加入以下排程 (例如：每週一至五 晚上 10 點執行)：
+
+```bash
+0 22 * * 1-5 /bin/bash /home/pi/WorkDir/investment_analysis/run_analysis.sh >> /home/pi/WorkDir/investment_analysis/auto_run.log 2>&1
+```
+
+---
+
 ## AI Agent 協作指南 (AI Agent Collaboration Guide)
 
 本專案的核心價值在於**「自動化程式碼」與「AI 分析能力」的結合**。讓 Python 腳本收集並且計算數據，讓 AI Agent 蒐集最新的新聞、解讀市場情緒，並且進行深入的分析。
