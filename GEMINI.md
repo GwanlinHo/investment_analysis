@@ -25,7 +25,7 @@
          - **Ratio:** Keep roughly 70% Global/US and 30% Taiwan.
        - **Step 3: Content Generation (Use Search Snippets):**
          - **Source of Truth:** Use the *Title* and *Snippet* text directly from the Google Search results. This ensures consistency.
-         - **Link:** Use the URL provided in the search result.
+         - **Translation:** Translate all news titles and summaries into Traditional Chinese.
        - **Formatting:**
          - Format as a clean HTML list (`<ul>` with `<li>`).
          - **No Hyperlinks:** Do NOT include `<a>` tags for news items.
