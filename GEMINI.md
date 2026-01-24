@@ -14,8 +14,22 @@
      - **Format:** Compact style (Title + Source Link on Line 1, Summary on Line 2). Max 2 lines per item.
   5. Generate analysis content (**STRICTLY NO EMOJIS ALLOWED**):
      - **Part A: Weekly News Focus**
-       - Use the 15 collected news items.
-       - Format as a clean list with links.
+       - **Search Strategy:**
+         - **70% International:** Search for top financial news using keywords like "US economy", "Fed rate", "AI chips", "Stock market" combined with authoritative domains (e.g., `site:cnbc.com OR site:reuters.com OR site:bloomberg.com OR site:wsj.com`).
+         - **30% Local (Taiwan):** Search for Taiwan-specific financial news (e.g., "台積電", "台股", "出口訂單") using reliable local sources (e.g., `site:cnyes.com OR site:udn.com OR site:money.udn.com`).
+       - **Content Verification (CRITICAL):**
+         - **Step 1:** Attempt to use the `web_fetch` tool to read the actual content of the selected news URLs.
+         - **Step 2 (Fallback):** If `web_fetch` fails (e.g., due to anti-bot measures), you **MUST** use the high-quality snippets/summaries provided in the search results to generate the news item. **Do NOT hallucinate content.**
+       - **Formatting:**
+         - Generate a clean HTML list (`<ul>` with `<li>`).
+         - Each item must include a **hyperlinked title** (opening in a new tab) and a short **summary**.
+         - **Example:**
+           ```html
+           <li class="news-item">
+               <a href="https://www.reuters.com/..." target="_blank" class="news-title">Fed Holds Rates Steady Amid Strong Jobs Data</a>
+               <p class="news-summary">The Federal Reserve maintained interest rates at 5.25-5.50%, citing robust employment growth as a reason to delay cuts.</p>
+           </li>
+           ```
        - Target div: `#weekly-news-focus`.
      - **Part B: AI Comprehensive Analysis**
        - **Data Extraction:** EXTRACT the fundamental data JSON from the `<script id="fundamental-data">` block in the HTML file.
