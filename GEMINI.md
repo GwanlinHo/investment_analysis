@@ -42,10 +42,10 @@
            ```
        - Target div: `#weekly-news-focus`.
      - **Part B: AI Comprehensive Analysis**
-       - **Data Extraction:** EXTRACT the fundamental data JSON from the `<script id="fundamental-data">` block in the HTML file.
+       - **Data Extraction:** EXTRACT the fundamental data JSON from `<script id="fundamental-data">` AND yield data from `<script id="yield-data">` in the HTML file.
        - **Technical Analysis (ISTP style):** Analyze volume/price, support/resistance, divergence. Warn of reversals. Be direct.
        - **Value Investing (ISTJ style):** Use extracted JSON data (PE, ROE, etc.) to evaluate stocks/ETFs. Focus on Moat and Margin of Safety.
-       - **Macro & Industry (INTJ style):** Analyze interest rates, industry cycles, and geopolitical risks using the collected macro data.
+       - **Macro & Industry (INTJ style):** Analyze interest rates, industry cycles, and geopolitical risks using the collected macro data. **CRITICAL:** Check the "US Treasury Yields" in the report (below the yield curve chart or in `<script id="yield-data">`). Calculate the 10Y-3M spread. If Positive -> "Normal Curve". If Negative -> "Inverted Curve". Do NOT hallucinate inversion.
        - **Constraint:** Do NOT write MBTI labels in the output.
        - Target div: `#ai-analysis-report`.
   6. **Update HTML Report:**

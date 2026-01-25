@@ -254,8 +254,9 @@ def create_ma_plot_base64(df, symbol, title=None):
         return None
 
 def create_yield_curve_plot_base64():
-    """建立美國公債殖利率曲線圖並返回Base64字串"""
+    """建立美國公債殖利率曲線圖並返回Base64字串及最新數據"""
     print("  - 正在產生美國公債殖利率圖表...")
+    yield_data = {}
     try:
         end_date = datetime.datetime.now()
         start_date = end_date - datetime.timedelta(days=5*365) # 5 years
@@ -267,7 +268,15 @@ def create_yield_curve_plot_base64():
 
         if three_month_df.empty or ten_year_df.empty or thirty_year_df.empty:
             print("  [Warning] 無法獲取完整的殖利率資料。")
-            return None
+            return None, {}
+
+        # 獲取最新數據 (簡單處理)
+        try:
+            yield_data['3M'] = float(three_month_df['Close'].iloc[-1])
+            yield_data['10Y'] = float(ten_year_df['Close'].iloc[-1])
+            yield_data['30Y'] = float(thirty_year_df['Close'].iloc[-1])
+        except Exception as e:
+            print(f"  [Warning] 無法提取殖利率數值: {e}")
 
         # 使用 matplotlib 風格
         plt.style.use('bmh')
@@ -290,16 +299,17 @@ def create_yield_curve_plot_base64():
         buf = BytesIO()
         plt.savefig(buf, format='png', bbox_inches='tight', dpi=100)
         plt.close()
-        return base64.b64encode(buf.getvalue()).decode('utf-8')
+        return base64.b64encode(buf.getvalue()).decode('utf-8'), yield_data
     except Exception as e:
         print(f"[Error] 產生殖利率圖表時發生錯誤: {e}")
-        return None
+        return None, {}
 
-def generate_html_report(report_data, date_str, summary_data, yield_curve_plot_b64=None, fundamental_data=None):
+def generate_html_report(report_data, date_str, summary_data, yield_curve_plot_b64=None, fundamental_data=None, yield_data=None):
     """生成最終的HTML報告"""
     
     # 將基本面數據轉換為 JSON 字串，嵌入 HTML 中供 AI 讀取
     fundamental_json = json.dumps(fundamental_data, ensure_ascii=False, indent=2) if fundamental_data else "{}"
+    yield_json = json.dumps(yield_data, ensure_ascii=False, indent=2) if yield_data else "{}"
 
     # 建構市場速覽 HTML
     summary_html = ""
@@ -377,12 +387,19 @@ def generate_html_report(report_data, date_str, summary_data, yield_curve_plot_b
 
     # Yield Curve Section
     if yield_curve_plot_b64:
+        yield_text = ""
+        if yield_data:
+            yield_text = f"Latest Yields: 3M: {yield_data.get('3M', 0):.2f}%, 10Y: {yield_data.get('10Y', 0):.2f}%, 30Y: {yield_data.get('30Y', 0):.2f}%"
+
         content_html += f'''
         <div id="macro-analysis" class="group-section">
             <h2 class="group-title">總體經濟指標</h2>
             <div class="card chart-card" style="max-width: 900px; margin: 0 auto;">
                  <div class="chart-header">美國長短期國庫券殖利率</div>
                  <img src="data:image/png;base64,{yield_curve_plot_b64}" alt="Yield Curve Plot">
+                 <div style="text-align: center; margin-top: 10px; color: #555; font-size: 14px; font-weight: bold;">
+                    {yield_text}
+                 </div>
             </div>
             
             <!-- Macro Data Section -->
@@ -420,6 +437,9 @@ def generate_html_report(report_data, date_str, summary_data, yield_curve_plot_b
         -->
         <script id="fundamental-data" type="application/json">
         {fundamental_json}
+        </script>
+        <script id="yield-data" type="application/json">
+        {yield_json}
         </script>
         <style>
             :root {{
@@ -631,10 +651,10 @@ def main():
                 break
     
     # 產生總經殖利率圖
-    yield_curve_plot = create_yield_curve_plot_base64()
+    yield_curve_plot, yield_data = create_yield_curve_plot_base64()
 
     if report_data:
-        generate_html_report(report_data, current_date_str, ordered_summary, yield_curve_plot, fundamental_data_list)
+        generate_html_report(report_data, current_date_str, ordered_summary, yield_curve_plot, fundamental_data_list, yield_data)
     else:
         print("[Error] 沒有任何資料可生成報告。")
 
