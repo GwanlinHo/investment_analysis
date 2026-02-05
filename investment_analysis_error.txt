@@ -1,0 +1,15 @@
+[Error] Investment Analysis Failed
+Date: 2026-02-04
+
+Reason: Python environment is not accessible.
+Details:
+- Command `python` returned: Access is denied.
+- Command `python3` returned: Access is denied.
+- Command `py` returned: Command not found.
+
+This usually happens on Windows when the "App Execution Aliases" for Python are enabled but Python is not installed from the Microsoft Store.
+
+Action Required:
+1. Install Python from python.org.
+2. Ensure "Add Python to PATH" is checked during installation.
+3. Or, if installed, disable the "App Execution Aliases" for python.exe and python3.exe in Windows Settings.
