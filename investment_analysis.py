@@ -304,12 +304,13 @@ def create_yield_curve_plot_base64():
         print(f"[Error] 產生殖利率圖表時發生錯誤: {e}")
         return None, {}
 
-def generate_html_report(report_data, date_str, summary_data, yield_curve_plot_b64=None, fundamental_data=None, yield_data=None):
+def generate_html_report(report_data, date_str, summary_data, yield_curve_plot_b64=None, fundamental_data=None, yield_data=None, market_data=None):
     """生成最終的HTML報告"""
     
-    # 將基本面數據轉換為 JSON 字串，嵌入 HTML 中供 AI 讀取
+    # 將數據轉換為 JSON 字串，嵌入 HTML 中供 AI 讀取
     fundamental_json = json.dumps(fundamental_data, ensure_ascii=False, indent=2) if fundamental_data else "{}"
     yield_json = json.dumps(yield_data, ensure_ascii=False, indent=2) if yield_data else "{}"
+    market_json = json.dumps(market_data, ensure_ascii=False, indent=0) if market_data else "{}"
 
     # 建構市場速覽 HTML
     summary_html = ""
@@ -440,6 +441,10 @@ def generate_html_report(report_data, date_str, summary_data, yield_curve_plot_b
         </script>
         <script id="yield-data" type="application/json">
         {yield_json}
+        </script>
+        <!-- HIDDEN MARKET DATA FOR TECHNICAL ANALYSIS -->
+        <script id="market-data" type="application/json">
+        {market_json}
         </script>
         <style>
             :root {{
@@ -586,6 +591,7 @@ def main():
     report_data = []
     summary_data_list = []
     fundamental_data_list = [] # 儲存基本面數據
+    market_data_dict = {}     # 儲存技術分析用的歷史數據
 
     print(f"[Info] 開始執行分析工作... ({current_date_str})")
 
@@ -625,6 +631,14 @@ def main():
                     'change': latest['Change %']
                 })
             
+            # 收集最近 60 天的歷史數據用於 AI 技術分析
+            recent_df = df_indicators.tail(60).copy().reset_index()
+            recent_df['Date'] = recent_df['Date'].dt.strftime('%Y-%m-%d')
+            # 選取關鍵技術欄位
+            cols = ['Date', 'Open', 'High', 'Low', 'Close', 'Volume', '5MA', '20MA', '60MA', 'K', 'D']
+            actual_cols = [c for c in cols if c in recent_df.columns]
+            market_data_dict[display_name] = recent_df[actual_cols].to_dict(orient='records')
+
             # 抓取基本面數據 (非指數類)
             if not symbol.startswith('^'):
                 f_data = get_fundamental_data(symbol)
@@ -654,7 +668,7 @@ def main():
     yield_curve_plot, yield_data = create_yield_curve_plot_base64()
 
     if report_data:
-        generate_html_report(report_data, current_date_str, ordered_summary, yield_curve_plot, fundamental_data_list, yield_data)
+        generate_html_report(report_data, current_date_str, ordered_summary, yield_curve_plot, fundamental_data_list, yield_data, market_data_dict)
     else:
         print("[Error] 沒有任何資料可生成報告。")
 

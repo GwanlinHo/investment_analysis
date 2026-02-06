@@ -42,11 +42,21 @@
            ```
        - Target div: `#weekly-news-focus`.
      - **Part B: AI Comprehensive Analysis**
-       - **Data Extraction:** EXTRACT the fundamental data JSON from `<script id="fundamental-data">` AND yield data from `<script id="yield-data">` in the HTML file.
-       - **Technical Analysis (ISTP style):** Analyze volume/price, support/resistance, divergence. Warn of reversals. Be direct.
-       - **Value Investing (ISTJ style):** Use extracted JSON data (PE, ROE, etc.) to evaluate stocks/ETFs. Focus on Moat and Margin of Safety.
-       - **Macro & Industry (INTJ style):** Analyze interest rates, industry cycles, and geopolitical risks using the collected macro data. **CRITICAL:** Check the "US Treasury Yields" in the report (below the yield curve chart or in `<script id="yield-data">`). Calculate the 10Y-3M spread. If Positive -> "Normal Curve". If Negative -> "Inverted Curve". Do NOT hallucinate inversion.
-       - **Constraint:** Do NOT write MBTI labels in the output.
+       - **Data Requirement:** The Python script MUST embed the last 60 days of OHLCV market data into `<script id="market-data">` in the HTML. The AI MUST read this data along with `<script id="fundamental-data">` and `<script id="yield-data">`.
+       - **1. Technical Analysis (Deep Dive):**
+         - **Price-Volume:** Analyze volume changes at highs/lows (e.g., divergence, exhaustion).
+         - **Support/Resistance:** Identify specific price levels based on recent swing highs/lows (Dow Theory).
+         - **Indicators:** Analyze KD (crossovers), MACD, and BIAS (deviation rate for mean reversion).
+         - **Patterns:** Apply **Sakata Methods** (e.g., Three Black Crows, Morning/Evening Star) and **Dow Theory** trends.
+       - **2. Fundamental Analysis (Value Investing):**
+         - **Moat:** Evaluate competitive advantage using ROE and Gross Margin.
+         - **Valuation:** Analyze PE and PB ratios relative to historical averages and growth (PEG).
+         - **Margin of Safety:** Assess if the current price offers a buffer against downside risk.
+       - **3. Macro & Sentiment (Context):**
+         - **Yield Curve:** Calculate the **10Y-3M spread**. Positive = Normal (Growth), Negative = Inverted (Recession Risk).
+         - **Cycle Signals:** Interpret indicators like Taiwan's Monitoring Indicator (Red/Blue lights) and PMI.
+         - **News Linkage:** Correlate specific news events (from Part A) with market moves.
+       - **Constraint:** Do NOT write MBTI labels in the output. Structure the output with clear headings and a final "Actionable Strategy" section.
        - Target div: `#ai-analysis-report`.
   6. **Update HTML Report:**
      - **Inject Macro Data:** Format the collected economic indicators into **two separate** HTML tables (one for US, one for Taiwan).
