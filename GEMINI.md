@@ -46,8 +46,8 @@
        - **1. Technical Analysis (Deep Dive):**
          - **Price-Volume:** Analyze volume changes at highs/lows (e.g., divergence, exhaustion).
          - **Support/Resistance:** Identify specific price levels based on recent swing highs/lows (Dow Theory).
-         - **Indicators:** Analyze KD (crossovers), MACD, and BIAS (deviation rate for mean reversion).
-         - **Patterns:** Apply **Sakata Methods** (e.g., Three Black Crows, Morning/Evening Star) and **Dow Theory** trends.
+         - **Indicators:** Analyze KD (crossovers), MACD, and BIAS (deviation rate for mean reversion). **CRITICAL:** When describing indicator status (e.g., crossovers), MUST verify the exact date of occurrence from the `market-data` and state it explicitly. Do NOT confuse historical signals with current status if they occurred several days ago.
+         - **Patterns:** Apply **Sakata Methods** (e.g., Three Black Crows, Morning/Evening Star) and **Dow Theory** trends. **CRITICAL:** Every identified pattern or signal MUST explicitly state the corresponding asset (e.g., "S&P 500 指數" or "台股加權指數") to avoid ambiguity.
        - **2. Fundamental Analysis (Value Investing):**
          - **Moat:** Evaluate competitive advantage using ROE and Gross Margin.
          - **Valuation:** Analyze PE and PB ratios relative to historical averages and growth (PEG).
