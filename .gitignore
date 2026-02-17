@@ -113,6 +113,12 @@ ENV/
 env.bak/
 venv.bak/
 
+# Temporary Analysis Fragments
+ai_analysis.html
+tw_macro_table.html
+us_macro_table.html
+weekly_news.html
+
 # Spyder Screen Resolution Project
 .spyderproject
 .spyproject
