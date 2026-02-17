@@ -2,7 +2,7 @@
 
 ## Workflow: Investment Analysis
 - When the user types the phrase `investment analysis` (or similar trigger within this context), perform the following sequence:
-  1. Execute `./.venv/bin/python3 investment_analysis.py` to generate the HTML report in the report directory.
+  1. Execute `uv run investment_analysis.py` to generate the HTML report in the report directory.
   2. Read the generated HTML file from `report/`.
   3. **Collect Macroeconomic Data:**
      - **CRITICAL RULE:** Always use the latest **OFFICIAL released data** (e.g., from government bureaus like BEA, BLS, NDC). **Do NOT use forecast/estimated data** for the current or future months unless explicitly requested. If the current month's data is not yet out, use the previous month's official data.
