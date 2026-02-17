@@ -94,11 +94,14 @@ git clone https://github.com/GwanlinHo/investment_analysis.git
 cd investment_analysis
 ```
 
-### 2. 環境需求
+### 2. 環境需求與設定
 *   Python 3.8 或以上版本。
-*   安裝必要的 Python 套件：
+*   建議使用虛擬環境管理套件：
     ```bash
-    pip install yfinance pandas matplotlib mplfinance pytz
+    python3 -m venv .venv
+    source .venv/bin/activate  # Linux/macOS
+    # .\.venv\Scripts\activate  # Windows
+    pip install -r requirements.txt
     ```
 
 ### 3. 設定追蹤清單 (`config.json`)
