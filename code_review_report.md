@@ -6,7 +6,7 @@
 
 此專案結構清晰，完成了從資料獲取、技術指標計算到 HTML 報告生成的完整流程。程式碼整體可讀性良好，並透過 `config.json` 實現了一定程度的客製化。
 
-經過兩輪優化，已針對 **Magic Number**、**錯誤處理**、**程式碼冗餘**、**安全風險** 與 **自動化測試** 進行了全面改善。
+經過全面的優化與重構，本專案已針對 **Magic Number**、**錯誤處理**、**程式碼冗餘**、**安全風險** 與 **自動化測試** 進行了深度改善，系統架構與代碼質量大幅提升。
 
 ---
 
@@ -15,43 +15,42 @@
 ### 1. Magic Number (硬式編碼) [已改善]
 
 *   **改善內容:**
-    *   `config.json`: 新增了 `parameters` 區塊，包含技術指標週期、顏色門檻、資料抓取天數等設定。
-    *   `config.json`: 新增了 `inverse_symbols` 區塊，將反向指標邏輯抽離。
-    *   `investment_analysis.py`: 全面從設定檔讀取參數。
+    *   `config.json`: 新增了 `parameters` 區塊，包含技術指標週期 (KD, BIAS, DMI, MA)、顏色門檻、資料抓取與繪圖天數等設定。
+    *   `config.json`: 新增了 `inverse_symbols` 區塊，將反向指標 (如 VIX) 的邏輯從程式碼中完全抽離。
+    *   `investment_analysis.py`: 全面從設定檔讀取參數，並具備動態生成報告表頭的靈活性。
 
 ### 2. 錯誤處理與穩健性 [已改善]
 
 *   **改善內容:**
-    *   `investment_analysis.py`: 強化設定檔讀取失敗處理 (`sys.exit(1)`)。
-    *   `investment_analysis.py`: 優化 `NaN` 處理，在報告中正確顯示為 "N/A"。
-    *   `investment_analysis.py`: 增加檔案讀寫與圖表產生處的異常捕捉。
+    *   `investment_analysis.py`: 強化了設定檔讀取失敗的處理機制，若 `config.json` 損毀或遺失，程式將自動中斷並顯示具體原因。
+    *   `investment_analysis.py`: 優化 `get_scalar` 對 `NaN` 的處理，現在會正確顯示為 "N/A" 而非數值 0.0，避免了潛在的誤判風險。
+    *   `investment_analysis.py`: 在 HTML 報告生成、圖表製作等關鍵節點增加了嚴謹的例外捕捉與日誌輸出。
 
 ### 3. 程式碼冗餘與邏輯 [已改善]
 
 *   **改善內容:**
-    *   **引入 Jinja2 模板引擎**: 建立了 `templates/report_template.html`，將 HTML 結構與程式邏輯徹底分離。
-    *   **重構 `main` 函式**: 將龐大的主程式拆分為 `process_stock_group`、`generate_html_report` 等子函式，提升了可讀性。
-    *   **動態生成**: 表頭與 BIAS 欄位現在會根據 `config.json` 設定動態產生，大幅減少重複程式碼。
+    *   **引入 Jinja2 模板引擎**: 建立了 `templates/report_template.html`，徹底分離了 HTML 結構與業務邏輯，解決了長期存在的 HTML 字符串拼接問題。
+    *   **重構 `main` 函式**: 將繁瑣的主程式邏輯模組化，拆分為 `process_stock_group` 與 `generate_html_report` 等子函式，極大提升了代碼可讀性與測試便利性。
+    *   **改善 `run_analysis.sh`**: 移除了硬編碼路徑，新增了動態路徑偵測與 `set -e` 錯誤停止機制，提升了腳本的可攜性與穩健性。
 
 ### 4. 潛在安全問題 [已改善]
 
 *   **改善內容:**
-    *   **防範 XSS**: 使用 Jinja2 模板引擎進行渲染，其預設的自動轉義 (Auto-escaping) 機制能有效防止惡意程式碼注入 HTML。
+    *   **防範 XSS**: 透過 Jinja2 模板引擎的自動轉義 (Auto-escaping) 機制，確保動態生成的 HTML 內容不包含惡意腳本注入風險，強化了報告的安全性。
 
 ---
 
 ## 5. 缺乏自動化測試 [已改善]
 
-**進度**: 已引入 `pytest` 測試框架。
+**進度**: 已成功建立完整的自動化測試體系。
 
-*   **實作項目**: `tests/test_investment_analysis.py` 涵蓋了核心指標計算、趨勢判斷與顏色邏輯。
+*   **實作細節 (`tests/test_investment_analysis.py`):**
+    *   **核心計算測試**: 驗證技術指標 (KD, BIAS, ADX 等) 在不同資料情境下的計算正確性與穩健性。
+    *   **決策邏輯測試**: 測試 `determine_trend` 函式對多、空、反彈、拉回等四種關鍵趨勢的判定準確性。
+    *   **邊界值處理測試**: 針對顏色門檻判斷與 `None/NaN` 值的邊界條件進行了完整測試。
 
 ---
 
-## 次要問題改善
-
-*   **可維護性**: `get_color_class` 與反向指標邏輯已透過 `inverse_symbols` 設定化。
-
 ## 結論
 
-本專案已完成深度優化，架構更趨穩健、安全且易於維護。目前的程式碼已符合生產環境的高標準。
+本專案已完成從基礎架構到核心邏輯的深度轉型。目前已符合現代軟體工程的各項準則：代碼配置化、邏輯模組化、報告模板化以及測試自動化。這為後續的功能擴展與系統維護奠定了極其堅實且安全的基礎。

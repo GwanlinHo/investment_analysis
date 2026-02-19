@@ -1,10 +1,21 @@
 #!/bin/bash
-# 1. 進入專案目錄
-cd /home/pi/WorkDir/investment_analysis/
+# 讓腳本在遇到錯誤時立即停止執行
+set -e
 
-# 2. 執行 Gemini CLI 進行 AI 分析 (這會根據 GEMINI.md 自動執行 Python 腳本)
-export PATH=$PATH:/home/pi/.config/nvm/versions/node/v22.17.0/bin
+# 取得腳本所在的目錄，並切換至該目錄，增加可攜性
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+cd "$SCRIPT_DIR"
+
+echo "[Info] 開始執行投資分析工作流..."
+
+# 檢查 gemini 指令是否存在
+if ! command -v gemini &> /dev/null; then
+    echo "[Error] 找不到 'gemini' 指令。請確保已安裝 Gemini CLI 並正確設定 PATH。"
+    exit 1
+fi
+
+# 執行 Gemini CLI 進行完整的投資分析工作流 (包含 Python 資料生成、AI 搜尋與報告更新)
+# 這裡使用 'investment analysis' 觸發 GEMINI.md 中定義的自動化流程
 gemini -p 'investment analysis' -y
 
-# 3. 順利產生後，刪除暫時的 HTML 檔案
-rm -f ai_analysis.html tw_macro_table.html us_macro_table.html weekly_news.html
+echo "[Success] 投資分析工作流執行完畢。"
