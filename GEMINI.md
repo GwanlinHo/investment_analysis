@@ -52,9 +52,12 @@
      - **Part B: AI Comprehensive Analysis**
        - **Data Requirement:** The Python script MUST embed the last 60 days of OHLCV market data into `<script id="market-data">` in the HTML. The AI MUST read this data along with `<script id="fundamental-data">` and `<script id="yield-data">`. 
        - **Market Status Awareness**: AI MUST check the `.market-status` tags in the HTML report. If a market is labeled as **"休市中 (Market Closed)"**, the AI MUST explicitly mention the holiday or market closure in its analysis and ensure all price-related statements refer to the **"最後交易日"** instead of the current date.
-       - **1. 宏觀環境定調 (Macro Framework)**:
+       - **3. 宏觀環境定調 (Macro Framework)**:
          - **總經解讀**: 結合 CPI, PPI, 零售銷售與利率週期，判斷目前處於經濟週期的哪個階段。
-         - **債市訊號**: 計算 10Y-3M 價差，評估殖利率曲線對衰退風險或成長動能的指示。
+         - **債市訊號 (CRITICAL)**: AI **必須** 讀取 `<script id="yield-data">` 中的最新數值，並手動計算 **10Y 減 3M** 的利差。
+           - 若 (10Y - 3M) < 0：描述為「利差倒掛」，警示衰退風險。
+           - 若 (10Y - 3M) > 0：描述為「利差轉正/正向」，評估成長預期。
+           - **嚴禁**在利差為正值時描述為「持續倒掛」。
        - **2. 市場動態與產業趨勢 (Market & Industry Dynamics)**:
          - **資金流向 (Capital Flow)**: 分析美元指數 (DXY) 與公債殖利率對全球資金流向的影響，特別是針對台股外資流出壓力與美股權值股動能進行關聯分析。
          - **產業估值 (Sector Valuation)**: 評估高成長科技股 (如 AI, 半導體) 在當前利率環境下的估值回調風險；結合 M2 貨幣供給判斷市場流動性是否支撐當前股價。
