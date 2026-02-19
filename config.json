@@ -17,6 +17,34 @@
         }
     ],
     "key_indicators": ["^VIX", "^GSPC", "^SOX", "^NYFANG", "2330.TW", "00719B.TWO"],
+    "inverse_symbols": ["^VIX", "00677U.TW"],
+    "parameters": {
+        "kd_window": 9,
+        "bias_periods": [5, 20, 60],
+        "dmi_window": 14,
+        "ma_periods": [5, 20, 60],
+        "volume_ma_window": 20,
+        "history_days": 250,
+        "plot_days": 120,
+        "ai_analysis_days": 60,
+        "trend_thresholds": {
+            "bias_signal_period": 20,
+            "bias_threshold": 0
+        },
+        "color_thresholds": {
+            "kd_high": 80,
+            "kd_low": 20,
+            "bias5_high": 3,
+            "bias5_low": -3,
+            "bias20_high": 5,
+            "bias20_low": -5,
+            "bias60_high": 10,
+            "bias60_low": -10,
+            "adx_high": 25,
+            "vol_high": 100,
+            "vol_low": 50
+        }
+    },
     "symbol_name_map": {
         "^VIX": "恐慌指數",
         "^GSPC": "標普 500",

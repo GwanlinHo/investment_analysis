@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import mplfinance as mpf
 
 import json
+import sys
 
 # --- 全域設定 ---
 warnings.filterwarnings("ignore")
@@ -24,21 +25,31 @@ try:
         STOCK_GROUPS = config.get("stock_groups", [])
         KEY_INDICATORS = config.get("key_indicators", [])
         SYMBOL_NAME_MAP = config.get("symbol_name_map", {})
+        INVERSE_SYMBOLS = config.get("inverse_symbols", ["^VIX"])
+        PARAMS = config.get("parameters", {})
+        
+        # 提取參數並提供預設值
+        KD_WINDOW = PARAMS.get("kd_window", 9)
+        BIAS_PERIODS = PARAMS.get("bias_periods", [5, 20, 60])
+        DMI_WINDOW = PARAMS.get("dmi_window", 14)
+        MA_PERIODS = PARAMS.get("ma_periods", [5, 20, 60])
+        VOL_MA_WINDOW = PARAMS.get("volume_ma_window", 20)
+        HISTORY_DAYS = PARAMS.get("history_days", 250)
+        PLOT_DAYS = PARAMS.get("plot_days", 120)
+        AI_ANALYSIS_DAYS = PARAMS.get("ai_analysis_days", 60)
+        
+        TREND_PARAMS = PARAMS.get("trend_thresholds", {"bias_signal_period": 20, "bias_threshold": 0})
+        COLOR_THRESHOLDS = PARAMS.get("color_thresholds", {})
+
 except FileNotFoundError:
     print(f"[Error] 錯誤：找不到設定檔 {CONFIG_FILE}。")
-    STOCK_GROUPS = []
-    KEY_INDICATORS = []
-    SYMBOL_NAME_MAP = {}
+    sys.exit(1)
 except json.JSONDecodeError:
     print(f"[Error] 錯誤：設定檔 {CONFIG_FILE} 格式不正確。")
-    STOCK_GROUPS = []
-    KEY_INDICATORS = []
-    SYMBOL_NAME_MAP = {}
+    sys.exit(1)
 except Exception as e:
     print(f"[Error] 讀取設定檔時發生未預期的錯誤: {e}")
-    STOCK_GROUPS = []
-    KEY_INDICATORS = []
-    SYMBOL_NAME_MAP = {}
+    sys.exit(1)
 
 # --- 資料獲取 ---
 def get_stock_data(symbols, start_date, end_date):
@@ -95,14 +106,14 @@ def calculate_all_indicators(df):
     """計算所有需要的技術指標"""
     df = df.copy()
     # KD
-    low_min = df['Low'].rolling(window=9, min_periods=1).min()
-    high_max = df['High'].rolling(window=9, min_periods=1).max()
+    low_min = df['Low'].rolling(window=KD_WINDOW, min_periods=1).min()
+    high_max = df['High'].rolling(window=KD_WINDOW, min_periods=1).max()
     rsv = (df['Close'] - low_min) / (high_max - low_min) * 100
     df['K'] = rsv.ewm(com=2, adjust=False).mean()
     df['D'] = df['K'].ewm(com=2, adjust=False).mean()
     
     # BIAS (乖離率)
-    for period in [5, 20, 60]:
+    for period in BIAS_PERIODS:
         ma = df['Close'].rolling(window=period).mean()
         df[f'BIAS_{period}'] = ((df['Close'] - ma) / ma) * 100
         
@@ -110,44 +121,45 @@ def calculate_all_indicators(df):
     df['+DM'] = df['High'].diff().clip(lower=0)
     df['-DM'] = -df['Low'].diff().clip(upper=0)
     tr = pd.concat([df['High'] - df['Low'], abs(df['High'] - df['Close'].shift()), abs(df['Low'] - df['Close'].shift())], axis=1).max(axis=1)
-    df['TR'] = tr.rolling(window=14).sum()
-    df['+DI'] = 100 * (df['+DM'].rolling(window=14).sum() / df['TR'])
-    df['-DI'] = 100 * (df['-DM'].rolling(window=14).sum() / df['TR'])
+    df['TR'] = tr.rolling(window=DMI_WINDOW).sum()
+    df['+DI'] = 100 * (df['+DM'].rolling(window=DMI_WINDOW).sum() / df['TR'])
+    df['-DI'] = 100 * (df['-DM'].rolling(window=DMI_WINDOW).sum() / df['TR'])
     dx = abs(df['+DI'] - df['-DI']) / (df['+DI'] + df['-DI'])
-    df['ADX'] = (dx * 100).rolling(window=14).mean()
+    df['ADX'] = (dx * 100).rolling(window=DMI_WINDOW).mean()
 
     # Change & Volume
     df['Change %'] = df['Close'].pct_change() * 100
-    df['Volume Change %'] = (df['Volume'] / df['Volume'].rolling(window=20).mean() * 100).fillna(0)
+    df['Volume Change %'] = (df['Volume'] / df['Volume'].rolling(window=VOL_MA_WINDOW).mean() * 100).fillna(0)
     
     # Moving Averages
-    df['5MA'] = df['Close'].rolling(window=5).mean()
-    df['20MA'] = df['Close'].rolling(window=20).mean()
-    df['60MA'] = df['Close'].rolling(window=60).mean()
+    for ma_period in MA_PERIODS:
+        df[f'{ma_period}MA'] = df['Close'].rolling(window=ma_period).mean()
     
     return df
 
 # --- HTML 樣式與輔助函式 ---
 
-def determine_trend(k, d, bias20, change_pct):
+def determine_trend(k, d, bias_signal_val):
     """簡易趨勢判斷"""
     signal = ""
     style_class = "neutral"
     
+    threshold = TREND_PARAMS.get("bias_threshold", 0)
+    
     # 強勢多頭：K > D 且 月線乖離 > 0
-    if k > d and bias20 > 0:
+    if k > d and bias_signal_val > threshold:
         signal = "多頭排列"
         style_class = "bullish-strong"
     # 弱勢反彈：K > D 但 月線乖離 < 0
-    elif k > d and bias20 < 0:
+    elif k > d and bias_signal_val < threshold:
         signal = "反彈"
         style_class = "bullish-weak"
     # 強勢空頭：K < D 且 月線乖離 < 0
-    elif k < d and bias20 < 0:
+    elif k < d and bias_signal_val < threshold:
         signal = "空頭修正"
         style_class = "bearish-strong"
     # 高檔拉回：K < D 但 月線乖離 > 0
-    elif k < d and bias20 > 0:
+    elif k < d and bias_signal_val > threshold:
         signal = "回檔整理"
         style_class = "bearish-weak"
         
@@ -159,7 +171,8 @@ def get_color_class(value, high=0, low=0, inverse=False):
     inverse=True 用於 VIX 或反向指標 (跌是好的)
     預設: > high (Red/Up), < low (Green/Down)
     """
-    if pd.isna(value): return ""
+    if value is None or (isinstance(value, float) and pd.isna(value)):
+        return ""
     
     if not inverse:
         if value > high: return "text-up"
@@ -176,29 +189,71 @@ def format_data_row(symbol, latest, prev):
         val = data.get(key)
         if isinstance(val, pd.Series):
             val = val.iloc[0]
-        return val if pd.notna(val) else 0.0
+        return val if pd.notna(val) else None
+
+    def fmt_num(val, fmt="{:.1f}", fallback="N/A"):
+        return fmt.format(val) if val is not None else fallback
 
     change_pct = get_scalar(latest, "Change %")
     close = get_scalar(latest, "Close")
     vol_change = get_scalar(latest, "Volume Change %")
     k = get_scalar(latest, "K")
     d = get_scalar(latest, "D")
-    bias5 = get_scalar(latest, "BIAS_5")
-    bias20 = get_scalar(latest, "BIAS_20")
-    bias60 = get_scalar(latest, "BIAS_60")
-    adx = get_scalar(latest, "ADX")
-    plus_di = get_scalar(latest, "+DI")
-    minus_di = get_scalar(latest, "-DI")
     
-    trend_signal, trend_class = determine_trend(k, d, bias20, change_pct)
+    bias_signal_period = TREND_PARAMS.get("bias_signal_period", 20)
+    bias_signal_val = get_scalar(latest, f"BIAS_{bias_signal_period}")
     
-    # 判斷是否為 VIX 相關 (代碼含 VIX 或反向)
-    is_inverse = "VIX" in symbol
+    # 趨勢判斷需要有效數值，若為 None 則給預設中性
+    if k is not None and d is not None and bias_signal_val is not None:
+        trend_signal, trend_class = determine_trend(k, d, bias_signal_val)
+    else:
+        trend_signal, trend_class = "資料不足", "neutral"
+    
+    # 判斷是否為反向指標
+    is_inverse = symbol in INVERSE_SYMBOLS or any(inv in symbol for inv in ["VIX", "Inverse", "Short"])
     
     # 獲取顯示名稱
     display_name = SYMBOL_NAME_MAP.get(symbol, symbol)
     # 組合顯示 HTML: 中文名稱在上，代碼在下(小字)
     symbol_html = f"<div>{display_name}</div><div style='font-size: 11px; color: #888;'>{symbol}</div>"
+
+    # 取得顏色門檻值
+    ct = COLOR_THRESHOLDS
+    
+    # 輔助格式化數值欄位
+    def make_td(val, high, low, inv=False, fmt="{:.1f}"):
+        cls = get_color_class(val, high, low, inv)
+        return f'<td class="number-cell {cls}">{fmt_num(val, fmt)}</td>'
+
+    rows = f"""
+    <tr>
+      <td class="symbol-cell">{symbol_html}</td>
+      <td class="number-cell {get_color_class(change_pct, 0, 0, is_inverse)}"><strong>{fmt_num(close, "{:,.2f}")}</strong></td>
+      <td class="number-cell {get_color_class(change_pct, 0, 0, is_inverse)}">{fmt_num(change_pct, "{:+.2f}%")}</td>
+      <td class="trend-cell"><span class="badge {trend_class}">{trend_signal}</span></td>
+      {make_td(vol_change, ct.get("vol_high", 100), ct.get("vol_low", 50))}
+      {make_td(k, ct.get("kd_high", 80), ct.get("kd_low", 20))}
+      {make_td(d, ct.get("kd_high", 80), ct.get("kd_low", 20))}
+    """
+    
+    # 動態產生 BIAS 欄位
+    for period in BIAS_PERIODS:
+        val = get_scalar(latest, f"BIAS_{period}")
+        h = ct.get(f"bias{period}_high", 0)
+        l = ct.get(f"bias{period}_low", 0)
+        rows += make_td(val, h, l)
+        
+    # ADX/DI
+    adx = get_scalar(latest, "ADX")
+    plus_di = get_scalar(latest, "+DI")
+    minus_di = get_scalar(latest, "-DI")
+    
+    rows += make_td(adx, ct.get("adx_high", 25), 0)
+    rows += make_td(plus_di, minus_di if minus_di is not None else 0, float("-inf"))
+    rows += make_td(minus_di, plus_di if plus_di is not None else 0, float("-inf"))
+    
+    rows += "</tr>"
+    return rows
 
     return f"""
     <tr>
@@ -315,7 +370,8 @@ def generate_html_report(report_data, date_str, summary_data, yield_curve_plot_b
     # 建構市場速覽 HTML
     summary_html = ""
     for item in summary_data:
-        color_class = get_color_class(item['change'], 0, 0, inverse=("VIX" in item['symbol']))
+        is_inverse = item['symbol'] in INVERSE_SYMBOLS or any(inv in item['symbol'] for inv in ["VIX", "Inverse", "Short"])
+        color_class = get_color_class(item['change'], 0, 0, inverse=is_inverse)
         icon = "▲" if item['change'] > 0 else "▼" if item['change'] < 0 else "-"
         summary_html += f'''
         <div class="summary-card">
@@ -324,6 +380,9 @@ def generate_html_report(report_data, date_str, summary_data, yield_curve_plot_b
             <div class="summary-change {color_class}">{icon} {item['change']:.2f}%</div>
         </div>
         '''
+
+    # 動態產生 BIAS 表頭
+    bias_headers = "".join([f"<th>{p}日乖離</th>" for p in BIAS_PERIODS])
 
     content_html = ""
     for group_data in report_data:
@@ -355,11 +414,9 @@ def generate_html_report(report_data, date_str, summary_data, yield_curve_plot_b
                                 <th>漲跌%</th>
                                 <th>技術訊號</th>
                                 <th>量比%</th>
-                                <th>K9</th>
-                                <th>D9</th>
-                                <th>5日乖離</th>
-                                <th>20日乖離</th>
-                                <th>60日乖離</th>
+                                <th>K{KD_WINDOW}</th>
+                                <th>D{KD_WINDOW}</th>
+                                {bias_headers}
                                 <th>ADX</th>
                                 <th>+DI</th>
                                 <th>-DI</th>
@@ -584,8 +641,8 @@ def generate_html_report(report_data, date_str, summary_data, yield_curve_plot_b
 def main():
     """主執行函式"""
     utc_now = datetime.datetime.utcnow()
-    # 抓取足夠長的時間以計算 60MA
-    start_date = utc_now - datetime.timedelta(days=250)
+    # 抓取足夠長的時間以計算指標
+    start_date = utc_now - datetime.timedelta(days=HISTORY_DAYS)
     current_date_str = utc_now.astimezone(TZ).strftime('%Y-%m-%d')
     
     report_data = []
@@ -621,7 +678,7 @@ def main():
             
             # 產生圖表
             display_name = SYMBOL_NAME_MAP.get(symbol, symbol)
-            plots[display_name] = create_ma_plot_base64(df_indicators.tail(120), symbol, display_name)
+            plots[display_name] = create_ma_plot_base64(df_indicators.tail(PLOT_DAYS), symbol, display_name)
 
             # 收集摘要數據
             if symbol in KEY_INDICATORS:
@@ -631,11 +688,12 @@ def main():
                     'change': latest['Change %']
                 })
             
-            # 收集最近 60 天的歷史數據用於 AI 技術分析
-            recent_df = df_indicators.tail(60).copy().reset_index()
+            # 收集歷史數據用於 AI 技術分析
+            recent_df = df_indicators.tail(AI_ANALYSIS_DAYS).copy().reset_index()
             recent_df['Date'] = recent_df['Date'].dt.strftime('%Y-%m-%d')
             # 選取關鍵技術欄位
-            cols = ['Date', 'Open', 'High', 'Low', 'Close', 'Volume', '5MA', '20MA', '60MA', 'K', 'D']
+            ma_cols = [f'{p}MA' for p in MA_PERIODS]
+            cols = ['Date', 'Open', 'High', 'Low', 'Close', 'Volume'] + ma_cols + ['K', 'D']
             actual_cols = [c for c in cols if c in recent_df.columns]
             market_data_dict[display_name] = recent_df[actual_cols].to_dict(orient='records')
 
