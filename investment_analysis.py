@@ -271,7 +271,29 @@ def process_stock_group(group, start_date, utc_now):
     """處理單個股票群組"""
     stock_data = get_stock_data(group["symbols"], start_date, utc_now)
     if not stock_data: return None
-    group_res = {"title": group['title'], "section_id": "", "table_rows": "", "plots": {}}
+    
+    # 獲取最後交易日 (取群組內第一個標的為準)
+    first_symbol = group["symbols"][0]
+    last_trading_date = "N/A"
+    is_closed = False
+    
+    if first_symbol in stock_data:
+        last_dt = stock_data[first_symbol].index[-1]
+        last_trading_date = last_dt.strftime('%Y-%m-%d')
+        
+        # 判斷是否為休市 (簡單邏輯：若最後交易日早於 utc_now 的當天日期，且當天是週一至週五)
+        current_date = utc_now.astimezone(TZ).date()
+        if last_dt.date() < current_date and current_date.weekday() < 5:
+            is_closed = True
+
+    group_res = {
+        "title": group['title'], 
+        "section_id": "", 
+        "table_rows": "", 
+        "plots": {},
+        "last_trading_date": last_trading_date,
+        "is_closed": is_closed
+    }
     if "美股" in group['title']: group_res["section_id"] = "us-stocks"
     elif "台股" in group['title']: group_res["section_id"] = "tw-stocks"
     elif "債券" in group['title']: group_res["section_id"] = "bonds"

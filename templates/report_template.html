@@ -52,7 +52,12 @@
         
         /* Group Section */
         .group-section { margin-bottom: 50px; }
-        .group-title { font-size: 22px; color: #2c3e50; border-left: 5px solid var(--accent-color); padding-left: 15px; margin-bottom: 8px; font-weight: 700; }
+        .group-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; border-bottom: 2px solid #eceff1; padding-bottom: 8px; flex-wrap: wrap; gap: 10px; }
+        .group-title { font-size: 22px; color: #2c3e50; border-left: 5px solid var(--accent-color); padding-left: 15px; margin: 0; font-weight: 700; }
+        .market-status { font-size: 13px; font-weight: 600; padding: 4px 10px; border-radius: 4px; display: flex; align-items: center; gap: 6px; }
+        .status-closed { background-color: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+        .status-open { background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+        
         .subsection-title { text-align: center; font-size: 18px; color: var(--text-secondary); margin: 30px 0 20px; position: relative; }
         .subsection-title:after { content: ''; display: block; width: 50px; height: 3px; background: #ddd; margin: 10px auto 0; }
 
@@ -121,7 +126,20 @@
 
         {% for group in report_data %}
         <div id="{{ group.section_id }}" class="group-section">
-            <h2 class="group-title">{{ group.title }}</h2>
+            <div class="group-header">
+                <h2 class="group-title">{{ group.title }}</h2>
+                {% if group.is_closed %}
+                <div class="market-status status-closed">
+                    <span>休市中 (Market Closed)</span>
+                    <span style="font-weight: normal; margin-left: 8px;">最後交易：{{ group.last_trading_date }}</span>
+                </div>
+                {% else %}
+                <div class="market-status status-open">
+                    <span>交易中 (Market Open)</span>
+                    <span style="font-weight: normal; margin-left: 8px;">截至：{{ group.last_trading_date }}</span>
+                </div>
+                {% endif %}
+            </div>
             <div class="card table-card">
                 <div class="table-responsive">
                     <table>

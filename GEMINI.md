@@ -50,7 +50,8 @@
            ```
        - Target div: `#weekly-news-focus`.
      - **Part B: AI Comprehensive Analysis**
-       - **Data Requirement:** The Python script MUST embed the last 60 days of OHLCV market data into `<script id="market-data">` in the HTML. The AI MUST read this data along with `<script id="fundamental-data">` and `<script id="yield-data">`.
+       - **Data Requirement:** The Python script MUST embed the last 60 days of OHLCV market data into `<script id="market-data">` in the HTML. The AI MUST read this data along with `<script id="fundamental-data">` and `<script id="yield-data">`. 
+       - **Market Status Awareness**: AI MUST check the `.market-status` tags in the HTML report. If a market is labeled as **"休市中 (Market Closed)"**, the AI MUST explicitly mention the holiday or market closure in its analysis and ensure all price-related statements refer to the **"最後交易日"** instead of the current date.
        - **1. 宏觀環境定調 (Macro Framework)**:
          - **總經解讀**: 結合 CPI, PPI, 零售銷售與利率週期，判斷目前處於經濟週期的哪個階段。
          - **債市訊號**: 計算 10Y-3M 價差，評估殖利率曲線對衰退風險或成長動能的指示。
