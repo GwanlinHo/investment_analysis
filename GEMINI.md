@@ -9,7 +9,15 @@
      - Search for the latest **US Economic Indicators**: GDP (國內生產總值), CPI (消費者物價指數), PPI (生產者物價指數), Retail Sales (零售銷售), Non-farm payrolls (非農就業人數), Unemployment rate (失業率), Initial Jobless Claims (初次請領失業救濟金人數), ISM Manufacturing Index (ISM 製造業指數), M2 Money Supply (M2 貨幣供給), Credit Card Delinquency Rate (信用卡違約率), Real Private Investment (實質民間投資), US Dollar Index (美元指數).
      - Search for the latest **Taiwan Economic Indicators**: Monitoring Indicator (景氣對策信號) [MUST query directly from NDC official site: https://index.ndc.gov.tw/n/zh_tw to confirm the latest color/score], Export Orders YoY (外銷訂單年增率), Industrial Production Index (工業生產指數), Consumer Confidence Index (消費者信心指數), M1B & M2 Money Supply (M1B & M2 貨幣供給), Credit Card Delinquency Rate (信用卡違約率), Real Private Investment (實質民間投資), Unemployment rate (失業率), Industrial/Service Overtime Hours (工業及服務業加班工時), Margin Purchase Balance (融資餘額) and Short Sale Balance (融券餘額) [Query specifically for the "Total Market Balance" and "Daily Change" (increase/decrease)].
   4. Collect **15** important news items impacting US/Taiwan economy, FX, and rates.
-     - **CRITICAL:** Do NOT generate simulated or fake news. All news must be real, current, and verifiable.
+     - **CRITICAL: News Verification Protocol (新聞查核協議)**
+       - **Source Validation (來源驗證)**: Only accept news from Tier-1 authoritative media. 
+         - **Global**: Bloomberg, Reuters, WSJ, Financial Times, CNBC, Barron's.
+         - **Taiwan**: 經濟日報, 工商時報, 中央通訊社 (CNA), 鉅亨網 (Anue).
+         - **STRICTLY PROHIBITED**: Social media (X/Facebook), personal blogs, content farms, or sites with sensationalist clickbait titles.
+       - **Cross-Verification (交叉比對)**: Major market events (e.g., Fed decisions, CPI data) MUST be confirmed by at least **two** independent Tier-1 sources.
+       - **Recency Check (時效性檢查)**: All news MUST be published within the last **7 days**.
+       - **Data Consistency (數據一致性)**: If a news item contains economic figures (e.g., GDP growth), it MUST match the official data collected in Step 3. Discard the news if there's a conflict.
+       - **No Hallucination (嚴禁虛構)**: Do NOT generate simulated or fake news. All news must be real, current, and verifiable.
      - **Requirement:** Every news item **MUST** include a valid, **DIRECT** source link to the specific article (NOT the homepage URL).
      - **Format:** Compact style (Title + Source Link on Line 1, Summary on Line 2). Max 2 lines per item.
   5. Generate analysis content (**STRICTLY NO EMOJIS ALLOWED**):

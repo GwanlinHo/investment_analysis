@@ -51,9 +51,27 @@
     *   **主計總處**: 實質民間投資 (固定資本形成)、失業率、加班工時。
     *   **證交所 (TWSE)**: 融資餘額、融券餘額。
 
-### 2. 即時新聞與市場數據
-*   **財經新聞**: 僅從全球主流媒體 (如 Bloomberg, Reuters, 經濟日報, 工商時報) 獲取，且每一則新聞均附帶**直接來源連結**，確保真實性。
+### 2. 即時新聞與市場數據 (Real-time Context)
 *   **市場數據**: 直接調用 **Yahoo Finance (yfinance) API** 獲取歷史價格、技術指標與企業財報基本面數據。
+*   **財經新聞**: 遵循嚴格的 **新聞查核協議 (News Verification Protocol)**，確保每則新聞的真實性與準確性。
+
+---
+
+## 新聞查核機制 (News Verification Protocol)
+
+為了防止 AI 產生幻覺或抓取錯誤資訊，本專案實施以下查核措施：
+
+### 1. 權威媒體白名單 (Tier-1 Source Whitelist)
+AI Agent 僅能從以下全球及本土主流財經媒體搜集資訊：
+*   **全球 (Global)**: Bloomberg, Reuters, The Wall Street Journal (WSJ), Financial Times, CNBC, Barron's.
+*   **台灣 (Taiwan)**: 經濟日報、工商時報、中央通訊社 (CNA)、鉅亨網 (Anue)。
+*   **嚴格禁制**: 社交媒體 (如 X/Facebook)、個人部落格、內容農場、或任何標題誇張的非專業網站。
+
+### 2. 多重驗證與數據一致性
+*   **交叉比對 (Triangulation)**: 對於重大市場事件 (如聯準會決策、關鍵經濟數據)，AI 必須同時找到 **2 家以上** 不同媒體體系的報導才可採納。
+*   **時效性檢查 (Recency Check)**: 所有新聞發布時間必須在 **7 天內**，避免舊聞重貼。
+*   **數據一致性 (Consistency Check)**: 新聞內容中的經濟指標數值必須與本報告中抓取的「官方總經數據」一致。若有衝突，AI 必須優先採納官方數據並捨棄該則新聞。
+*   **強烈真實性 (Verifiability)**: 每一則新聞都必須附帶指向原文的 **直接來源連結** (Direct Link)，方便人工複查。
 
 ---
 
