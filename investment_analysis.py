@@ -34,6 +34,7 @@ try:
         KD_WINDOW = PARAMS.get("kd_window", 9)
         BIAS_PERIODS = PARAMS.get("bias_periods", [5, 20, 60])
         DMI_WINDOW = PARAMS.get("dmi_window", 14)
+        RSI_WINDOW = PARAMS.get("rsi_window", 14)
         MA_PERIODS = PARAMS.get("ma_periods", [5, 20, 60])
         VOL_MA_WINDOW = PARAMS.get("volume_ma_window", 20)
         HISTORY_DAYS = PARAMS.get("history_days", 250)
@@ -84,6 +85,7 @@ def get_fundamental_data(symbol):
             "pe_trailing": info.get('trailingPE'),
             "pe_forward": info.get('forwardPE'),
             "pb_ratio": info.get('priceToBook'),
+            "peg_ratio": info.get('pegRatio'),
             "roe": info.get('returnOnEquity'),
             "gross_margin": info.get('grossMargins'),
             "operating_margin": info.get('operatingMargins'),
@@ -103,16 +105,34 @@ def get_fundamental_data(symbol):
 def calculate_all_indicators(df):
     """計算所有需要的技術指標"""
     df = df.copy()
+    
+    # KD 計算
     low_min = df['Low'].rolling(window=KD_WINDOW, min_periods=1).min()
     high_max = df['High'].rolling(window=KD_WINDOW, min_periods=1).max()
     rsv = (df['Close'] - low_min) / (high_max - low_min) * 100
     df['K'] = rsv.ewm(com=2, adjust=False).mean()
     df['D'] = df['K'].ewm(com=2, adjust=False).mean()
     
+    # RSI 計算
+    delta = df['Close'].diff()
+    gain = (delta.where(delta > 0, 0)).rolling(window=RSI_WINDOW).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=RSI_WINDOW).mean()
+    rs = gain / loss
+    df['RSI'] = 100 - (100 / (1 + rs))
+
+    # MACD 計算
+    exp1 = df['Close'].ewm(span=12, adjust=False).mean()
+    exp2 = df['Close'].ewm(span=26, adjust=False).mean()
+    df['MACD'] = exp1 - exp2
+    df['Signal_Line'] = df['MACD'].ewm(span=9, adjust=False).mean()
+    df['MACD_Hist'] = df['MACD'] - df['Signal_Line']
+    
+    # 乖離率 (BIAS)
     for period in BIAS_PERIODS:
         ma = df['Close'].rolling(window=period).mean()
         df[f'BIAS_{period}'] = ((df['Close'] - ma) / ma) * 100
         
+    # DMI 指標
     df['+DM'] = df['High'].diff().clip(lower=0)
     df['-DM'] = -df['Low'].diff().clip(upper=0)
     tr = pd.concat([df['High'] - df['Low'], abs(df['High'] - df['Close'].shift()), abs(df['Low'] - df['Close'].shift())], axis=1).max(axis=1)
@@ -122,9 +142,11 @@ def calculate_all_indicators(df):
     dx = abs(df['+DI'] - df['-DI']) / (df['+DI'] + df['-DI'])
     df['ADX'] = (dx * 100).rolling(window=DMI_WINDOW).mean()
 
+    # 量價相關
     df['Change %'] = df['Close'].pct_change() * 100
     df['Volume Change %'] = (df['Volume'] / df['Volume'].rolling(window=VOL_MA_WINDOW).mean() * 100).fillna(0)
     
+    # 均線
     for ma_period in MA_PERIODS:
         df[f'{ma_period}MA'] = df['Close'].rolling(window=ma_period).mean()
     
@@ -310,7 +332,7 @@ def process_stock_group(group, start_date, utc_now):
         if symbol in KEY_INDICATORS: summary_items.append({'symbol': display_name, 'close': latest['Close'], 'change': latest['Change %'], 'orig_symbol': symbol})
         recent_df = df_indicators.tail(AI_ANALYSIS_DAYS).copy().reset_index()
         recent_df['Date'] = recent_df['Date'].dt.strftime('%Y-%m-%d')
-        cols = ['Date', 'Open', 'High', 'Low', 'Close', 'Volume'] + [f'{p}MA' for p in MA_PERIODS] + ['K', 'D']
+        cols = ['Date', 'Open', 'High', 'Low', 'Close', 'Volume', 'RSI', 'MACD', 'MACD_Hist'] + [f'{p}MA' for p in MA_PERIODS] + ['K', 'D']
         market_data[display_name] = recent_df[[c for c in cols if c in recent_df.columns]].to_dict(orient='records')
         if not symbol.startswith('^'):
             f_data = get_fundamental_data(symbol)
