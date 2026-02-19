@@ -32,9 +32,12 @@
 
 ## 專案結構
 
-*   `investment_analysis.py`: 核心 Python 腳本。負責抓取 `yfinance` 數據、計算指標、繪圖並生成 HTML 報告框架。
+*   `investment_analysis.py`: 核心 Python 腳本。負責抓取 `yfinance` 數據、計算指標、繪圖，並透過 `jinja2` 模板引擎產出 HTML 報告。
+*   `templates/`: 存放 HTML 報告模板 (`report_template.html`)，讓報告格式與邏輯分離。
 *   `config.json`: 設定檔。管理追蹤清單、群組分類與中文名稱對照。
 *   `report/`: 存放生成的 HTML 日報 (檔名格式：`invest_analysis_YYYYMMDD.html`)。
+*   `GEMINI.md`: 定義 AI Agent 的協作邏輯、總經數據抓取規則與自動化流程。
+*   `requirements.txt`: 專案依賴清單。
 *   `README.md`: 專案說明文件。
 
 ## 開發者日誌規範
@@ -59,29 +62,30 @@ graph TD
     Final[Final Report]
 
     %% 步驟 1: Python 處理硬數據
-    Script -->|1. Fetch Data & Draw Charts| Raw
+    Script -->|1. Fetch Data, Calculate Indicators & Draw| Raw
 
     %% 步驟 2: AI 處理軟資訊
-    Raw -->|2. Read Context| AI
-    AI <-->|3. Search Web News| AI
-    AI -->|4. Analyze & Inject| Final
+    Raw -->|2. Read Context & Market Data| AI
+    AI <-->|3. Multi-Angle Web News Search| AI
+    AI -->|4. Deep Analysis & Precision Inject| Final
 ```
 
 本專案建議搭配 AI Agent (如 Gemini CLI) 使用以獲得完整體驗。運作流程如下：
 
-1.  **執行腳本**：讓AI Agent(或手動)執行 `investment_analysis.py`。
+1.  **執行腳本**：讓 AI Agent (或手動) 執行 `investment_analysis.py`。
     *   程式讀取 `config.json`。
-    *   抓取歷史股價數據。
-    *   計算指標並判斷趨勢訊號（如：多頭排列、空頭修正）。
-    *   根據數據繪製圖表並轉換為 Base64 嵌入 HTML檔案中。
-    *   生成包含數據表格與圖表的原始報告 (HTML檔案)。
+    *   抓取歷史股價數據與指標。
+    *   使用 `jinja2` 渲染 `templates/report_template.html`。
+    *   根據數據繪製圖表並轉換為 Base64 嵌入 HTML 檔案中。
+    *   生成包含數據表格與圖表的原始報告 (HTML 檔案)。
 2.  **AI 分析與注入** (由 AI Agent 完成)：
-    *   讀取腳本所生成的原始報告。
-    *   **資訊搜集**：搜尋最新的財經新聞與總經數據。
-    *   **內容生成**：分別撰寫「本週財經焦點」與「AI 綜合分析」兩份內容。
+    *   讀取腳本所生成的原始報告及其嵌入的 `market-data`。
+    *   **資訊搜集**：執行多重搜尋（美股總經、台股科技、風險與財報）尋找最新真實新聞。
+    *   **內容生成**：撰寫「本週財經焦點」與「AI 綜合分析」（含技術、基本、總經面）。
     *   **精準注入**：
-        *   新聞內容注入至 HTML 的 `<div id="weekly-news-focus">`。
-        *   分析內容注入至 HTML 的 `<div id="ai-analysis-report">`。
+        *   總經指標注入至 `us-macro-placeholder` 與 `tw-macro-placeholder`。
+        *   新聞內容注入至 `#weekly-news-focus`。
+        *   分析報告注入至 `#ai-analysis-report`。
 
 ---
 
@@ -95,13 +99,18 @@ cd investment_analysis
 ```
 
 ### 2. 環境需求與設定
-*   Python 3.8 或以上版本。
-*   建議使用虛擬環境管理套件：
+*   Python 3.9 或以上版本。
+*   推薦使用 **uv** (現代化 Python 封裝工具) 以獲得最佳效能：
+    ```bash
+    # 使用 uv 執行 (自動管理環境)
+    uv run investment_analysis.py
+    ```
+*   傳統 pip 方式：
     ```bash
     python3 -m venv .venv
     source .venv/bin/activate  # Linux/macOS
-    # .\.venv\Scripts\activate  # Windows
     pip install -r requirements.txt
+    python3 investment_analysis.py
     ```
 
 ### 3. 設定追蹤清單 (`config.json`)
