@@ -5,6 +5,7 @@ import pytz
 import warnings
 import os
 import base64
+import shutil
 from io import BytesIO
 import matplotlib.pyplot as plt
 import mplfinance as mpf
@@ -286,7 +287,13 @@ def generate_html_report(report_data, date_str, summary_html, yield_curve_plot_b
         filename = f"report/invest_analysis_{date_str.replace('-', '')}.html"
         os.makedirs(os.path.dirname(filename), exist_ok=True)
         with open(filename, 'w', encoding='utf-8') as f: f.write(html_output)
+        
+        # 複製一份為 index.html 以便 Server 展示最新內容
+        index_filename = os.path.join(os.path.dirname(filename), "index.html")
+        shutil.copy2(filename, index_filename)
+        
         print(f"[Success] 報告已成功生成：{os.path.abspath(filename)}")
+        print(f"[Info] 已同步更新最新報告至：{os.path.abspath(index_filename)}")
     except Exception as e: print(f"[Error] 生成 HTML 報告時發生錯誤: {e}")
 
 def process_stock_group(group, start_date, utc_now):

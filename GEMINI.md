@@ -91,4 +91,5 @@
        - Inject the **Weekly News Focus** content into the `<div id="weekly-news-focus"></div>`.
        - Inject the **AI Comprehensive Analysis** content into the `<div id="ai-analysis-report"></div>`.
        - **CRITICAL:** Ensure NO emojis are used in the injected content.
-  7. Execute `git add report/ && git commit -m "Update analysis report" && git push` to upload the changes to GitHub.
+  7. **Finalization:** The analysis is now complete. The updated report is available in the `report/` directory as both a dated file and `index.html`.
+
