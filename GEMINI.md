@@ -51,19 +51,19 @@
        - Target div: `#weekly-news-focus`.
      - **Part B: AI Comprehensive Analysis**
        - **Data Requirement:** The Python script MUST embed the last 60 days of OHLCV market data into `<script id="market-data">` in the HTML. The AI MUST read this data along with `<script id="fundamental-data">` and `<script id="yield-data">`.
-       - **1. Technical Analysis (Deep Dive):**
-         - **Price-Volume:** Analyze volume changes at highs/lows (e.g., divergence, exhaustion).
-         - **Support/Resistance:** Identify specific price levels based on recent swing highs/lows (Dow Theory).
-         - **Indicators:** Analyze KD (crossovers), MACD, and BIAS (deviation rate for mean reversion). **CRITICAL:** When describing indicator status (e.g., crossovers), AI MUST verify the exact date of occurrence from the `market-data` and state it explicitly in the report (e.g., "於 2026-02-10 發生"). Historical signals MUST NOT be described as current events.
-         - **Patterns:** Apply **Sakata Methods** (e.g., Three Black Crows, Morning/Evening Star) and **Dow Theory** trends. **CRITICAL:** The AI investment analysis report MUST explicitly mention the asset (e.g., "S&P 500 指數" or "台股加權指數") for every technical pattern or signal identified to avoid ambiguity.
-       - **2. Fundamental Analysis (Value Investing):**
-         - **Moat:** Evaluate competitive advantage using ROE and Gross Margin.
-         - **Valuation:** Analyze PE and PB ratios relative to historical averages and growth (PEG).
-         - **Margin of Safety:** Assess if the current price offers a buffer against downside risk.
-       - **3. Macro & Sentiment (Context):**
-         - **Yield Curve:** Calculate the **10Y-3M spread**. Positive = Normal (Growth), Negative = Inverted (Recession Risk).
-         - **Cycle Signals:** Interpret indicators like Taiwan's Monitoring Indicator (Red/Blue lights) and PMI.
-         - **News Linkage:** Correlate specific news events (from Part A) with market moves.
+       - **1. 宏觀環境定調 (Macro Framework)**:
+         - **總經解讀**: 結合 CPI, PPI, 零售銷售與利率週期，判斷目前處於經濟週期的哪個階段。
+         - **債市訊號**: 計算 10Y-3M 價差，評估殖利率曲線對衰退風險或成長動能的指示。
+       - **2. 市場動態與產業趨勢 (Market & Industry Dynamics)**:
+         - **資金流向 (Capital Flow)**: 分析美元指數 (DXY) 與公債殖利率對全球資金流向的影響，特別是針對台股外資流出壓力與美股權值股動能進行關聯分析。
+         - **產業估值 (Sector Valuation)**: 評估高成長科技股 (如 AI, 半導體) 在當前利率環境下的估值回調風險；結合 M2 貨幣供給判斷市場流動性是否支撐當前股價。
+         - **籌碼面監控 (Positioning)**: 結合台股融資融券餘額與信用卡違約率數據，分析散戶情緒與潛在的信用風險背離。
+       - **3. 技術面與個股健檢 (Technical & Fundamental Deep Dive)**:
+         - **量價與指標**: 針對特定標的 (例如 S&P 500 或 TSMC) 分析量價背離、KD 交叉日期及 MACD 趨勢。
+         - **品質與估值**: 運用 ROE 與毛利率評估企業競爭力，並對比 PE/PB 歷史區間尋找具備「安全邊際」的切入點。
+       - **4. 綜合對策與情境預測 (Actionable Strategy)**:
+         - **情境模擬**: 分別定義「樂觀 (Bull)」、「中立 (Base)」、「悲觀 (Bear)」三種情境及觸發條件。
+         - **具體行動**: 提供分批布局、避險、或提高現金比重的具體操作建議。
        - **Constraint:** Do NOT write MBTI labels in the output. Structure the output with clear headings and a final "Actionable Strategy" section.
        - Target div: `#ai-analysis-report`.
   6. **Update HTML Report:**
