@@ -9,15 +9,15 @@
      - Search for the latest **US Economic Indicators**: GDP (國內生產總值), CPI (消費者物價指數), PPI (生產者物價指數), Retail Sales (零售銷售), Non-farm payrolls (非農就業人數), Unemployment rate (失業率), Initial Jobless Claims (初次請領失業救濟金人數), ISM Manufacturing Index (ISM 製造業指數), M2 Money Supply (M2 貨幣供給), Credit Card Delinquency Rate (信用卡違約率), Real Private Investment (實質民間投資), US Dollar Index (美元指數).
      - Search for the latest **Taiwan Economic Indicators**: Monitoring Indicator (景氣對策信號) [MUST query directly from NDC official site: https://index.ndc.gov.tw/n/zh_tw to confirm the latest color/score], Export Orders YoY (外銷訂單年增率), Industrial Production Index (工業生產指數), Consumer Confidence Index (消費者信心指數), M1B & M2 Money Supply (M1B & M2 貨幣供給), Credit Card Delinquency Rate (信用卡違約率), Real Private Investment (實質民間投資), Unemployment rate (失業率), Industrial/Service Overtime Hours (工業及服務業加班工時), Margin Purchase Balance (融資餘額) and Short Sale Balance (融券餘額) [Query specifically for the "Total Market Balance" and "Daily Change" (increase/decrease)].
   4. Collect **15** important news items impacting US/Taiwan economy, FX, and rates.
-     - **CRITICAL: News Verification Protocol (新聞查核協議)**
-       - **Source Validation (來源驗證)**: Only accept news from Tier-1 authoritative media. 
+     - **CRITICAL: News Verification Protocol**
+       - **Source Validation**: Only accept news from Tier-1 authoritative media. 
          - **Global**: Bloomberg, Reuters, WSJ, Financial Times, CNBC, Barron's.
-         - **Taiwan**: 經濟日報, 工商時報, 中央通訊社 (CNA), 鉅亨網 (Anue).
+         - **Taiwan**: Economic Daily News (經濟日報), Commercial Times (工商時報), Central News Agency (CNA/中央通訊社), Anue (鉅亨網).
          - **STRICTLY PROHIBITED**: Social media (X/Facebook), personal blogs, content farms, or sites with sensationalist clickbait titles.
-       - **Cross-Verification (交叉比對)**: Major market events (e.g., Fed decisions, CPI data) MUST be confirmed by at least **two** independent Tier-1 sources.
-       - **Recency Check (時效性檢查)**: All news MUST be published within the last **7 days**.
-       - **Data Consistency (數據一致性)**: If a news item contains economic figures (e.g., GDP growth), it MUST match the official data collected in Step 3. Discard the news if there's a conflict.
-       - **No Hallucination (嚴禁虛構)**: Do NOT generate simulated or fake news. All news must be real, current, and verifiable.
+       - **Cross-Verification**: Major market events (e.g., Fed decisions, CPI data) MUST be confirmed by at least **two** independent Tier-1 sources.
+       - **Recency Check**: All news MUST be published within the last **7 days**.
+       - **Data Consistency**: If a news item contains economic figures (e.g., GDP growth), it MUST match the official data collected in Step 3. Discard the news if there is a conflict.
+       - **No Hallucination**: Do NOT generate simulated or fake news. All news must be real, current, and verifiable.
      - **Requirement:** Every news item **MUST** include a valid, **DIRECT** source link to the specific article (NOT the homepage URL).
      - **Format:** Compact style (Title + Source Link on Line 1, Summary on Line 2). Max 2 lines per item.
   5. Generate analysis content (**STRICTLY NO EMOJIS ALLOWED**):
@@ -51,29 +51,29 @@
        - Target div: `#weekly-news-focus`.
      - **Part B: AI Comprehensive Analysis**
        - **Data Requirement:** The Python script MUST embed the last 60 days of OHLCV market data into `<script id="market-data">` in the HTML. The AI MUST read this data along with `<script id="fundamental-data">` and `<script id="yield-data">`. 
-       - **Market Status Awareness**: AI MUST check the `.market-status` tags in the HTML report. If a market is labeled as **"休市中 (Market Closed)"**, the AI MUST explicitly mention the holiday or market closure in its analysis and ensure all price-related statements refer to the **"最後交易日"** instead of the current date.
-       - **3. 宏觀環境定調 (Macro Framework)**:
-         - **總經解讀**: 結合 CPI, PPI, 零售銷售與利率週期，判斷目前處於經濟週期的哪個階段。
-         - **債市訊號 (CRITICAL)**: AI **必須** 讀取 `<script id="yield-data">` 中的最新數值，並手動計算 **10Y 減 3M** 的利差。
-           - 若 (10Y - 3M) < 0：描述為「利差倒掛」，警示衰退風險。
-           - 若 (10Y - 3M) > 0：描述為「利差轉正/正向」，評估成長預期。
-           - **嚴禁**在利差為正值時描述為「持續倒掛」。
-       - **2. 市場動態與產業趨勢 (Market & Industry Dynamics)**:
-         - **資金流向 (Capital Flow)**: 分析美元指數 (DXY) 與公債殖利率對全球資金流向的影響，特別是針對台股外資流出壓力與美股權值股動能進行關聯分析。
-         - **產業估值 (Sector Valuation)**: 評估高成長科技股 (如 AI, 半導體) 在當前利率環境下的估值回調風險；結合 M2 貨幣供給判斷市場流動性是否支撐當前股價。
-         - **籌碼面監控 (Positioning)**: 結合台股融資融券餘額與信用卡違約率數據，分析散戶情緒與潛在的信用風險背離。
-       - **3. 技術面與個股健檢 (Technical & Fundamental Deep Dive)**:
-         - **量價結構與背離 (Price-Volume & Divergence)**:
-           - **量價分析**: 分析成交量與漲跌幅的關聯性，判斷是否存在「價漲量縮」或「低檔量增」等訊號。
-           - **指標背離**: 交叉比對價格與 KD、MACD、RSI。若發現指標背離（例如價格創高但指標未創高），**必須標註發生日期**（例如：「於 2026-02-15 觀察到 KD 頂背離」）。
-           - **關鍵水位**: 識別近期支撐與壓力區的量能變化，評估突破或跌破的真實性。
-         - **品質與安全邊際 (Quality & Margin of Safety)**:
-           - **財報評估**: 讀取 `fundamental-data`。運用 ROE 與毛利率評估護城河；對比 PE/PB 與歷史區間判斷當前價值。
-           - **成長估值 (PEG)**: 計算或引用 PEG Ratio（PEG < 1 通常視為低估），評估盈餘成長是否支撐當前股價。
-           - **安全邊際**: 計算現價與 AI 評估價的差距，提供明確的「風險緩衝」評估。
-       - **4. 綜合對策與情境預測 (Actionable Strategy)**:
-         - **情境模擬**: 分別定義「樂觀 (Bull)」、「中立 (Base)」、「悲觀 (Bear)」三種情境及觸發條件。
-         - **具體行動**: 提供分批布局、避險、或提高現金比重的具體操作建議。
+       - **Market Status Awareness**: AI MUST check the `.market-status` tags in the HTML report. If a market is labeled as **"休市中 (Market Closed)"**, the AI MUST explicitly mention the holiday or market closure in its analysis and ensure all price-related statements refer to the **"最後交易日" (Last Trading Day)** instead of the current date.
+       - **1. Macro Framework**:
+         - **Macro Interpretation**: Combine CPI, PPI, Retail Sales, and interest rate cycles to determine the current stage of the economic cycle.
+         - **Yield Curve Signal (CRITICAL)**: AI **MUST** read the latest values from `<script id="yield-data">` and manually calculate the **10Y minus 3M** spread.
+           - If (10Y - 3M) < 0: Describe as "Yield Curve Inversion" and warn of recession risks.
+           - If (10Y - 3M) > 0: Describe as "Spread Normalized/Positive" and evaluate growth expectations.
+           - **STRICTLY PROHIBITED (Duration Speculation)**: Do NOT use phrases like "X years long," "ending X years of inversion," or any specific numerical duration (e.g., "three years long") without explicit historical data support. AI must only describe the "Current Value State" and the "Direction of Change" compared to the previous period. If historical context is mentioned, it MUST cite specific data points (date and value); avoid baseless inferences.
+       - **2. Market & Industry Dynamics**:
+         - **Capital Flow**: Analyze the impact of the US Dollar Index (DXY) and Treasury yields on global capital flows, specifically regarding foreign capital outflow pressure in Taiwan and momentum in US mega-cap stocks.
+         - **Sector Valuation**: Evaluate valuation correction risks for high-growth tech stocks (e.g., AI, Semiconductors) in the current interest rate environment; use M2 money supply to judge if market liquidity supports current prices.
+         - **Positioning & Sentiment**: Combine Taiwan's margin/short balance with credit card delinquency rates to analyze retail sentiment and potential credit risk divergences.
+       - **3. Technical & Fundamental Deep Dive**:
+         - **Price-Volume & Divergence**:
+           - **Volume Analysis**: Analyze the correlation between trading volume and price movement to identify signals like "Price Up/Volume Down" or "Low-Level Accumulation."
+           - **Indicator Divergence**: Cross-reference price with KD, MACD, and RSI. If divergence is found (e.g., price reaches a new high but indicators do not), **MUST label the occurrence date** (e.g., "KD Bearish Divergence observed on 2026-02-15").
+           - **Key Levels**: Identify recent support and resistance zones and assess the authenticity of breakouts or breakdowns.
+         - **Quality & Margin of Safety**:
+           - **Financial Assessment**: Read `fundamental-data`. Use ROE and Gross Margin to evaluate the "Moat"; compare PE/PB with historical ranges to judge current value.
+           - **Growth Valuation (PEG)**: Calculate or cite the PEG Ratio (PEG < 1 is generally undervalued) to assess whether earnings growth supports the current stock price.
+           - **Margin of Safety**: Calculate the gap between the current price and the AI-estimated value, providing a clear "Risk Buffer" assessment.
+       - **4. Actionable Strategy**:
+         - **Scenario Simulation**: Define "Bull," "Base," and "Bear" scenarios with specific trigger conditions.
+         - **Execution Plan**: Provide specific operational suggestions such as tiered entry, hedging, or increasing cash positions.
        - **Constraint:** Do NOT write MBTI labels in the output. Structure the output with clear headings and a final "Actionable Strategy" section.
        - Target div: `#ai-analysis-report`.
   6. **Update HTML Report:**
@@ -82,7 +82,7 @@
          - Inject US indicators table into `<div id="us-macro-placeholder"></div>`.
          - Inject Taiwan indicators table into `<div id="tw-macro-placeholder"></div>`.
        - **Formatting Rules:**
-         - **Language:** The "Indicator Name" column MUST be written in Traditional Chinese (例如：國內生產總值 (GDP)、非農就業人數、失業率等).
+         - **Language:** The "Indicator Name" column MUST be written in Traditional Chinese (e.g., 國內生產總值 (GDP), 非農就業人數, 失業率, etc.).
          - **Columns:** "Indicator Name" (Left-aligned), "Value" (Right-aligned), "Date/Note" (Right-aligned). **Do NOT include a 'Region' column.**
          - **Trends:** Do not show plain numbers. Use trend arrows (**▲/▼**) and color coding (Red for positive/up, Green for negative/down).
          - **Mobile Layout:** Ensure tables use standard HTML `<table>` tags. The container divs already handle responsiveness.
