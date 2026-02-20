@@ -288,12 +288,16 @@ def generate_html_report(report_data, date_str, summary_html, yield_curve_plot_b
         os.makedirs(os.path.dirname(filename), exist_ok=True)
         with open(filename, 'w', encoding='utf-8') as f: f.write(html_output)
         
-        # 複製一份為 index.html 以便 Server 展示最新內容
-        index_filename = os.path.join(os.path.dirname(filename), "index.html")
-        shutil.copy2(filename, index_filename)
+        # 複製一份為 index.html 至根目錄，以便 GitHub Pages 發佈
+        root_index_filename = "index.html"
+        shutil.copy2(filename, root_index_filename)
+        
+        # 同時保留 report/index.html 
+        report_index_filename = os.path.join(os.path.dirname(filename), "index.html")
+        shutil.copy2(filename, report_index_filename)
         
         print(f"[Success] 報告已成功生成：{os.path.abspath(filename)}")
-        print(f"[Info] 已同步更新最新報告至：{os.path.abspath(index_filename)}")
+        print(f"[Info] 已同步更新最新報告至根目錄：{os.path.abspath(root_index_filename)}")
     except Exception as e: print(f"[Error] 生成 HTML 報告時發生錯誤: {e}")
 
 def process_stock_group(group, start_date, utc_now):
