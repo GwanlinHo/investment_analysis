@@ -1,7 +1,37 @@
-# 投資分析自動化專案 (Investment Analysis Automation)
+# Investment Analysis Automation
 
-這是一個結合 **Python 自動化腳本** 與 **AI 智慧分析** 的投資輔助工具。旨在每週自動抓取美股、台股 ETF 及債券市場數據，計算關鍵技術指標，繪製 K 線圖，並結合 AI 代理人生成深度市場觀點與即時新聞彙整，最終產出一份易於閱讀的 HTML 綜合分析報告。
-當然，一週要觸發多少次，以及每次要收集哪些資料，完全可以由使用者自行調整。
+This is an investment assistance tool that combines **Python automation scripts** with **AI-powered analysis**. It is designed to automatically fetch data from the US and Taiwan stock markets (ETFs) and bond markets, calculate key technical indicators, generate K-line charts, and produce in-depth market insights and real-time news summaries with the help of an AI agent, ultimately delivering an easy-to-read comprehensive HTML analysis report. Of course, the frequency of execution and the data to be collected each time can be fully customized by the user.
+
+# 投資分析自動化專案
+
+這是一個結合 **Python 自動化腳本** 與 **AI 智慧分析** 的投資輔助工具。旨在自動抓取美股、台股 ETF 及債券市場數據，計算關鍵技術指標，繪製 K 線圖，並結合 AI 代理人生成深度市場觀點與即時新聞彙整，最終產出一份易於閱讀的 HTML 綜合分析報告。當然，一週要觸發多少次，以及每次要收集哪些資料，完全可以由使用者自行調整。
+
+---
+
+## Key Features
+
+1.  **Multi-Market Data Tracking**: Supports tracking of US stock indices (e.g., S&P 500, Philadelphia Semiconductor Index), popular Taiwan ETFs (e.g., 0050, 0056), individual stocks, and bond ETFs.
+2.  **Automated Technical Indicator Calculation**:
+    *   **KD (Stochastic Oscillator)**: To identify overbought/oversold zones and trend strength.
+    *   **Bias Ratio (BIAS)**: Calculates 5-day, 20-day, and 60-day BIAS to determine if the stock price is overheated or oversold.
+    *   **DMI & ADX**: To determine the direction and strength of bullish/bearish trends.
+    *   **Moving Averages (MA)**: Calculates 5MA, 20MA, and 60MA.
+3.  **Visual Chart Generation**: Automatically generates K-line charts including moving averages and volume, as well as the US Treasury yield curve chart.
+4.  **Independent Financial Focus Section**:
+    *   Automatically collects real, important news related to the US/Taiwan economy, foreign exchange, and interest rates, providing links and summaries for users to quickly grasp market trends.
+    *   Placed in a dedicated **`#weekly-news-focus`** block.
+5.  **AI-Powered In-Depth Comprehensive Analysis**:
+    *   The report includes a dedicated **`#ai-analysis-report`** block.
+    *   **Technical Analysis**: Analyzes price-volume structure and indicator divergences.
+    *   **Fundamental Analysis**: Uses financial statement data to evaluate economic moats and margin of safety.
+    *   **Macroeconomic Analysis**: Interprets market cycles by combining automatically fetched macroeconomic data.
+6.  **Professional-Grade Report Style**:
+    *   **Strict No-Emoji Policy**: No emojis are used in code logs or report content to ensure a professional and clean output.
+    *   **Taiwan Stock Market Convention**: Adopts the red-for-up, green-for-down K-line color convention, aligning with local user habits.
+7.  **Macroeconomic Indicator Monitoring**: Automatically tracks key US and Taiwan economic data, including:
+    *   **United States**: GDP growth rate, CPI (Consumer Price Index), PPI (Producer Price Index), Retail Sales, Non-farm Payrolls, Unemployment Rate, Initial Jobless Claims, ISM Manufacturing Index, M2 Money Supply, Credit Card Delinquency Rate, Real Private Investment, US Dollar Index (DXY).
+    *   **Taiwan**: Monitoring Indicator (Signal), Export Orders YoY, Industrial Production Index, Consumer Confidence Index (CCI), M1B & M2 Money Supply, Credit Card Delinquency Rate, Real Private Investment, Unemployment Rate, Overtime Hours, Margin Purchase Balance, Short Sale Balance.
+8.  **Financial News Aggregation**.
 
 ## 主要功能
 
@@ -29,6 +59,32 @@
 8. **財經新聞彙整**：
 
 ---
+
+## Authoritative Data Sources
+
+To ensure the professionalism and accuracy of the analysis, this project strictly limits the AI Agent to fetching the latest **officially released data** from government statistical agencies. The use of forecasts or unofficial estimates is strictly prohibited.
+
+### 1. Macroeconomic Data
+*   **United States (US)**:
+    *   **BEA (Bureau of Economic Analysis)**: GDP, Real Private Investment.
+    *   **BLS (Bureau of Labor Statistics)**: CPI, PPI, Non-farm Payrolls, Unemployment Rate.
+    *   **U.S. Census Bureau**: Retail Sales.
+    *   **U.S. Department of Labor**: Initial Jobless Claims.
+    *   **ISM (Institute for Supply Management)**: ISM Manufacturing Index.
+    *   **Federal Reserve**: M2 Money Supply, Delinquency Rate.
+    *   **Yahoo Finance**: US Dollar Index (DXY), Treasury Yields.
+*   **Taiwan**:
+    *   **National Development Council (NDC)**: [Monitoring Indicator (Signal)](https://index.ndc.gov.tw/n/zh_tw) (ensuring the latest score and color), Export Orders YoY.
+    *   **Ministry of Economic Affairs**: Industrial Production Index.
+    *   **Central Bank**: M1B & M2 Money Supply.
+    *   **Financial Supervisory Commission (FSC)**: Credit Card Delinquency Rate.
+    *   **Research Center for Taiwan Economic Development, National Central University**: Consumer Confidence Index (CCI).
+    *   **Directorate-General of Budget, Accounting and Statistics**: Real Private Investment (Gross Fixed Capital Formation), Unemployment Rate, Overtime Hours.
+    *   **Taiwan Stock Exchange (TWSE)**: Margin Purchase Balance, Short Sale Balance.
+
+### 2. Real-time News and Market Data
+*   **Market Data**: Directly calls the **Yahoo Finance (yfinance) API** to obtain historical prices, technical indicators, and fundamental data from financial statements.
+*   **Financial News**: Adheres to a strict **News Verification Protocol** to ensure the authenticity and accuracy of every news item.
 
 ## 權威資料來源 (Authoritative Data Sources)
 
@@ -58,6 +114,22 @@
 
 ---
 
+## News Verification Protocol
+
+To prevent AI from hallucinating or fetching incorrect information, this project implements the following verification measures:
+
+### 1. Tier-1 Source Whitelist
+The AI Agent is only allowed to gather information from the following global and local mainstream financial media outlets:
+*   **Global**: Bloomberg, Reuters, The Wall Street Journal (WSJ), Financial Times, CNBC, Barron's.
+*   **Taiwan**: Economic Daily News (經濟日報), Commercial Times (工商時報), Central News Agency (CNA), Anue (鉅亨網).
+*   **Strictly Prohibited**: Social media (e.g., X/Facebook), personal blogs, content farms, or any unprofessional websites with sensationalist titles.
+
+### 2. Triangulation and Data Consistency
+*   **Triangulation**: For major market events (e.g., Fed decisions, key economic data), the AI must find reports from at least **two** different media sources before adopting the information.
+*   **Recency Check**: All news must be published within the last **7 days** to avoid reposting old information.
+*   **Consistency Check**: The economic indicator values in the news content must be consistent with the "official macro data" fetched in this report. If there is a conflict, the AI must prioritize the official data and discard the news item.
+*   **Verifiability**: Every news item must include a **direct link** to the original article for manual verification.
+
 ## 新聞查核機制 (News Verification Protocol)
 
 為了防止 AI 產生幻覺或抓取錯誤資訊，本專案實施以下查核措施：
@@ -76,8 +148,17 @@ AI Agent 僅能從以下全球及本土主流財經媒體搜集資訊：
 
 ---
 
-## 專案結構
+## Project Structure
 
+*   `investment_analysis.py`: The core Python script. Responsible for fetching `yfinance` data, calculating indicators, generating charts, and producing the HTML report via the `jinja2` template engine.
+*   `templates/`: Contains the HTML report template (`report_template.html`), separating the report's format from its logic.
+*   `config.json`: Configuration file. Manages the tracking list, group classifications, and Chinese name mappings.
+*   `report/`: Stores the generated daily HTML reports (filename format: `invest_analysis_YYYYMMDD.html`).
+*   `GEMINI.md`: Defines the AI Agent's collaboration logic, macro data fetching rules, and automation workflow.
+*   `requirements.txt`: The project's dependency list.
+*   `README.md`: This project description file.
+
+## 專案結構
 
 *   `investment_analysis.py`: 核心 Python 腳本。負責抓取 `yfinance` 數據、計算指標、繪圖，並透過 `jinja2` 模板引擎產出 HTML 報告。
 *   `templates/`: 存放 HTML 報告模板 (`report_template.html`)，讓報告格式與邏輯分離。
@@ -87,8 +168,45 @@ AI Agent 僅能從以下全球及本土主流財經媒體搜集資訊：
 *   `requirements.txt`: 專案依賴清單。
 *   `README.md`: 專案說明文件。
 
-
 ---
+
+## How It Works & Workflow
+
+This project uses a "two-stage processing" architecture, combining Python's data processing capabilities with AI's analytical logic.
+
+```mermaid
+graph TD
+    %% Define Nodes
+    Script[Python Script]
+    Raw[Raw HTML Draft]
+    AI[AI Agent]
+    Final[Final Report]
+
+    %% Stage 1: Python processes hard data
+    Script -->|1. Fetch Data, Calculate Indicators & Draw| Raw
+
+    %% Stage 2: AI processes soft information
+    Raw -->|2. Read Context & Market Data| AI
+    AI <-->|3. Multi-Angle Web News Search| AI
+    AI -->|4. Deep Analysis & Precision Inject| Final
+```
+
+This project is recommended to be used with an AI Agent (like Gemini CLI) for the full experience. The workflow is as follows:
+
+1.  **Execute the Script**: Have the AI Agent (or manually) run `investment_analysis.py`.
+    *   The program reads `config.json`.
+    *   Fetches historical stock price data and indicators.
+    *   Renders `templates/report_template.html` using `jinja2`.
+    *   Generates charts based on the data and embeds them into the HTML file as Base64.
+    *   Generates a raw report (HTML file) containing data tables and charts.
+2.  **AI Analysis and Injection** (performed by the AI Agent):
+    *   Reads the raw report generated by the script and its embedded `market-data`.
+    *   **Information Gathering**: Performs multiple searches (US macro, Taiwan tech, risks & earnings) to find the latest real news.
+    *   **Content Generation**: Writes the "Weekly Financial Focus" and "AI Comprehensive Analysis" (including technical, fundamental, and macroeconomic aspects).
+    *   **Precision Injection**:
+        *   Injects macro indicators into `us-macro-placeholder` and `tw-macro-placeholder`.
+        *   Injects news content into `#weekly-news-focus`.
+        *   Injects the analysis report into `#ai-analysis-report`.
 
 ## 運作方式與流程
 
@@ -129,6 +247,46 @@ graph TD
         *   分析報告注入至 `#ai-analysis-report`。
 
 ---
+
+## Installation & Setup
+
+### 1. Clone the Project
+Clone the project to your local workspace:
+```bash
+git clone https://github.com/GwanlinHo/investment_analysis.git
+cd investment_analysis
+```
+
+### 2. Environment Requirements & Setup
+*   Python 3.9 or higher.
+*   It is recommended to use **uv** (a modern Python packager) for optimal performance:
+    ```bash
+    # Run with uv (manages environment automatically)
+    uv run investment_analysis.py
+    ```
+*   Traditional pip method:
+    ```bash
+    python3 -m venv .venv
+    source .venv/bin/activate  # Linux/macOS
+    pip install -r requirements.txt
+    python3 investment_analysis.py
+    ```
+
+### 3. Configure the Tracking List (`config.json`)
+You can customize the assets you want to track by modifying `config.json`. The file structure is as follows:
+
+*   **`stock_groups`**: Defines the classification groups in the report.
+    ```json
+    {
+      "title": "Group Name (e.g., US Stocks)",
+      "symbols": ["Ticker1", "Ticker2", ...],
+      "description": "Group Description"
+    }
+    ```
+*   **`key_indicators`**: Defines which assets will appear in the "Market Snapshot" section at the top of the report.
+*   **`symbol_name_map`**: Defines the Chinese names corresponding to the stock tickers (if not set, the ticker is displayed).
+
+**Modification Example**: To add "Tesla (TSLA)" for tracking, add `"TSLA"` to the corresponding array in `stock_groups`, and add `"TSLA": "特斯拉"` to `symbol_name_map`.
 
 ## 安裝與設定
 
@@ -172,6 +330,27 @@ cd investment_analysis
 
 ---
 
+## Automation
+
+You can set up `crontab` to automatically run the analysis and upload the report at scheduled times.
+
+### 1. Create an Execution Script
+Create a file (e.g., `run_analysis.sh`) and paste the following content (please modify the paths according to your environment):
+
+```bash
+#!/bin/bash
+export PATH=$PATH:/home/pi/.config/nvm/versions/node/v22.17.0/bin
+cd /home/pi/WorkDir/investment_analysis/
+gemini -p 'investment analysis' -y
+```
+
+### 2. Set up Crontab
+Run `crontab -e` and add the following schedule (e.g., runs at 10 PM from Monday to Friday):
+
+```bash
+0 22 * * 1-5 /bin/bash /home/pi/WorkDir/investment_analysis/run_analysis.sh >> /home/pi/WorkDir/investment_analysis/auto_run.log 2>&1
+```
+
 ## 自動化執行 (Automation)
 
 您可以透過設定 `crontab` 來實現定時自動執行分析並上傳報告。
@@ -194,6 +373,29 @@ gemini -p 'investment analysis' -y
 ```
 
 ---
+
+## AI Agent Collaboration Guide
+
+The core value of this project lies in the combination of **"automated code" and "AI analytical capabilities"**. Let the Python script collect and calculate data, and let the AI Agent gather the latest news, interpret market sentiment, and conduct in-depth analysis.
+
+### 1. Gemini CLI Collaboration Mode (Default)
+
+This project has built-in integration settings for Gemini CLI.
+
+*   **Trigger Mechanism**:
+    You just need to type the keyword in Gemini CLI: **`investment analysis`**.
+*   **How It Works**:
+    The `GEMINI.md` file in the project (or `.gemini/GEMINI.md`) acts as a "System Prompt." When the AI reads this file, it knows that when the user inputs the specific keyword, it must perform the following actions in order:
+    1.  **Execute Script**: `python3 investment_analysis.py`.
+    2.  **Read File**: Read the content of the generated raw report.
+    3.  **Web Search**: Use Google Search to find recent real news about US stocks, Taiwan stocks, and foreign exchange markets (with source links).
+    4.  **Role-Play Analysis**: Switch between three personas—(1) Technical Analyst, (2) Value Analyst, and (3) Macro Analyst—for a multi-angle analysis.
+    5.  **Write to File**: Write the news and analysis results back into the raw report to form a complete report.
+    6.  **Git Operations**: Automatically upload the report to the remote (GitHub) server.
+
+### 2. Collaboration with Other AI Agents (e.g., Claude Code, Codex, Cursor)
+
+This "File-based Context Injection" concept can be easily ported to other AI programming tools.
 
 ## AI Agent 協作指南 (AI Agent Collaboration Guide)
 
@@ -218,8 +420,59 @@ gemini -p 'investment analysis' -y
 
 這套「以檔案為基礎的上下文注入 (File-based Context Injection)」概念可以輕易移植到其他 AI 程式設計工具。
 
-
 ---
+
+## Report Reading Guide
+
+The generated HTML report contains the following key information:
+
+### Navigation Bar Features
+The top of the report provides quick navigation buttons, including:
+*   **US Stocks / Taiwan Stocks / Bonds**: Quickly jump to market quotes and K-line charts for each market.
+*   **Macro Info**: View the US Treasury yield curve and key economic indicator tables for the US and Taiwan.
+*   **Financial Focus**: Browse summaries of this week's important financial news.
+*   **AI Analysis**: Read the AI's comprehensive assessment of technical, fundamental, and macroeconomic aspects.
+
+### 1. Technical Signal Badges
+| Signal | Color | Meaning | Logic |
+| :--- | :--- | :--- | :--- |
+| **Bullish Alignment** | <span style="color:red">Red</span> | Strong Uptrend | K > D and Monthly BIAS > 0 |
+| **Rebound** | <span style="color:lightcoral">Light Red</span> | Weak Rebound | K > D but Monthly BIAS < 0 |
+| **Pullback Consolidation** | <span style="color:lightgreen">Light Green</span> | Bullish Pullback | K < D but Monthly BIAS > 0 |
+| **Bearish Correction** | <span style="color:green">Green</span> | Downtrend | K < D and Monthly BIAS < 0 |
+
+### 2. Key Indicator Interpretation
+*   **K9 / D9**: KD Stochastic Oscillator.
+    *   **> 80**: Overbought zone (potential for a pullback, but also could indicate a strong trend).
+    *   **< 20**: Oversold zone (potential for a rebound).
+    *   **K > D**: Golden cross (bullish).
+    *   **K < D**: Death cross (bearish).
+*   **Bias Ratio (BIAS)**: The percentage distance between the stock price and its moving average.
+    *   **Positive value**: Price is above the moving average. **Negative value**: Price is below the moving average.
+    *   An excessively large value indicates short-term overheating or being oversold.
+*   **ADX**: Trend strength indicator. A higher value indicates a stronger current trend (regardless of direction). Typically, > 25 indicates a clear trend.
+*   **+DI / -DI**: Directional indicators. +DI above -DI indicates bullish dominance; -DI above +DI indicates bearish dominance.
+*   **Volume Ratio %**: The ratio of the current day's trading volume to the average trading volume over the past 20 days.
+    *   **> 100%**: Today's volume is greater than the 20-day average, indicating strengthening momentum.
+    *   **< 100%**: Today's volume is less than the 20-day average, indicating weakening momentum.
+*   **Yield Curve Inversion**:
+    *   An abnormal phenomenon where short-term government bond yields are higher than long-term bond yields.
+    *   Historically considered a leading indicator of an **economic recession** (because the market expects future interest rates to fall, causing long-term bond yields to decrease).
+
+### 3. Macro Dashboard
+The report lists key macro data for the US and Taiwan to help assess the overall environmental risk:
+*   **Trend Arrows (▲/▼)**: Intuitively show the direction of change from the previous period or expectation.
+*   **Color Coding**:
+    *   <span style="color:red">Red</span>: Usually represents positive expansion (e.g., GDP increase, better economic signal) or a bullish signal (e.g., increased margin financing).
+    *   <span style="color:green">Green</span>: Usually represents contraction, improvement (e.g., lower unemployment), or a risk-off signal.
+*   **Monitoring Indicator**: Released by Taiwan's NDC. A yellow-red/red light indicates a booming economy, while a blue light indicates a slump.
+*   **Margin/Short Balance**: To observe market sentiment and retail investor positioning.
+
+### 4. Four AI In-Depth Analysis Perspectives
+*   **1. Macro Environment Setting**: Tells you which stage of the economic cycle the broader environment is in (expansion/recession/inflation).
+*   **2. Market Dynamics & Industry Trends**: Focuses on **capital flow** (e.g., the impact of the US dollar on foreign investment) and **industry valuation** (e.g., correction risk for tech stocks).
+*   **3. Technical & Individual Stock Health Check**: Analyzes price-volume indicators and fundamental quality for specific assets.
+*   **4. Comprehensive Strategy & Scenario Forecasting**: Provides **concrete action plans** for different market scenarios (bullish/neutral/bearish).
 
 ## 報告閱讀指南
 
@@ -274,6 +527,9 @@ gemini -p 'investment analysis' -y
 *   **4. 綜合對策與情境預測**: 提供不同市場情境下的**具體行動建議** (樂觀/中立/悲觀)。
 
 ---
+
+## ⚠️ Disclaimer
+The reports generated by this project are for research and reference purposes only and do not constitute any investment advice. Financial markets are unpredictable; please conduct your own thorough risk assessment before investing.
 
 ## ⚠️ 免責聲明
 本專案生成的報告僅供研究與參考，不構成任何投資建議。金融市場變化莫測，投資前請務必自行審慎評估風險。
