@@ -9,8 +9,6 @@ This is an investment assistance tool that combines **Python automation scripts*
 ### A Note on How This Tool Works
 This tool is an intelligent financial information agent, not a web scraper in the traditional sense. It primarily retrieves data through structured APIs, supplemented by web content analysis only when necessary. Its core advantage lies in not relying on fixed parsing logic; instead, it uses AI for semantic understanding to dynamically extract key information from unstructured pages, allowing it to more effectively handle challenges from website redesigns.
 
-### 關於本工具的定位
-本工具是一個智慧型財經資訊代理，而非傳統意義上的網路爬蟲。它主要透過結構化 API 獲取資料，僅在必要時輔以網頁內容分析。其核心優勢在於不依賴固定的解析邏輯，而是利用 AI 進行語意理解，動態地從非結構化頁面中擷取關鍵資訊，能更有效地應對目標網站的改版挑戰。
 
 ---
 
