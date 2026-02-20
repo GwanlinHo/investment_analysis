@@ -6,9 +6,6 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 這是一個結合 **Python 自動化腳本** 與 **AI 智慧分析** 的投資輔助工具。旨在自動抓取美股、台股 ETF 及債券市場數據，計算關鍵技術指標，繪製 K 線圖，並結合 AI 代理人生成深度市場觀點與即時新聞彙整，最終產出一份易於閱讀的 HTML 綜合分析報告。當然，一週要觸發多少次，以及每次要收集哪些資料，完全可以由使用者自行調整。
 
-### A Note on How This Tool Works
-This tool is an intelligent financial information agent, not a web scraper in the traditional sense. It primarily retrieves data through structured APIs, supplemented by web content analysis only when necessary. Its core advantage lies in not relying on fixed parsing logic; instead, it uses AI for semantic understanding to dynamically extract key information from unstructured pages, allowing it to more effectively handle challenges from website redesigns.
-
 
 ---
 
