@@ -8,6 +8,12 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 ---
 
+## Live Demo (操作示範)
+
+[![專案操作影片](https://img.youtube.com/vi/lfzpw7sPqhI/maxresdefault.jpg)](https://www.youtube.com/watch?v=lfzpw7sPqhI)
+
+---
+
 ## Key Features
 
 1.  **Multi-Market Data Tracking**: Supports tracking of US stock indices (e.g., S&P 500, Philadelphia Semiconductor Index), popular Taiwan ETFs (e.g., 0050, 0056), individual stocks, and bond ETFs.
