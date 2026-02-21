@@ -5,7 +5,14 @@
   1. Execute `uv run investment_analysis.py` to generate the HTML report in the report directory.
   2. Read the generated HTML file from `report/`.
   3. **Collect Macroeconomic Data:**
-     - **CRITICAL RULE:** Always use the latest **OFFICIAL released data** (e.g., from government bureaus like BEA, BLS, NDC). **Do NOT use forecast/estimated data** for the current or future months unless explicitly requested. If the current month's data is not yet out, use the previous month's official data.
+     - **CRITICAL RULE:** Always use the latest **OFFICIAL released data** (e.g., from government bureaus like BEA, BLS, NDC). **STRICTLY PROHIBITED:** Using any forecast, estimated, or outlook data (預測值/估計值/展望值). All data MUST be historical actuals that have been formally released.
+     - **Verification Protocol:** 
+       1. **Date Backtest:** `Data Month` MUST be < `Current Month`. If `Current Month` is Feb, any data labeled "Feb" or later is REJECTED.
+       2. **Keyword Blacklist:** Any data source containing "Forecast", "Estimated", "Expected", "Outlook", "預測", "預估", "展望" MUST be discarded.
+       3. **Lag Compliance:** 
+          - GDP/Investment: Min 1 Quarter lag.
+          - CPI/Jobs/Signals: Min 1 Month lag.
+       4. **Fail-Safe:** If no valid historical data is found for the current cycle, use the "Latest Confirmed Historical Actual" and explicitly mark the "Data Month" in the table. NEVER fill a cell with future-dated data.
      - Search for the latest **US Economic Indicators**: GDP (國內生產總值), CPI (消費者物價指數), PPI (生產者物價指數), Retail Sales (零售銷售), Non-farm payrolls (非農就業人數), Unemployment rate (失業率), Initial Jobless Claims (初次請領失業救濟金人數), ISM Manufacturing Index (ISM 製造業指數), M2 Money Supply (M2 貨幣供給), Credit Card Delinquency Rate (信用卡違約率), Real Private Investment (實質民間投資), US Dollar Index (美元指數).
      - Search for the latest **Taiwan Economic Indicators**: Monitoring Indicator (景氣對策信號) [MUST query directly from NDC official site: https://index.ndc.gov.tw/n/zh_tw to confirm the latest color/score], Export Orders YoY (外銷訂單年增率), Industrial Production Index (工業生產指數), Consumer Confidence Index (消費者信心指數), M1B & M2 Money Supply (M1B & M2 貨幣供給), Credit Card Delinquency Rate (信用卡違約率), Real Private Investment (實質民間投資), Unemployment rate (失業率), Industrial/Service Overtime Hours (工業及服務業加班工時), Margin Purchase Balance (融資餘額) and Short Sale Balance (融券餘額) [Query specifically for the "Total Market Balance" and "Daily Change" (increase/decrease)].
   4. Collect **15** important news items impacting US/Taiwan economy, FX, and rates.
@@ -52,6 +59,7 @@
      - **Part B: AI Comprehensive Analysis**
        - **Data Requirement:** The Python script MUST embed the last 60 days of OHLCV market data into `<script id="market-data">` in the HTML. The AI MUST read this data along with `<script id="fundamental-data">` and `<script id="yield-data">`. 
        - **Market Status Awareness**: AI MUST check the `.market-status` tags in the HTML report. If a market is labeled as **"休市中 (Market Closed)"**, the AI MUST explicitly mention the holiday or market closure in its analysis and ensure all price-related statements refer to the **"最後交易日" (Last Trading Day)** instead of the current date.
+       - **Logic and Chronological Consistency Check**: Before injecting the "AI Comprehensive Analysis" into the HTML, AI MUST perform a final consistency check to eliminate logic or chronological errors. Specifically, it MUST NOT report market-active phenomena (e.g., "observed a specific candlestick pattern today") during periods labeled as **"休市中 (Market Closed)"**. All such analysis during holidays must explicitly refer to the **"最後交易日" (Last Trading Day)** to maintain factual accuracy.
        - **1. Macro Framework**:
          - **Macro Interpretation**: Combine CPI, PPI, Retail Sales, and interest rate cycles to determine the current stage of the economic cycle.
          - **Yield Curve Signal (CRITICAL)**: AI **MUST** read the latest values from `<script id="yield-data">` and manually calculate the **10Y minus 3M** spread.
@@ -63,26 +71,26 @@
          - **Sector Valuation**: Evaluate valuation correction risks for high-growth tech stocks (e.g., AI, Semiconductors) in the current interest rate environment; use M2 money supply to judge if market liquidity supports current prices.
          - **Positioning & Sentiment**: Combine Taiwan's margin/short balance with credit card delinquency rates to analyze retail sentiment and potential credit risk divergences.
        - **3. Technical & Fundamental Deep Dive**:
-         - **市場趨勢分析 (道氏理論應用) (Market Trend Analysis - Dow Theory Application)**:
-           - **主要趨勢判斷 (Primary Trend Identification)**: AI 必須根據市場過去 60 個交易日的價格走勢，識別出主要的長期趨勢。
-             - **上升趨勢 (Uptrend)**: 確認出現「一系列更高的高點 (Higher Highs)」和「更高的低點 (Higher Lows)」。
-             - **下降趨勢 (Downtrend)**: 確認出現「一系列更低的高點 (Lower Highs)」和「更低的低點 (Lower Lows)」。
-             - 報告中必須明確說明當前是處於「主要上升趨勢」、「主要下降趨勢」還是「橫盤整理」。
-           - **次級折返走勢 (Secondary Reactions)**: 在主要趨勢中，AI 應識別任何逆勢的「次級折返」走勢。必須評估此折返是否伴隨成交量縮小，這通常是健康的修正訊號。
-           - **成交量確認 (Volume Confirmation)**: 趨勢必須由成交量確認。在上升趨勢中，價格上漲時成交量應放大；在下降趨勢中，價格下跌時成交量應放大。如果量價背離，必須提出警示。
-         - **關鍵 K 棒型態 (酒田戰法應用) (Key Candlestick Patterns - Sakata Method Application)**:
-           - **K 棒組合掃描 (Pattern Scanning)**: AI 必須掃描最近 30 個交易日的 K 線圖，尋找酒田戰法中的關鍵反轉或持續型態。
-           - **型態識別與標注 (Pattern Identification & Labeling)**: 當識別出顯著型態時（例如：「晨星」、「夜星」、「鎚子」、「吊人」、「三陽開泰」、「三鴉蔽日」等），**必須標注型態發生的確切日期**。
-           - **報告範例 (Example)**: 「在 2026-02-20 觀察到晨星（Morning Star）型態，為潛在的底部反轉訊號。」
-           - **結合趨勢分析 (Contextual Analysis)**: 型態的解讀必須結合道氏理論的趨勢分析。例如，在一個主要上升趨勢中的回檔出現「鎚子線」，其看漲訊號的可靠性會更高。
-         - **指標與價量背離 (Indicators & Divergence)**:
-           - **量價分析 (Volume Analysis)**: 分析成交量與價格變動的關聯，以識別「價漲量縮」或「低檔吸籌」等信號。
-           - **指標背離 (Indicator Divergence)**: 將價格與 KD、MACD、RSI 進行交叉比對。若發現背離（例如，價格創新高但指標未跟上），**必須標注事件發生的日期**（例如：「KD 指標於 2026-02-15 出現看跌背離」）。
-           - **關鍵價位 (Key Levels)**: 識別近期的支撐與壓力區，並評估突破或跌破的真實性。
-         - **品質與安全邊際 (Quality & Margin of Safety)**:
-           - **財務評估 (Financial Assessment)**: 讀取 `fundamental-data`。使用 ROE 與毛利率評估「護城河」；比較 PE/PB 與歷史區間，判斷當前價值。
-           - **成長估值 (PEG) (Growth Valuation (PEG))**: 計算或引用 PEG Ratio (PEG < 1 通常代表低估)，以評估盈餘成長是否支撐當前股價。
-           - **安全邊際 (Margin of Safety)**: 計算當前價格與 AI 評估價值之間的差距，提供明確的「風險緩衝」評估。
+         - **Market Trend Analysis (Dow Theory Application)**:
+           - **Primary Trend Identification**: AI must identify the primary long-term trend based on the market's price action over the past 60 trading days. **The analysis must explicitly name the specific asset and its symbol (e.g., S&P 500 (^GSPC)).**
+             - **Uptrend**: Confirm a "series of Higher Highs and Higher Lows".
+             - **Downtrend**: Confirm a "series of Lower Highs and Lower Lows".
+             - The report must clearly state whether the specific asset is in a "Primary Uptrend", "Primary Downtrend", or "Sideways Consolidation".
+           - **Secondary Reactions**: Identify any "Secondary Reactions" (counter-trend movements) within the primary trend. Evaluate if these reactions are accompanied by decreasing volume, which typically signals a healthy correction.
+           - **Volume Confirmation**: Trends must be confirmed by volume. In an uptrend, volume should expand on price increases; in a downtrend, volume should expand on price decreases. AI must alert on any price-volume divergence.
+         - **Key Candlestick Patterns (Sakata Method Application)**:
+           - **Pattern Scanning**: AI must scan the candlestick charts of the last 30 trading days for key reversal or continuation patterns defined in the Sakata Method.
+           - **Identification & Labeling**: When significant patterns are identified (e.g., "Morning Star", "Evening Star", "Hammer", "Hanging Man", "Three White Soldiers", "Three Black Crows", etc.), **AI must specify the asset name and symbol, and the exact date of occurrence.**
+           - **Example**: "On 2026-02-20, **S&P 500 (^GSPC)** exhibited a Morning Star pattern, signaling a potential bottom reversal."
+           - **Contextual Analysis**: Pattern interpretation must be integrated with Dow Theory trend analysis. For instance, a "Hammer" appearing during a pullback in a primary uptrend carries significantly higher reliability.
+         - **Indicators & Divergence**:
+           - **Volume Analysis**: Analyze the correlation between volume and price movement to identify signals such as "Price Up, Volume Down" or "Bottom Accumulation". **The target asset must be specified.**
+           - **Indicator Divergence**: Cross-reference price action with KD, MACD, and RSI. If a divergence is found (e.g., price hits a new high but the indicator does not), **AI must specify the asset name and symbol, and the exact date of occurrence** (e.g., "KD indicator for **TSMC (2330.TW)** showed a bearish divergence on 2026-02-15").
+           - **Key Levels**: Identify recent support and resistance zones and evaluate the authenticity of any breakouts or breakdowns.
+         - **Quality & Margin of Safety**:
+           - **Financial Assessment**: Read `fundamental-data`. Use ROE and Gross Margin to evaluate the "Moat"; compare PE/PB with historical ranges to judge current valuation.
+           - **Growth Valuation (PEG)**: Calculate or cite the PEG Ratio (PEG < 1 usually suggests undervaluation) to assess if earnings growth supports the current stock price.
+           - **Margin of Safety**: Calculate the gap between the current price and the AI-estimated intrinsic value, providing a clear "Risk Buffer" assessment.
        - **4. Actionable Strategy**:
          - **Scenario Simulation**: Define "Bull," "Base," and "Bear" scenarios with specific trigger conditions.
          - **Execution Plan**: Provide specific operational suggestions such as tiered entry, hedging, or increasing cash positions.
@@ -103,5 +111,7 @@
        - Inject the **Weekly News Focus** content into the `<div id="weekly-news-focus"></div>`.
        - Inject the **AI Comprehensive Analysis** content into the `<div id="ai-analysis-report"></div>`.
        - **CRITICAL:** Ensure NO emojis are used in the injected content.
-  7. **Finalization:** The analysis is now complete. The updated report is available in the `report/` directory as both a dated file and `index.html`.
+  7. **Finalization:** The analysis is now complete. 
+     - **Sync Updated Report:** Copy the final updated dated HTML file to `index.html` and `report/index.html` to ensure the root index and directory index are always up-to-date with the latest AI analysis and macro data.
+     - The updated report is available in the `report/` directory as both a dated file and `index.html`.
 
