@@ -63,14 +63,26 @@
          - **Sector Valuation**: Evaluate valuation correction risks for high-growth tech stocks (e.g., AI, Semiconductors) in the current interest rate environment; use M2 money supply to judge if market liquidity supports current prices.
          - **Positioning & Sentiment**: Combine Taiwan's margin/short balance with credit card delinquency rates to analyze retail sentiment and potential credit risk divergences.
        - **3. Technical & Fundamental Deep Dive**:
-         - **Price-Volume & Divergence**:
-           - **Volume Analysis**: Analyze the correlation between trading volume and price movement to identify signals like "Price Up/Volume Down" or "Low-Level Accumulation."
-           - **Indicator Divergence**: Cross-reference price with KD, MACD, and RSI. If divergence is found (e.g., price reaches a new high but indicators do not), **MUST label the occurrence date** (e.g., "KD Bearish Divergence observed on 2026-02-15").
-           - **Key Levels**: Identify recent support and resistance zones and assess the authenticity of breakouts or breakdowns.
-         - **Quality & Margin of Safety**:
-           - **Financial Assessment**: Read `fundamental-data`. Use ROE and Gross Margin to evaluate the "Moat"; compare PE/PB with historical ranges to judge current value.
-           - **Growth Valuation (PEG)**: Calculate or cite the PEG Ratio (PEG < 1 is generally undervalued) to assess whether earnings growth supports the current stock price.
-           - **Margin of Safety**: Calculate the gap between the current price and the AI-estimated value, providing a clear "Risk Buffer" assessment.
+         - **市場趨勢分析 (道氏理論應用) (Market Trend Analysis - Dow Theory Application)**:
+           - **主要趨勢判斷 (Primary Trend Identification)**: AI 必須根據市場過去 60 個交易日的價格走勢，識別出主要的長期趨勢。
+             - **上升趨勢 (Uptrend)**: 確認出現「一系列更高的高點 (Higher Highs)」和「更高的低點 (Higher Lows)」。
+             - **下降趨勢 (Downtrend)**: 確認出現「一系列更低的高點 (Lower Highs)」和「更低的低點 (Lower Lows)」。
+             - 報告中必須明確說明當前是處於「主要上升趨勢」、「主要下降趨勢」還是「橫盤整理」。
+           - **次級折返走勢 (Secondary Reactions)**: 在主要趨勢中，AI 應識別任何逆勢的「次級折返」走勢。必須評估此折返是否伴隨成交量縮小，這通常是健康的修正訊號。
+           - **成交量確認 (Volume Confirmation)**: 趨勢必須由成交量確認。在上升趨勢中，價格上漲時成交量應放大；在下降趨勢中，價格下跌時成交量應放大。如果量價背離，必須提出警示。
+         - **關鍵 K 棒型態 (酒田戰法應用) (Key Candlestick Patterns - Sakata Method Application)**:
+           - **K 棒組合掃描 (Pattern Scanning)**: AI 必須掃描最近 30 個交易日的 K 線圖，尋找酒田戰法中的關鍵反轉或持續型態。
+           - **型態識別與標注 (Pattern Identification & Labeling)**: 當識別出顯著型態時（例如：「晨星」、「夜星」、「鎚子」、「吊人」、「三陽開泰」、「三鴉蔽日」等），**必須標注型態發生的確切日期**。
+           - **報告範例 (Example)**: 「在 2026-02-20 觀察到晨星（Morning Star）型態，為潛在的底部反轉訊號。」
+           - **結合趨勢分析 (Contextual Analysis)**: 型態的解讀必須結合道氏理論的趨勢分析。例如，在一個主要上升趨勢中的回檔出現「鎚子線」，其看漲訊號的可靠性會更高。
+         - **指標與價量背離 (Indicators & Divergence)**:
+           - **量價分析 (Volume Analysis)**: 分析成交量與價格變動的關聯，以識別「價漲量縮」或「低檔吸籌」等信號。
+           - **指標背離 (Indicator Divergence)**: 將價格與 KD、MACD、RSI 進行交叉比對。若發現背離（例如，價格創新高但指標未跟上），**必須標注事件發生的日期**（例如：「KD 指標於 2026-02-15 出現看跌背離」）。
+           - **關鍵價位 (Key Levels)**: 識別近期的支撐與壓力區，並評估突破或跌破的真實性。
+         - **品質與安全邊際 (Quality & Margin of Safety)**:
+           - **財務評估 (Financial Assessment)**: 讀取 `fundamental-data`。使用 ROE 與毛利率評估「護城河」；比較 PE/PB 與歷史區間，判斷當前價值。
+           - **成長估值 (PEG) (Growth Valuation (PEG))**: 計算或引用 PEG Ratio (PEG < 1 通常代表低估)，以評估盈餘成長是否支撐當前股價。
+           - **安全邊際 (Margin of Safety)**: 計算當前價格與 AI 評估價值之間的差距，提供明確的「風險緩衝」評估。
        - **4. Actionable Strategy**:
          - **Scenario Simulation**: Define "Bull," "Base," and "Bear" scenarios with specific trigger conditions.
          - **Execution Plan**: Provide specific operational suggestions such as tiered entry, hedging, or increasing cash positions.
