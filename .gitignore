@@ -146,3 +146,4 @@ cython_debug/
 # OS Specific
 .DS_Store
 Thumbs.db
+GEMINI.md.bak
