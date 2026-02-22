@@ -1,0 +1,150 @@
+{
+    "US_MACRO": [
+        {
+            "name": "國內生產毛額 (GDP) Q4",
+            "value": "1.4%",
+            "note": "2025 Q4 (年化)",
+            "trend": "down",
+            "last_updated": "2026-02-22",
+            "is_cache": false
+        },
+        {
+            "name": "消費者物價指數 (CPI)",
+            "value": "2.4%",
+            "note": "2026-01 (YoY)",
+            "trend": "down",
+            "last_updated": "2026-02-22",
+            "is_cache": false
+        },
+        {
+            "name": "生產者物價指數 (PPI)",
+            "value": "3.0%",
+            "note": "2025-12 (YoY)",
+            "trend": "up",
+            "last_updated": "2026-02-22",
+            "is_cache": false
+        },
+        {
+            "name": "零售銷售 (Retail Sales)",
+            "value": "0.0%",
+            "note": "2025-12 (MoM)",
+            "trend": "neutral",
+            "last_updated": "2026-02-22",
+            "is_cache": false
+        },
+        {
+            "name": "非農就業人口",
+            "value": "+13.0萬",
+            "note": "2026-01",
+            "trend": "neutral",
+            "last_updated": "2026-02-22",
+            "is_cache": false
+        },
+        {
+            "name": "失業率",
+            "value": "4.3%",
+            "note": "2026-01",
+            "trend": "up",
+            "last_updated": "2026-02-22",
+            "is_cache": false
+        },
+        {
+            "name": "初領失業金人數",
+            "value": "22.7萬",
+            "note": "截至 2026-02-07",
+            "trend": "neutral",
+            "last_updated": "2026-02-22",
+            "is_cache": false
+        },
+        {
+            "name": "ISM 製造業指數",
+            "value": "52.6",
+            "note": "2026-01",
+            "trend": "up",
+            "last_updated": "2026-02-22",
+            "is_cache": false
+        },
+        {
+            "name": "M2 貨幣供給",
+            "value": "4.60%",
+            "note": "2025-12 (YoY)",
+            "trend": "up",
+            "last_updated": "2026-02-22",
+            "is_cache": false
+        },
+        {
+            "name": "實質私人投資",
+            "value": "3.8%",
+            "note": "2025 Q4 (成長率)",
+            "trend": "up",
+            "last_updated": "2026-02-22",
+            "is_cache": false
+        }
+    ],
+    "TW_MACRO": [
+        {
+            "name": "景氣對策信號",
+            "value": "38分 (紅燈)",
+            "note": "2025-12",
+            "trend": "up",
+            "last_updated": "2026-02-22",
+            "is_cache": false
+        },
+        {
+            "name": "外銷訂單",
+            "value": "+43.8%",
+            "note": "2025-12 (YoY)",
+            "trend": "up",
+            "last_updated": "2026-02-22",
+            "is_cache": false
+        },
+        {
+            "name": "工業生產指數",
+            "value": "+21.57%",
+            "note": "2025-12 (YoY)",
+            "trend": "up",
+            "last_updated": "2026-02-22",
+            "is_cache": false
+        },
+        {
+            "name": "消費者信心指數 (CCI)",
+            "value": "67.16",
+            "note": "2026-01",
+            "trend": "up",
+            "last_updated": "2026-02-22",
+            "is_cache": false
+        },
+        {
+            "name": "失業率",
+            "value": "3.30%",
+            "note": "2025-12",
+            "trend": "down",
+            "last_updated": "2026-02-22",
+            "is_cache": false
+        },
+        {
+            "name": "製造業加班工時",
+            "value": "17.6小時",
+            "note": "2025-12",
+            "trend": "up",
+            "last_updated": "2026-02-22",
+            "is_cache": false
+        },
+        {
+            "name": "融資餘額",
+            "value": "3680.47億",
+            "note": "-45.40億 (2/11)",
+            "trend": "down",
+            "last_updated": "2026-02-22",
+            "is_cache": false
+        },
+        {
+            "name": "融券餘額",
+            "value": "24.8萬張",
+            "note": "-1771張 (2/11)",
+            "trend": "down",
+            "last_updated": "2026-02-22",
+            "is_cache": false
+        }
+    ]
+}

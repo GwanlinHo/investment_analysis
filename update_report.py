@@ -1,9 +1,23 @@
-
 import os
 import datetime
+import json
 
-# --- Data ---
-US_MACRO = [
+# --- Cache Management ---
+CACHE_FILE = "macro_cache.json"
+
+def load_cache():
+    if os.path.exists(CACHE_FILE):
+        with open(CACHE_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {"US_MACRO": [], "TW_MACRO": []}
+
+def save_cache(cache_data):
+    with open(CACHE_FILE, "w", encoding="utf-8") as f:
+        json.dump(cache_data, f, ensure_ascii=False, indent=4)
+
+# Current Search Results (Simulated for this script execution, in real flow this comes from AI search)
+# These represent the NEW data found today.
+CURRENT_US_DATA = [
     {"name": "國內生產毛額 (GDP) Q4", "value": "1.4%", "note": "2025 Q4 (年化)", "trend": "down"},
     {"name": "消費者物價指數 (CPI)", "value": "2.4%", "note": "2026-01 (YoY)", "trend": "down"},
     {"name": "生產者物價指數 (PPI)", "value": "3.0%", "note": "2025-12 (YoY)", "trend": "up"},
@@ -16,7 +30,7 @@ US_MACRO = [
     {"name": "實質私人投資", "value": "3.8%", "note": "2025 Q4 (成長率)", "trend": "up"},
 ]
 
-TW_MACRO = [
+CURRENT_TW_DATA = [
     {"name": "景氣對策信號", "value": "38分 (紅燈)", "note": "2025-12", "trend": "up"},
     {"name": "外銷訂單", "value": "+43.8%", "note": "2025-12 (YoY)", "trend": "up"},
     {"name": "工業生產指數", "value": "+21.57%", "note": "2025-12 (YoY)", "trend": "up"},
@@ -27,6 +41,38 @@ TW_MACRO = [
     {"name": "融券餘額", "value": "24.8萬張", "note": "-1771張 (2/11)", "trend": "down"},
 ]
 
+def merge_data(current, cached):
+    merged = []
+    updated = False
+    # Logic: If item exists in current, it's new data. Update cache.
+    # If not in current but in cache, use cache data.
+    
+    # Create map for easier lookup
+    current_map = {item['name']: item for item in current}
+    cached_map = {item['name']: item for item in cached}
+    
+    all_names = list(current_map.keys())
+    for name in cached_map.keys():
+        if name not in all_names:
+            all_names.append(name)
+            
+    for name in all_names:
+        if name in current_map:
+            # Check if this is truly "newer" or just a re-confirmation
+            # For simplicity in this version, current search always takes priority and updates last_updated
+            new_item = current_map[name].copy()
+            new_item['last_updated'] = datetime.datetime.now().strftime("%Y-%m-%d")
+            new_item['is_cache'] = False
+            merged.append(new_item)
+            updated = True
+        elif name in cached_map:
+            item = cached_map[name].copy()
+            item['is_cache'] = True # Mark as cached
+            merged.append(item)
+            
+    return merged, updated
+
+# --- News & Analysis Data (Static for this update) ---
 NEWS_ITEMS = [
     {"source": "TradingKey", "title": "聯準會新主席沃許上任：貨幣政策大轉向？", "link": "https://www.tradingkey.com", "summary": "川普提名凱文·沃許為下一任主席，主張縮表加降息，市場關注2026貨幣政策轉向。"},
     {"source": "財經新報", "title": "Fed 會議紀錄偏鷹，決策者看法分歧", "link": "https://technews.tw", "summary": "1月會議紀錄顯示官員對降息路徑有歧見，若通膨持續不排除維持高利率。"},
@@ -45,7 +91,6 @@ NEWS_ITEMS = [
     {"source": "明日智庫", "title": "兩岸衝突強度降溫 地緣風險趨緩", "link": "https://www.tomorrow.org.tw", "summary": "2026年2月兩岸軍事與政治摩擦顯著減少，地緣政治風險指數下降。"}
 ]
 
-# --- Analysis Text ---
 AI_ANALYSIS_TEXT = """
 <h3>1. 總體經濟與循環架構</h3>
 <p>
@@ -66,7 +111,7 @@ AI_ANALYSIS_TEXT = """
 
 <h3>3. 深度焦點分析：台積電 (2330.TW)</h3>
 <ul>
-    <li><strong>基本面護城河：</strong> 1 月營收月增 19.8%、年增 36.8%，毛利率維持在 60% 高檔，ROE 高達 35%。在 AI 晶片壟斷地位穩固下，幾乎沒有競爭對手能威脅其定價權。</li>
+    <li><strong>基本面護城護：</strong> 1 月營收月增 19.8%、年增 36.8%，毛利率維持在 60% 高檔，ROE 高達 35%。在 AI 晶片壟斷地位穩固下，幾乎沒有競爭對手能威脅其定價權。</li>
     <li><strong>技術面結構：</strong>
         <ul>
             <li><strong>道氏理論：</strong> 主要趨勢（Primary Trend）呈現明確多頭排列，休市期間 ADR 創高預示現貨將跳空開高，確認新一輪漲勢。</li>
@@ -87,19 +132,12 @@ AI_ANALYSIS_TEXT = """
 </div>
 """
 
-# --- Helper Functions ---
+# --- HTML Generator ---
 def generate_macro_table(data, region_id):
     html = f'<table class="macro-table" id="{region_id}"><thead><tr><th style="text-align:left;">指標名稱</th><th style="text-align:right;">數值</th><th style="text-align:right;">日期/備註</th></tr></thead><tbody>'
     for item in data:
         trend_icon = "▲" if item['trend'] == "up" else "▼" if item['trend'] == "down" else "-"
         trend_class = "text-up" if item['trend'] == "up" else "text-down" if item['trend'] == "down" else "text-secondary"
-        # Invert colors for Unemployment (Down is Good/Red? No, usually Red is Up/Hot in TW stock context, but for econ indicators:
-        # GEMINI.md says: "Red for Up/Positive, Green for Down/Negative".
-        # For Unemployment, Up is Negative (Green?), Down is Positive (Red?).
-        # Let's stick to strict direction: Red = Up, Green = Down.
-        # User interpretation of good/bad is separate.
-        
-        # Special handling for "Red Light" in text? No, just stick to arrow color.
         
         val_cell = f'<span class="{trend_class}"><strong>{item["value"]}</strong> <span style="font-size:10px;">{trend_icon}</span></span>'
         
@@ -125,32 +163,60 @@ def generate_ai_analysis(text):
     return html
 
 # --- Main Execution ---
-report_file = "report/invest_analysis_20260222.html"
-if not os.path.exists(report_file):
-    print(f"Error: {report_file} not found.")
-    exit(1)
+def main():
+    report_file = "report/invest_analysis_20260222.html"
+    if not os.path.exists(report_file):
+        print(f"Error: {report_file} not found.")
+        return
 
-with open(report_file, "r", encoding="utf-8") as f:
-    content = f.read()
+    # 1. Load Cache
+    cache = load_cache()
 
-# Inject US Macro
-us_table = generate_macro_table(US_MACRO, "us-macro-table")
-content = content.replace('<div id="us-macro-placeholder"></div>', us_table)
+    # 2. Merge current search results with cache
+    us_merged, us_updated = merge_data(CURRENT_US_DATA, cache.get("US_MACRO", []))
+    tw_merged, tw_updated = merge_data(CURRENT_TW_DATA, cache.get("TW_MACRO", []))
 
-# Inject TW Macro
-tw_table = generate_macro_table(TW_MACRO, "tw-macro-table")
-content = content.replace('<div id="tw-macro-placeholder"></div>', tw_table)
+    # 3. Update Cache File if needed
+    if us_updated or tw_updated:
+        cache["US_MACRO"] = us_merged
+        cache["TW_MACRO"] = tw_merged
+        save_cache(cache)
+        print("[Info] Macro Cache Updated.")
 
-# Inject News
-news_html = generate_news_list(NEWS_ITEMS)
-content = content.replace('<div id="weekly-news-focus"></div>', news_html)
+    with open(report_file, "r", encoding="utf-8") as f:
+        content = f.read()
 
-# Inject AI Analysis
-ai_html = generate_ai_analysis(AI_ANALYSIS_TEXT)
-content = content.replace('<div id="ai-analysis-report"></div>', ai_html)
+    # 4. Inject Tables
+    us_table = generate_macro_table(us_merged, "us-macro-table")
+    content = content.replace('<div id="us-macro-placeholder"></div>', us_table)
 
-# Save
-with open(report_file, "w", encoding="utf-8") as f:
-    f.write(content)
+    tw_table = generate_macro_table(tw_merged, "tw-macro-table")
+    content = content.replace('<div id="tw-macro-placeholder"></div>', tw_table)
 
-print(f"Successfully updated {report_file}")
+    # 5. Inject News
+    news_html = generate_news_list(NEWS_ITEMS)
+    # Using specific markers to avoid double-wrapping if IDs already exist
+    if '<div id="weekly-news-focus">' in content:
+        # Simple replacement logic for existing blocks (replace inner or whole block)
+        # For simplicity, we just look for placeholders or previously injected IDs
+        import re
+        content = re.sub(r'<div id="weekly-news-focus">.*?</div>', news_html, content, flags=re.DOTALL)
+    else:
+        content = content.replace('<div id="weekly-news-focus"></div>', news_html)
+
+    # 6. Inject AI Analysis
+    ai_html = generate_ai_analysis(AI_ANALYSIS_TEXT)
+    if '<div id="ai-analysis-report">' in content:
+        import re
+        content = re.sub(r'<div id="ai-analysis-report">.*?</div>', ai_html, content, flags=re.DOTALL)
+    else:
+        content = content.replace('<div id="ai-analysis-report"></div>', ai_html)
+
+    # 7. Save Final
+    with open(report_file, "w", encoding="utf-8") as f:
+        f.write(content)
+
+    print(f"[Success] Updated {report_file} with Cache Integration.")
+
+if __name__ == "__main__":
+    main()
