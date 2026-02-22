@@ -2,7 +2,7 @@
     "stock_groups": [
         {
             "title": "美股主要指數",
-            "symbols": ["^VIX", "^GSPC", "^SOX", "^IXIC", "^DJI", "^NYFANG", "^N225", "^XAU"],
+            "symbols": ["^VIX", "^GSPC", "^SOX", "^IXIC", "^DJI", "^NYFANG", "^RUT", "^N225", "^XAU"],
             "description": ""
         },
         {
