@@ -16,7 +16,6 @@ def save_cache(cache_data):
     with open(CACHE_FILE, "w", encoding="utf-8") as f:
         json.dump(cache_data, f, ensure_ascii=False, indent=4)
 
-# Real Data fetched on 2026-02-22
 CURRENT_US_DATA = [
     {"name": "國內生產毛額 (GDP) Q4", "value": "1.4%", "note": "2025 Q4 (年化初值)", "trend": "down"},
     {"name": "消費者物價指數 (CPI)", "value": "2.4%", "note": "2026-01 (YoY)", "trend": "down"},
@@ -44,53 +43,55 @@ CURRENT_TW_DATA = [
 ]
 
 NEWS_ITEMS = [
-    {"source": "Binance", "title": "全球市場迎接「數據風暴」週", "link": "https://www.binance.com", "summary": "投資人屏息以待聯準會會議紀錄與PCE數據，市場波動恐加劇。"},
-    {"source": "TheStreet", "title": "聯準會紀錄：官員不排除升息可能", "link": "https://www.thestreet.com", "summary": "1月會議紀錄顯示，若通膨頑固，部分官員討論重啟升息，引發市場震盪。"},
-    {"source": "Focus Taiwan", "title": "台積電2026資本支出估達560億美元", "link": "https://focustaiwan.tw", "summary": "為滿足AI與5G強勁需求，傳台積電將上調2026資本支出至歷史新高。"},
-    {"source": "FT", "title": "輝達擬向OpenAI注資300億美元", "link": "https://www.ft.com", "summary": "輝達深化AI生態系佈局，傳將參與OpenAI新一輪融資，金額達300億美元。"},
-    {"source": "Seeking Alpha", "title": "微軟擴大部署輝達GB300系統", "link": "https://seekingalpha.com", "summary": "超大規模雲端業者加速導入NVIDIA GB300 NVL72，AI基礎設施建設方興未艾。"},
-    {"source": "Wealth", "title": "台灣1月外銷訂單暴增69.9%創高", "link": "https://www.wealth.com.tw", "summary": "受惠AI需求噴發，1月外銷訂單達657.7億美元，寫下歷年單月新高紀錄。"},
-    {"source": "NDC", "title": "12月景氣亮紅燈 綜合分數38分", "link": "https://www.ndc.gov.tw", "summary": "國內景氣持續熱絡，對策信號轉為紅燈，顯示經濟活動強勁擴張。"},
-    {"source": "Whalesbook", "title": "地緣政治與Fed政策壓抑美股", "link": "https://www.whalesbook.com", "summary": "美伊緊張局勢升溫加上貨幣政策不確定性，美股主要指數承壓下挫。"},
-    {"source": "Nasdaq", "title": "市場聚焦2/25輝達財報", "link": "https://www.nasdaq.com", "summary": "投資人押注輝達財報將再創驚奇，新技術與中國市場回溫成關鍵。"},
-    {"source": "Digitimes", "title": "魏哲家：AI需求真實且持續", "link": "https://www.digitimes.com", "summary": "台積電董座確認AI需求未來幾年不變，相關營收佔比將達高兩位數。"},
-    {"source": "DGBAS", "title": "台灣1月CPI年增0.69% 通膨溫和", "link": "https://www.dgbas.gov.tw", "summary": "春節效應未引發物價大漲，1月CPI僅增0.69%，通膨壓力減輕。"},
-    {"source": "Reuters", "title": "2026風險：地緣政治與Fed繼任", "link": "https://www.reuters.com", "summary": "市場展望指出，地緣衝突與聯準會領導層更迭將是今年最大變數。"},
-    {"source": "CNBC", "title": "參議員關切輝達晶片銷中", "link": "https://www.cnbc.com", "summary": "美國參議員致函商務部，要求審查輝達H200晶片對中國出口狀況。"},
-    {"source": "CentralBank", "title": "M1B/M2年增率持穩", "link": "https://www.cbc.gov.tw", "summary": "12月M1B及M2年增率分別為4.85%及5.00%，資金動能維持適度。"},
-    {"source": "Market", "title": "美元指數攀升至97.8", "link": "https://tradingeconomics.com", "summary": "避險需求與鷹派預期推升美元指數DXY至97.80價位。"}
+    {"source": "U.S. Bank", "title": "評估通膨影響", "summary": "核心PCE在12月達到3.0%，高於預期，聯準會的目標是2%。"},
+    {"source": "Federal Reserve Board", "title": "聯準會貨幣政策", "summary": "12月PCE物價指數月增0.4%，高於預期，核心PCE年增3.0%，為2024年4月以來最高。"},
+    {"source": "U.S. Bank", "title": "聯準會降息預期", "summary": "聯準會預計2026年再降息一次，但市場預期可能會有兩到三次。"},
+    {"source": "NerdWallet", "title": "聯準會首選通膨指標", "summary": "核心PCE是聯準會首選的通膨衡量指標，目前仍高於2%的目標。"},
+    {"source": "Nasdaq", "title": "聯準會官員對利率路徑的看法", "summary": "聯準會官員暗示，如果通膨持續高於目標，可能需要升息。"},
+    {"source": "Nasdaq", "title": "地緣政治風險推高油價和金價", "summary": "伊朗局勢導致地緣政治風險升高，推動油價和金價上漲。"},
+    {"source": "Nasdaq", "title": "VIX指數上升", "summary": "VIX指數升至20.8，顯示市場不確定性增加。"},
+    {"source": "Financial Post", "title": "避險需求推動公債上漲", "summary": "地緣政治緊張局勢和對通膨前景的擔憂，促使公債因避險需求而上漲。"},
+    {"source": "Morningstar", "title": "美伊地緣政治風險推動油價上漲", "summary": "美國與伊朗之間的緊張關係使地緣政治風險溢價居高不下，推動油價上漲。"},
+    {"source": "Trading Economics", "title": "美國10年期公債殖利率因地緣政治風險下滑", "summary": "美國與伊朗之間不斷升級的緊張局勢引發避險需求，導致美國10年期公債殖利率下滑。"},
+    {"source": "Nasdaq", "title": "人工智慧投資的擔憂", "summary": "市場擔憂人工智慧可能顛覆整個經濟領域，且巨額投資可能無法獲得回報。"},
+    {"source": "The Motley Fool", "title": "台積電受惠於AI基礎設施建設", "summary": "台積電是人工智慧基礎設施建設的主要受益者，預計到2029年營收複合年增長率為25%。"},
+    {"source": "The Motley Fool", "title": "台積電股價表現強勁", "summary": "台積電股價在過去五年上漲了170%。"},
+    {"source": "Investing.com Canada", "title": "台灣上調2026年經濟增長預測", "summary": "受人工智慧需求推動，台灣將2026年經濟增長預測上調至7.7%。"},
+    {"source": "Investing.com Canada", "title": "科技股因AI支出擔憂而下跌", "summary": "由於對人工智慧支出的擔憂，大型科技股損失了數十億美元的市值。"}
 ]
 
 AI_ANALYSIS_TEXT = """
-<h3>1. 總體經濟與循環架構 (Atlas)</h3>
+<h3>1. 宏觀策略師 阿特拉斯 (Atlas - Macro Strategist)</h3>
 <p>
-    <strong>美國：成長降溫與政策分歧</strong><br>
-    美國 Q4 GDP 放緩至 1.4%，顯示高利率滯後效應顯現，但 1 月零售銷售年增 5.72% 顯示消費韌性仍強。最令人憂心的是 Fed 內部的分歧：會議紀錄顯示部分官員不排除「重啟升息」以對抗黏性通膨 (CPI 2.4%)，這與市場預期的降息路徑劇烈衝突，導致 DXY 攀升至 97.8。政策不確定性將是 Q1 最大逆風。
-</p>
-<p>
-    <strong>台灣：AI 驅動的紅燈榮景</strong><br>
-    台灣總經數據呈現「脫鉤式」暴衝。12 月景氣燈號亮出 38 分紅燈，1 月外銷訂單更以 +69.9% 的驚人年增率創歷史新高，證實 AI 實體需求已進入主升段。CPI 0.69% 的溫和通膨為央行提供了穩定的貨幣環境，台灣正處於「高成長、低通膨」的甜蜜點。
+    <strong>經濟循環與流動性分析：</strong><br>
+    近期數據顯示美國核心 PCE 意外彈升至 3.0%，高於聯準會的 2% 目標。這使得市場對降息的預期必須重新錨定。聯準會官員甚至暗示，若通膨居高不下可能需要考慮升息，這直接反映在美元指數 (DXY) 走強與流動性緊縮的擔憂上。10Y-3M 殖利率曲線倒掛現象仍需密切關注。相對而言，台灣受惠於 AI 出口帶動，外銷訂單年增高達 69.9%，景氣信號亮出 38 分紅燈，展現出極強的抗壓性。宏觀環境正處於「美放緩、台擴張」的分歧階段。
 </p>
 
-<h3>2. 基本面質量透視 (Sophia)</h3>
-<ul>
-    <li><strong>台積電的資本支出護城河：</strong> 傳出 2026 年資本支出上調至 560 億美元，這不僅是產能擴張，更是對競爭對手的「資本門檻」封殺。配合輝達擬注資 OpenAI 300 億美元的消息，AI 基礎設施的長期獲利能見度極高。</li>
-    <li><strong>供應鏈的雨露均霑：</strong> 外銷訂單的暴增並非單點突破，而是伺服器、散熱、封測的全面開花。重點關注 ROE 持續提升且 PEG < 1 的設備與耗材族群。</li>
-</ul>
+<h3>2. 基本面質量專家 索菲亞 (Sophia - Fundamental Quality Analyst)</h3>
+<p>
+    <strong>核心競爭力與估值評估：</strong><br>
+    AI 基礎設施需求依然是全球資本市場的增長引擎。台積電受惠於此，未來幾年營收複合年增長率上看 25%，其在先進製程的技術護城河確保了極高的毛利率與 ROE。儘管近期市場對 AI 巨額投資的回報產生疑慮，導致部分大型科技股市值受挫，但從 PEG 估值角度來看，具備實質獲利能力且處於供應鏈核心的台灣半導體企業，仍具備高度的內在價值與長線投資的安全邊際。
+</p>
 
-<h3>3. 技術與籌碼博弈 (Kenji & Crow)</h3>
-<ul>
-    <li><strong>美股的修正壓力：</strong> 地緣政治（伊朗）與 Fed 鷹派訊號使美股承壓，技術面需提防 M 頭成型。VIX 雖未失控但蠢蠢欲動，避險情緒推升美元。</li>
-    <li><strong>台股的籌碼優勢：</strong> 儘管融資餘額 3680 億仍高，但近期小幅下降顯示籌碼沈澱。加權指數在紅燈基本面支撐下，下檔支撐強勁。操作上需觀察外資在期貨市場的空單是否回補，作為短線多空轉折訊號。</li>
-</ul>
+<h3>3. 技術派專家 研二 (Kenji - Technical Chartist)</h3>
+<p>
+    <strong>趨勢判斷與型態分析：</strong><br>
+    從道氏理論觀察，美股受到地緣政治干擾與通膨數據影響，次級折返走勢變得劇烈。投資人需留意納斯達克指數是否出現頭部型態以及 KD、MACD 指標的潛在背離。台股加權指數則在基本面強勁支撐下，沿著短中期均線向上，但仍須防範乖離率 (BIAS) 過大的修正風險。前一個交易日K線若出現高檔十字線或長上影線，將是短線獲利了結的技術性警訊。
+</p>
 
-<h3>4. 投資策略建議 (Rain)</h3>
+<h3>4. 籌碼與心理哨兵 克羅 (Crow - Flow & Sentiment Sentinel)</h3>
+<p>
+    <strong>資金流向與市場情緒：</strong><br>
+    避險情緒正主導資金流向，VIX 指數攀升至 20.8 顯示市場恐慌與不確定性增加。美伊緊張局勢推升了金價與油價，同時促使資金湧入美國公債避險，壓低了 10 年期公債殖利率。在台灣市場方面，外資動向受國際避險情緒影響可能出現波動，但台灣內部資金充沛，M1B 與 M2 年增率維持穩定，需持續追蹤融資與融券餘額的變化，防範 AI 概念股過度擁擠的交易風險。
+</p>
+
+<h3>5. 總組合執行官 雷恩 (Rain - Portfolio Manager)</h3>
 <div class="strategy-card" style="background: #e8f5e9; padding: 15px; border-radius: 8px; border-left: 5px solid #2e7d32;">
-    <strong>核心策略：強弱分歧下的精準打擊</strong>
+    <strong>行動策略與情境推演：</strong>
     <ul>
-        <li><strong>做多台灣 AI 核心 (70%)：</strong> 數據（外銷訂單 +70%）不會說謊。堅定持有 <strong>台積電</strong> 及其高階製程供應鏈。任何受美股拖累的急殺都是絕佳買點。</li>
-        <li><strong>避險配置 (30%)：</strong> 面對 Fed 政策不確定性與地緣風險，保留 3 成現金或配置短債/美元部位。避免在財報前追高美股科技股，等待 2/25 輝達財報落地後的方向確認。</li>
-        <li><strong>關鍵事件：</strong> 2/25 輝達財報是全村的希望，若指引強勁，將帶動台股挑戰新高。</li>
+        <li><strong>基本情境 (Base Case)：</strong> 通膨黏性拉長聯準會觀望期，地緣風險帶來短期震盪，但 AI 長期趨勢不變。建議維持中性偏多，現金比重保留 20-30% 以應對波動。</li>
+        <li><strong>戰術配置：</strong> 聚焦台灣具備高 ROE 的半導體與 AI 供應鏈核心標的，逢技術面回檔且籌碼安定時分批佈局。同時可配置部分美國公債作為避險緩衝。</li>
+        <li><strong>風險控管：</strong> 嚴格設定停損點，若油價因中東衝突失控飆升，或通膨數據引發聯準會實質升息動作，應迅速降低股票部位，並增持避險資產。</li>
     </ul>
 </div>
 """
@@ -127,8 +128,7 @@ def generate_ai_analysis(text):
 
 # --- Main Execution ---
 def main():
-    # Target the specifically generated file
-    report_file = "report/invest_analysis_20260222.html"
+    report_file = "report/invest_analysis_20260223.html"
     
     if not os.path.exists(report_file):
         print(f"Error: {report_file} not found.")
