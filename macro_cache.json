@@ -66,7 +66,7 @@
         {
             "name": "美元指數 (DXY)",
             "value": "97.80",
-            "note": "2026-02-21",
+            "note": "2026-02-24",
             "trend": "up",
             "last_updated": "2026-02-24"
         },
@@ -75,8 +75,7 @@
             "value": "3.8%",
             "note": "2025 Q4 (成長率)",
             "trend": "up",
-            "last_updated": "2026-02-22",
-            "is_cache": false
+            "last_updated": "2026-02-24"
         }
     ],
     "TW_MACRO": [
@@ -89,8 +88,8 @@
         },
         {
             "name": "外銷訂單",
-            "value": "657.7億美元",
-            "note": "2026-01 (+69.9%)",
+            "value": "762.0億美元",
+            "note": "2025-12 (+43.8%)",
             "trend": "up",
             "last_updated": "2026-02-24"
         },
@@ -139,7 +138,7 @@
         {
             "name": "融資餘額",
             "value": "3680.47億",
-            "note": "截至 2/11",
+            "note": "截至 2/24",
             "trend": "down",
             "last_updated": "2026-02-24"
         },
@@ -153,18 +152,16 @@
         {
             "name": "融券餘額",
             "value": "24.8萬張",
-            "note": "-1771張 (2/11)",
+            "note": "截至 2/24",
             "trend": "down",
-            "last_updated": "2026-02-22",
-            "is_cache": false
+            "last_updated": "2026-02-24"
         },
         {
             "name": "製造業加班工時",
             "value": "17.6小時",
             "note": "2025-12",
             "trend": "up",
-            "last_updated": "2026-02-22",
-            "is_cache": true
+            "last_updated": "2026-02-24"
         }
     ]
 }

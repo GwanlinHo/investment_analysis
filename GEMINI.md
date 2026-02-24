@@ -5,6 +5,7 @@
 - **LANGUAGE**: All generated content must be in **Traditional Chinese**.
 - **Python Execution**: ALWAYS use `uv run` to execute Python scripts to ensure dependency isolation.
 - **Consistency Check**: Before final injection, verify that no market-active phrases (e.g., "observed today") are used if the market status is "Market Closed". Refer to the "Last Trading Day" instead.
+- **Tool Usage Standard**: 禁止猜測檔案內字串的位置（如使用 offset）。必須使用 `grep_search` 或 `run_shell_command` 的 `grep` 工具進行精確定位與內容讀取。
 
 ## Workflow: Investment Analysis
 
@@ -27,6 +28,7 @@
 - **Freshness**: All news must be published within the **LAST 7 DAYS**.
 - **Authenticity**: MANDATORY cross-verification of all major claims. If a story is only reported by a single non-wire source, it must be excluded. Compare at least two Tier-1 sources for critical news.
 - **Search Strategy**: Execute **3 distinct searches**: (1) Global Macro/Fed, (2) TW Stock/Tech/TSMC, (3) Geopolitical Risks/Earnings surprises.
+- **Dynamic Injection**: 嚴禁在腳本中硬編碼新聞內容。必須每次由 AI 搜尋後動態注入腳本或報告。
 - **Selection**: 15 items total. Maintain a **70% Global / 30% Taiwan** ratio.
 - **Format**: 
   - Line 1: **[Source] Title** (No links allowed).
@@ -34,54 +36,33 @@
 - **HTML Target**: `#weekly-news-focus` (Use `<ul><li>`, NO `<a>` tags or URLs in the final HTML).
 
 ### 3. AI Comprehensive Analysis (Persona-Driven Framework)
-AI must simulate a professional investment committee consisting of the following 5 roles. Each analysis section should reflect their specific expertise and debate.
+AI 必須根據當前真實數據動態生成分析，嚴禁使用包含硬編碼數據（如固定的 VIX 數值、通膨率、利差描述）的靜態模板。
 
 #### 1. 宏觀策略師 阿特拉斯 (Atlas - Macro Strategist)
-- **Background**: Ex-BIS/Fed economist. Focuses on liquidity and cycles.
 - **Responsibilities**:
-  - Assess economic cycle stage. Calculate **10Y-3M yield spread**.
-  - Monitor **M2 Money Supply** and central bank policy shifts.
-  - Audit indicator data to ensure they are **Official Historical Actuals**.
-  - Analyze US macro impact on Taiwan's economic expansion.
+  - **殖利率監測邏輯**：計算 3M, 10Y, 30Y 三者間的利差。
+  - **觸發規則**：僅當任意兩者利差 **< 0.25% (25bps)** 或出現 **倒掛 (利差 < 0)** 時，才在報告中提及殖利率曲線狀態（如趨平或倒掛）。
+  - **靜默規則**：若三者差距均 > 0.25%，則視為曲線陡峭且正常，**嚴禁提及**殖利率曲線，應將焦點轉向 DXY、M2 或 GDP 等指標。
+  - 審核所有指標必須為官方歷史實績。
 
-#### 2. 基本面質量專家 索菲亞 (Sophia - Fundamental Quality Analyst)
-- **Background**: Top-tier semiconductor analyst. Believes in "Quality Growth".
+#### 2. 基本面分析師 索菲亞 (Sophia - Fundamental Quality Analyst)
 - **Responsibilities**:
-  - Evaluate **ROE** and **Gross Margin** trends to identify pricing power.
-  - Analyze **PE/PB historical ranges** and **PEG Ratio**.
-  - Assess competitive moats (e.g., TSMC technical leadership).
-  - Calculate **Intrinsic Value** and **Risk Buffers**.
+  - 根據 `fundamental-data` 腳本標籤中的真實 ROE、毛利率與 PEG 進行評價。
 
-#### 3. 技術派專家 研二 (Kenji - Technical Chartist)
-- **Background**: Legendary prop trader with 30+ years of K-line experience.
+#### 3. 技術面分析師 研二 (Kenji - Technical Chartist)
 - **Responsibilities**:
-  - Apply **Dow Theory** to identify Primary Trends (60-day) & Secondary Reactions.
-  - Perform **Sakata Method** scans for 30-day patterns (e.g., Morning Star, Hammer).
-  - Detect **Indicator Divergence** (KD, MACD, RSI).
-  - Define precise Support/Resistance levels and **BIAS** (乖離率) thresholds.
+  - 檢測真實的 KD、MACD 背離情形與均線乖離率 (BIAS)。
 
-#### 4. 籌碼與心理哨兵 克羅 (Crow - Flow & Sentiment Sentinel)
-- **Background**: Former market maker. Focuses on capital flow and herd behavior.
+#### 4. 籌碼與散戶心理觀察家 克羅 (Crow - Flow & Sentiment Sentinel)
 - **Responsibilities**:
-  - Monitor **DXY** and Bond Yields impact on capital flows (TW outflows vs US Mega-caps).
-  - Analyze **Margin/Short Balance** structures (Retail vs Institutional flow).
-  - Quantify market sentiment using **VIX** and greed/fear proxies.
-  - Warn against "Crowded Trades" in specific sectors.
+  - 根據當前真實 **VIX 指數** 與融資券餘額數據量化市場情緒。
 
-#### 5. 總組合執行官 雷恩 (Rain - Portfolio Manager)
-- **Background**: Senior Hedge Fund Manager. Focuses on execution and risk-adjusted returns.
+#### 5. 綜合策略分析師 雷恩 (Rain - Portfolio Manager)
 - **Responsibilities**:
-  - Synthesize conflicting opinions from the other four analysts.
-  - Model **Bull/Base/Bear scenarios** with specific triggers.
-  - Define **Actionable Strategies** (hedging, entry points, cash levels).
-  - Audit the final report for linguistic consistency and compliance with mandates.
+  - 根據上述動態分析合成 Bull/Base/Bear 情境與行動策略。
 
 ### 4. Data Injection & Synchronization
-- **Injection**: Execute `uv run update_report.py` to inject the collected Macro Data, News Focus, and AI Analysis into the base HTML report generated in Step 0.
-- **Macro Tables Formatting**: 
-  - **Language**: Indicator names in Traditional Chinese.
-  - **Columns**: Name (Left), Value (Right), Date/Note (Right). No "Region" column.
-  - **Trends**: Use **▲/▼** arrows. Red for Up/Positive, Green for Down/Negative.
-  - **TW Margin Data**: Separate rows for Margin and Short. Show "Total Balance" in Value column and "Daily Change" in Date/Note column.
-- **Finalization**: Sync the updated dated HTML file to `index.html` and `report/index.html`.
-- **Cleanup**: Ensure no placeholder tags (e.g., `<div id="...-placeholder">`) remain visible in the final output.
+- **Injection**: Execute `uv run update_report.py`。該腳本必須從基礎 HTML 報告的 JSON 標籤中提取數據，進行動態文本合成後再注入。
+- **No Hardcoding**: 腳本內不得含有 `AI_ANALYSIS_TEXT` 的靜態變數或硬編碼的巨觀經濟數值。
+- **Cleanup**: 確保無佔位符殘留。
+- **Finalization**: 同步更新至 `index.html` 與 `report/index.html`。
