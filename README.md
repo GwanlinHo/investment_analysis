@@ -11,8 +11,8 @@ This is an investment assistance tool that combines **Python automation scripts*
 ## 更新紀錄 (Changelog)
 
 - **2026-02-25**: 
-  - 修正市場狀態判定邏輯：優化 `yf.download` 調用參數並改以週末判定休市，解決台股與美股誤報「休市中」的問題。
-  - 調整專案文檔：將 `GEMINI.md` 全面翻譯為英文，並將 `README.md` 的更新紀錄搬移至檔頭以提升可讀性。
+  - 修正市場狀態判定邏輯：改善 `yf.download` 呼叫參數並改以週末判定休市，解決台股與美股誤報「休市中」的問題。
+  - 調整專案文件：將 `GEMINI.md` 全面翻譯為英文，並將 `README.md` 的更新紀錄搬移至檔頭以提升可讀性。
 
 ---
 
