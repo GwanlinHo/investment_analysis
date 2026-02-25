@@ -56,12 +56,12 @@ except Exception as e:
     sys.exit(1)
 
 # --- 資料獲取 ---
-def get_stock_data(symbols, start_date, end_date):
+def get_stock_data(symbols, start_date):
     """抓取多支股票的資料"""
     data = {}
     for symbol in symbols:
         try:
-            df = yf.download(symbol, start=start_date, end=end_date, progress=False, auto_adjust=True)
+            df = yf.download(symbol, start=start_date, progress=False, auto_adjust=True)
             if df.empty or len(df) < 2:
                 print(f"[Warning] 警告：無法獲取 {symbol} 的有效資料，將跳過。")
                 continue
@@ -302,7 +302,7 @@ def generate_html_report(report_data, date_str, summary_html, yield_curve_plot_b
 
 def process_stock_group(group, start_date, utc_now):
     """處理單個股票群組"""
-    stock_data = get_stock_data(group["symbols"], start_date, utc_now)
+    stock_data = get_stock_data(group["symbols"], start_date)
     if not stock_data: return None
     
     # 獲取最後交易日 (取群組內第一個標的為準)
@@ -314,9 +314,12 @@ def process_stock_group(group, start_date, utc_now):
         last_dt = stock_data[first_symbol].index[-1]
         last_trading_date = last_dt.strftime('%Y-%m-%d')
         
-        # 判斷是否為休市 (簡單邏輯：若最後交易日早於 utc_now 的當天日期，且當天是週一至週五)
-        current_date = utc_now.astimezone(TZ).date()
-        if last_dt.date() < current_date and current_date.weekday() < 5:
+        # 判定休市邏輯優化：
+        # 1. 只要是週六或週日，判定為休市
+        # 2. 如果是週間，原則上判定為 Market Open (交易中/開盤前/收盤後)
+        # 3. 這樣可以避免因時差或數據延遲導致的「休市」紅字誤判
+        current_tw_time = utc_now.replace(tzinfo=pytz.utc).astimezone(TZ)
+        if current_tw_time.weekday() >= 5: # 5: Saturday, 6: Sunday
             is_closed = True
 
     group_res = {
