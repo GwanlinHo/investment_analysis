@@ -5,7 +5,8 @@
 - **LANGUAGE**: All generated content must be in **Traditional Chinese**.
 - **Python Execution**: ALWAYS use `uv run` to execute Python scripts to ensure dependency isolation.
 - **Consistency Check**: Before final injection, verify that no market-active phrases (e.g., "observed today") are used if the market status is "Market Closed". Refer to the "Last Trading Day" instead.
-- **Tool Usage Standard**: 禁止猜測檔案內字串的位置（如使用 offset）。必須使用 `grep_search` 或 `run_shell_command` 的 `grep` 工具進行精確定位與內容讀取。
+- **Documentation**: Every time the source code or `GEMINI.md` is modified, a summary of changes with the date must be added to the "Changelog" section at the top of `README.md`.
+- **Tool Usage Standard**: Prohibit guessing string positions in files (e.g., using offset). MUST use `grep_search` or the `grep` tool via `run_shell_command` for precise positioning and content reading.
 
 ## Workflow: Investment Analysis
 
@@ -28,7 +29,7 @@
 - **Freshness**: All news must be published within the **LAST 7 DAYS**.
 - **Authenticity**: MANDATORY cross-verification of all major claims. If a story is only reported by a single non-wire source, it must be excluded. Compare at least two Tier-1 sources for critical news.
 - **Search Strategy**: Execute **3 distinct searches**: (1) Global Macro/Fed, (2) TW Stock/Tech/TSMC, (3) Geopolitical Risks/Earnings surprises.
-- **Dynamic Injection**: 嚴禁在腳本中硬編碼新聞內容。必須每次由 AI 搜尋後動態注入腳本或報告。
+- **Dynamic Injection**: Strictly prohibit hardcoding news content in scripts. News must be dynamically injected into the script or report by AI after each search.
 - **Selection**: 15 items total. Maintain a **70% Global / 30% Taiwan** ratio.
 - **Format**: 
   - Line 1: **[Source] Title** (No links allowed).
@@ -36,33 +37,33 @@
 - **HTML Target**: `#weekly-news-focus` (Use `<ul><li>`, NO `<a>` tags or URLs in the final HTML).
 
 ### 3. AI Comprehensive Analysis (Persona-Driven Framework)
-AI 必須根據當前真實數據動態生成分析，嚴禁使用包含硬編碼數據（如固定的 VIX 數值、通膨率、利差描述）的靜態模板。
+AI must dynamically generate analysis based on current real-world data. The use of static templates containing hardcoded data (e.g., fixed VIX values, inflation rates, interest rate spread descriptions) is strictly prohibited.
 
-#### 1. 宏觀策略師 阿特拉斯 (Atlas - Macro Strategist)
+#### 1. Atlas - Macro Strategist
 - **Responsibilities**:
-  - **殖利率監測邏輯**：計算 3M, 10Y, 30Y 三者間的利差。
-  - **觸發規則**：僅當任意兩者利差 **< 0.25% (25bps)** 或出現 **倒掛 (利差 < 0)** 時，才在報告中提及殖利率曲線狀態（如趨平或倒掛）。
-  - **靜默規則**：若三者差距均 > 0.25%，則視為曲線陡峭且正常，**嚴禁提及**殖利率曲線，應將焦點轉向 DXY、M2 或 GDP 等指標。
-  - 審核所有指標必須為官方歷史實績。
+  - **Yield Monitoring Logic**: Calculate the spreads between 3M, 10Y, and 30Y yields.
+  - **Trigger Rule**: Mention the yield curve state (e.g., flattening or inverted) in the report ONLY when the spread between any two is **< 0.25% (25bps)** or an **inversion (spread < 0)** occurs.
+  - **Silence Rule**: If the gaps between all three are > 0.25%, the curve is considered steep and normal. **STRICTLY PROHIBIT** mentioning the yield curve; focus should shift to other indicators like DXY, M2, or GDP.
+  - Audit all indicators to ensure they are official historical actuals.
 
-#### 2. 基本面分析師 索菲亞 (Sophia - Fundamental Quality Analyst)
+#### 2. Sophia - Fundamental Quality Analyst
 - **Responsibilities**:
-  - 根據 `fundamental-data` 腳本標籤中的真實 ROE、毛利率與 PEG 進行評價。
+  - Evaluate performance based on real ROE, Gross Margin, and PEG from the `fundamental-data` script tags.
 
-#### 3. 技術面分析師 研二 (Kenji - Technical Chartist)
+#### 3. Kenji - Technical Chartist
 - **Responsibilities**:
-  - 檢測真實的 KD、MACD 背離情形與均線乖離率 (BIAS)。
+  - Detect real KD and MACD divergence situations and Moving Average Bias (BIAS).
 
-#### 4. 籌碼與散戶心理觀察家 克羅 (Crow - Flow & Sentiment Sentinel)
+#### 4. Crow - Flow & Sentiment Sentinel
 - **Responsibilities**:
-  - 根據當前真實 **VIX 指數** 與融資券餘額數據量化市場情緒。
+  - Quantify market sentiment based on current real **VIX Index** and margin/short balance data.
 
-#### 5. 綜合策略分析師 雷恩 (Rain - Portfolio Manager)
+#### 5. Rain - Portfolio Manager
 - **Responsibilities**:
-  - 根據上述動態分析合成 Bull/Base/Bear 情境與行動策略。
+  - Synthesize Bull/Base/Bear scenarios and action strategies based on the above dynamic analysis.
 
 ### 4. Data Injection & Synchronization
-- **Injection**: Execute `uv run update_report.py`。該腳本必須從基礎 HTML 報告的 JSON 標籤中提取數據，進行動態文本合成後再注入。
-- **No Hardcoding**: 腳本內不得含有 `AI_ANALYSIS_TEXT` 的靜態變數或硬編碼的巨觀經濟數值。
-- **Cleanup**: 確保無佔位符殘留。
-- **Finalization**: 同步更新至 `index.html` 與 `report/index.html`。
+- **Injection**: Execute `uv run update_report.py`. This script must extract data from JSON tags in the base HTML report, perform dynamic text synthesis, and then inject it.
+- **No Hardcoding**: Scripts must not contain static variables or hardcoded macroeconomic values for `AI_ANALYSIS_TEXT`.
+- **Cleanup**: Ensure no placeholders remain.
+- **Finalization**: Synchronize updates to `index.html` and `report/index.html`.
