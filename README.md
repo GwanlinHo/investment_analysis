@@ -10,6 +10,9 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 ## 更新紀錄 (Changelog)
 
+- **2026-02-27**: 
+  - 完成今日最新的市場資料抓取與技術指標計算。
+  - 透過 AI 動態生成 15 則焦點新聞與多維度深度分析，並成功注入至最新投資報告中。
 - **2026-02-26**: 
   - **架構重構 (Data Refactor)**：實現數據與展示層分離。`investment_analysis.py` 現在將原始數據提取至獨立的 `technical_data.json`，不再直接嵌入 HTML，顯著提升報告加載速度與數據解耦度。
   - 更新 `update_report.py` 邏輯，優先從 JSON 讀取分析所需數據。
