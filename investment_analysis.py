@@ -153,6 +153,22 @@ def calculate_all_indicators(df):
     
     return df
 
+def save_to_json(fundamental_data, yield_data, market_data, summary_items, filename="technical_data.json"):
+    """將收集到的資料儲存至 JSON 檔案"""
+    data = {
+        "fundamental": fundamental_data,
+        "yield": yield_data,
+        "market": market_data,
+        "summary": summary_items,
+        "last_updated": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+    try:
+        with open(filename, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        print(f"[Success] 資料已成功儲存至 {filename}")
+    except Exception as e:
+        print(f"[Error] 儲存 JSON 資料時發生錯誤: {e}")
+
 # --- HTML 樣式與輔助函式 ---
 
 def determine_trend(k, d, bias_signal_val):
@@ -270,18 +286,18 @@ def create_yield_curve_plot_base64():
     except Exception as e:
         print(f"[Error] 產生殖利率圖表時發生錯誤: {e}"); return None, {}
 
-def generate_html_report(report_data, date_str, summary_html, yield_curve_plot_b64=None, fundamental_data=None, yield_data=None, market_data=None):
+def generate_html_report(report_data, date_str, summary_html, yield_curve_plot_b64=None, fundamental_data=None, yield_data=None, market_data=None, summary_items=None):
     """使用 Jinja2 生成 HTML 報告"""
-    fundamental_json = json.dumps(fundamental_data, ensure_ascii=False, indent=2) if fundamental_data else "{}"
-    yield_json = json.dumps(yield_data, ensure_ascii=False, indent=2) if yield_data else "{}"
-    market_json = json.dumps(market_data, ensure_ascii=False, indent=0) if market_data else "{}"
+    # 僅保留基本框架資料於 HTML，將詳細數據存入 JSON
+    save_to_json(fundamental_data, yield_data, market_data, summary_items)
+    
     env = Environment(loader=FileSystemLoader(TEMPLATE_DIR))
     try:
         template = env.get_template(TEMPLATE_FILE)
         render_vars = {
             "date_str": date_str, "summary_html": summary_html, "report_data": report_data,
-            "kd_window": KD_WINDOW, "bias_periods": BIAS_PERIODS, "fundamental_json": fundamental_json,
-            "yield_json": yield_json, "market_json": market_json, "yield_curve_plot_b64": yield_curve_plot_b64, "yield_data": yield_data
+            "kd_window": KD_WINDOW, "bias_periods": BIAS_PERIODS,
+            "yield_curve_plot_b64": yield_curve_plot_b64, "yield_data": yield_data
         }
         html_output = template.render(**render_vars)
         filename = f"report/invest_analysis_{date_str.replace('-', '')}.html"
@@ -376,7 +392,9 @@ def main():
             icon = "▲" if item['change'] > 0 else "▼" if item['change'] < 0 else "-"
             summary_html += f'<div class="summary-card"><div class="summary-title">{item["symbol"]}</div><div class="summary-price">{item["close"]:.2f}</div><div class="summary-change {cls}">{icon} {item["change"]:.2f}%</div></div>'
     yield_plot, yield_data = create_yield_curve_plot_base64()
-    if all_report_data: generate_html_report(all_report_data, current_date_str, summary_html, yield_plot, all_fundamental_data, yield_data, all_market_data)
+    if all_report_data: 
+        generate_html_report(all_report_data, current_date_str, summary_html, yield_plot, 
+                             all_fundamental_data, yield_data, all_market_data, all_summary_items)
     else: print("[Error] 沒有任何資料可生成報告。")
 
 if __name__ == "__main__":
