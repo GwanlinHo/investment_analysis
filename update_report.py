@@ -35,6 +35,16 @@ def extract_data_from_html(html_content):
             except: data[key] = {}
     return data
 
+def load_from_json(filename="technical_data.json"):
+    """從 JSON 檔案載入分析所需數據"""
+    if os.path.exists(filename):
+        try:
+            with open(filename, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"[Warning] 讀取 {filename} 失敗: {e}")
+    return None
+
 def generate_dynamic_ai_analysis(market_info, macro_data):
     yields = market_info.get("yield", {})
     y3m, y10y, y30y = yields.get("3M"), yields.get("10Y"), yields.get("30Y")
@@ -92,8 +102,15 @@ def generate_macro_table(data, region_id):
 def main():
     report_file = get_latest_report_file()
     if not report_file: return
+    
+    # 優先從 JSON 讀取
+    market_info = load_from_json()
+    if not market_info:
+        # 如果 JSON 不存在, 才從 HTML 抓 (保持向下相容)
+        with open(report_file, "r", encoding="utf-8") as f: content = f.read()
+        market_info = extract_data_from_html(content)
+    
     with open(report_file, "r", encoding="utf-8") as f: content = f.read()
-    market_info = extract_data_from_html(content)
     macro_cache = load_cache()
     
     content = content.replace('<div id="us-macro-placeholder"></div>', generate_macro_table(macro_cache.get("US_MACRO", []), "us-macro-table"))

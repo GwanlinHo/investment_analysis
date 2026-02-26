@@ -6,17 +6,11 @@
     <title>綜合投資分析報告 | {{ date_str }}</title>
     <!-- 
     HIDDEN DATA FOR AI ANALYSIS
-    AI Agents should read these blocks to perform analysis.
+    AI Agents should read technical_data.json instead.
     -->
-    <script id="fundamental-data" type="application/json">
-    {{ fundamental_json | safe }}
-    </script>
-    <script id="yield-data" type="application/json">
-    {{ yield_json | safe }}
-    </script>
-    <script id="market-data" type="application/json">
-    {{ market_json | safe }}
-    </script>
+    <script id="fundamental-data" type="application/json">{}</script>
+    <script id="yield-data" type="application/json">{}</script>
+    <script id="market-data" type="application/json">{}</script>
     <style>
         :root {
             --bg-color: #f4f6f8;
