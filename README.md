@@ -12,6 +12,8 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 - **2026-02-27**:
   - **規範更新**: 於 `GEMINI.md` 中明確化 `README.md` 的更新觸發條件，僅限修改 Source Code 或 `GEMINI.md` 本身時才執行變更紀錄。
+- **2026-02-26**:
+  - 使用 `technical_data.json` 存放技術分析數據，不再直接寫入報告中，減輕AI再次分析報告時的負擔。
 - **2026-02-25**: 
   - 修正市場狀態判定邏輯：改善 `yf.download` 呼叫參數並改以週末判定休市，解決台股與美股誤報「休市中」的問題。
   - 調整專案文件：將 `GEMINI.md` 全面翻譯為英文，並將 `README.md` 的更新紀錄搬移至檔頭以提升可讀性。
