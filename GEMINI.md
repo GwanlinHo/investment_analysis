@@ -5,7 +5,7 @@
 - **LANGUAGE**: All generated content must be in **Traditional Chinese**.
 - **Python Execution**: ALWAYS use `uv run` to execute Python scripts to ensure dependency isolation.
 - **Consistency Check**: Before final injection, verify that no market-active phrases (e.g., "observed today") are used if the market status is "Market Closed". Refer to the "Last Trading Day" instead.
-- **Documentation**: Every time the source code or `GEMINI.md` is modified, a summary of changes with the date must be added to the "Changelog" section at the top of `README.md`.
+- **Documentation**: 只有在修改原始碼 (Source Code) 或 `GEMINI.md` 本身時，才必須在 `README.md` 頂部的「更新紀錄 (Changelog)」區段新增變更摘要與日期。
 - **Tool Usage Standard**: Prohibit guessing string positions in files (e.g., using offset). MUST use `grep_search` or the `grep` tool via `run_shell_command` for precise positioning and content reading.
 
 ## Workflow: Investment Analysis

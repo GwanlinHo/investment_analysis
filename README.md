@@ -10,14 +10,8 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 ## 更新紀錄 (Changelog)
 
-- **2026-02-27**: 
-  - 完成今日最新的市場資料抓取與技術指標計算。
-  - 透過 AI 動態生成 15 則焦點新聞與多維度深度分析，並成功注入至最新投資報告中。
-- **2026-02-26**: 
-  - **架構重構 (Data Refactor)**：實現數據與展示層分離。`investment_analysis.py` 現在將原始數據提取至獨立的 `technical_data.json`，不再直接嵌入 HTML，顯著提升報告加載速度與數據解耦度。
-  - 更新 `update_report.py` 邏輯，優先從 JSON 讀取分析所需數據。
-  - 更新 `macro_cache.json` 以納入最新的美國與台灣官方總經數據。
-  - 透過 AI 代理人動態生成並寫入 `news.html` 與 `ai.html`，完成最新的綜合投資分析報告。
+- **2026-02-27**:
+  - **規範更新**: 於 `GEMINI.md` 中明確化 `README.md` 的更新觸發條件，僅限修改 Source Code 或 `GEMINI.md` 本身時才執行變更紀錄。
 - **2026-02-25**: 
   - 修正市場狀態判定邏輯：改善 `yf.download` 呼叫參數並改以週末判定休市，解決台股與美股誤報「休市中」的問題。
   - 調整專案文件：將 `GEMINI.md` 全面翻譯為英文，並將 `README.md` 的更新紀錄搬移至檔頭以提升可讀性。
