@@ -147,7 +147,6 @@ cython_debug/
 technical_data.json
 news.html
 ai.html
-report/invest_analysis_*.html
 *.log
 macro_cache.json
 # --- End Specifics ---
