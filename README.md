@@ -10,6 +10,11 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 ## 更新紀錄 (Changelog)
 
+- **2026-03-01**:
+  - **規範更新 (GEMINI.md)**: 全面將 `GEMINI.md` 翻譯為英文以確保指令精確性。
+  - **功能增強**: 擴充新聞收集至 20 則，並納入 BBC 與 CNN 作為權威來源。
+  - **預警邏輯**: 強化 Atlas (宏觀策略師) 角色，新增「地緣政治預警協定 (Geopolitical Warning Protocol)」，針對中東局勢、能源供應與全球航運進行前瞻性二階影響推演。
+  - **注入流程優化**: 升級 `update_report.py` 的強健性檢查機制。新增 `news.html` 與 `ai.html` 的**時效性 (5分鐘內) 與內容檢查**，防止將過期或空白數據注入正式報告中。
 - **2026-02-27**:
   - **規範更新**: 於 `GEMINI.md` 中明確化 `README.md` 的更新觸發條件，僅限修改 Source Code 或 `GEMINI.md` 本身時才執行變更紀錄。
 - **2026-02-26**:
