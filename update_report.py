@@ -101,8 +101,29 @@ def generate_macro_table(data, region_id):
 
 def main():
     report_file = get_latest_report_file()
-    if not report_file: return
+    if not report_file: 
+        print("[Error] No report file found in report/ directory.")
+        return
     
+    # --- Robustness Checks for Intermediate Files ---
+    now = datetime.datetime.now().timestamp()
+    for filename in ["news.html", "ai.html"]:
+        if not os.path.exists(filename):
+            print(f"[Error] Required file '{filename}' is missing.")
+            return
+        
+        # Check if file is empty
+        if os.path.getsize(filename) < 10:
+            print(f"[Error] File '{filename}' is empty or too small.")
+            return
+            
+        # Check file recency (must be updated within the last 5 minutes)
+        mtime = os.path.getmtime(filename)
+        if (now - mtime) > 300: # 300 seconds = 5 minutes
+            print(f"[Error] File '{filename}' is stale (last updated {(now - mtime)/60:.1f} minutes ago).")
+            print("[Action] Please update 'news.html' and 'ai.html' with fresh AI content before running this script.")
+            return
+
     # 優先從 JSON 讀取
     market_info = load_from_json()
     if not market_info:
