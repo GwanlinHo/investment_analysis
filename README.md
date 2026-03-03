@@ -10,6 +10,11 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 ## 更新紀錄 (Changelog)
 
+- **2026-03-03**:
+  - **CSS 樣式修正**: 修復 `update_report.py` 在注入內容時會誤刪外層 `div` ID 容器的問題，確保 `#weekly-news-focus` 與 `#ai-analysis-report` 的背景樣式能正確顯示。
+  - **邏輯優化**: 使用 `re.sub` 配合 lambda 函數進行安全注入，保留 HTML 結構完整性。
+  - **流程驗證**: 建立 `fix/ai-report-styling-injection` 分支進行端到端測試，確認從數據抓取到 AI 注入的完整流程運作正常。
+
 - **2026-03-01**:
   - **規範更新 (GEMINI.md)**: 全面將 `GEMINI.md` 翻譯為英文以確保指令精確性。
   - **功能增強**: 擴充新聞收集至 20 則，並納入 BBC 與 CNN 作為權威來源。
