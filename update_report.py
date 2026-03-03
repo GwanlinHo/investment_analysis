@@ -138,14 +138,18 @@ def main():
     content = content.replace('<div id="tw-macro-placeholder"></div>', generate_macro_table(macro_cache.get("TW_MACRO", []), "tw-macro-table"))
     
     with open("ai.html", "r", encoding="utf-8") as f: ai_report_container = f.read()
-    if '<div id="ai-analysis-report">' in content:
-        content = re.sub(r'<div id="ai-analysis-report">.*?</div>', ai_report_container, content, flags=re.DOTALL)
-    else: content = content.replace('<div id="ai-analysis-report"></div>', ai_report_container)
+    ai_id = 'ai-analysis-report'
+    pattern_ai = rf'(<div id="{ai_id}">)(.*?)(</div>)'
+    if f'<div id="{ai_id}">' in content:
+        content = re.sub(pattern_ai, lambda m: m.group(1) + "\n" + ai_report_container + "\n" + m.group(3), content, flags=re.DOTALL)
+    else: content = content.replace(f'<div id="{ai_id}"></div>', f'<div id="{ai_id}">\n{ai_report_container}\n</div>')
 
     with open("news.html", "r", encoding="utf-8") as f: news_container = f.read()
-    if '<div id="weekly-news-focus">' in content:
-        content = re.sub(r'<div id="weekly-news-focus">.*?</div>', news_container, content, flags=re.DOTALL)
-    else: content = content.replace('<div id="weekly-news-focus"></div>', news_container)
+    news_id = 'weekly-news-focus'
+    pattern_news = rf'(<div id="{news_id}">)(.*?)(</div>)'
+    if f'<div id="{news_id}">' in content:
+        content = re.sub(pattern_news, lambda m: m.group(1) + "\n" + news_container + "\n" + m.group(3), content, flags=re.DOTALL)
+    else: content = content.replace(f'<div id="{news_id}"></div>', f'<div id="{news_id}">\n{news_container}\n</div>')
 
     with open(report_file, "w", encoding="utf-8") as f: f.write(content)
     import shutil
