@@ -11,7 +11,7 @@ This is an investment assistance tool that combines **Python automation scripts*
 ## 更新紀錄 (Changelog)
 
 - **2026-03-06**:
-  - **黃金價格改為追蹤GC=F**: 原本追蹤 '^XAU' ，後來發現這是礦業股價，所以改為追蹤黃金期貨價格 'GC=F'。 
+  - **黃金價格改為追蹤GC=F**: 原本追蹤 `^XAU` ，後來發現這是礦業股價，所以改為追蹤黃金期貨價格 `GC=F`，這樣比較能夠觀察到風險趨避。 
 - **2026-03-03**:
   - **CSS 樣式修正**: 修復 `update_report.py` 在注入內容時會誤刪外層 `div` ID 容器的問題，確保 `#weekly-news-focus` 與 `#ai-analysis-report` 的背景樣式能正確顯示。
   - **邏輯優化**: 使用 `re.sub` 配合 lambda 函數進行安全注入，保留 HTML 結構完整性。
