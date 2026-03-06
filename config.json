@@ -2,7 +2,7 @@
     "stock_groups": [
         {
             "title": "美股主要指數",
-            "symbols": ["^VIX", "^GSPC", "^SOX", "^IXIC", "^DJI", "^NYFANG", "^RUT", "^N225", "^XAU"],
+            "symbols": ["^VIX", "^GSPC", "^SOX", "^IXIC", "^DJI", "^NYFANG", "^RUT", "^N225", "GC=F"],
             "description": ""
         },
         {
@@ -54,7 +54,7 @@
         "^NYFANG": "尖牙指數",
         "^RUT": "羅素2000",
         "^N225": "日經 225",
-        "^XAU": "黃金現貨",
+        "GC=F": "黃金期貨",
         "00770.TW": "國泰北美科技",
         "00924.TW": "復華S&P500",
         "00757.TW": "統一FANG+",
