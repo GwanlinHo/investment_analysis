@@ -137,19 +137,47 @@ def main():
     content = content.replace('<div id="us-macro-placeholder"></div>', generate_macro_table(macro_cache.get("US_MACRO", []), "us-macro-table"))
     content = content.replace('<div id="tw-macro-placeholder"></div>', generate_macro_table(macro_cache.get("TW_MACRO", []), "tw-macro-table"))
     
-    with open("ai.html", "r", encoding="utf-8") as f: ai_report_container = f.read()
-    ai_id = 'ai-analysis-report'
-    pattern_ai = rf'(<div id="{ai_id}">)(.*?)(</div>)'
-    if f'<div id="{ai_id}">' in content:
-        content = re.sub(pattern_ai, lambda m: m.group(1) + "\n" + ai_report_container + "\n" + m.group(3), content, flags=re.DOTALL)
-    else: content = content.replace(f'<div id="{ai_id}"></div>', f'<div id="{ai_id}">\n{ai_report_container}\n</div>')
-
-    with open("news.html", "r", encoding="utf-8") as f: news_container = f.read()
+    # --- Inject AI News ---
+    with open("news.html", "r", encoding="utf-8") as f: news_content = f.read().strip()
     news_id = 'weekly-news-focus'
-    pattern_news = rf'(<div id="{news_id}">)(.*?)(</div>)'
-    if f'<div id="{news_id}">' in content:
-        content = re.sub(pattern_news, lambda m: m.group(1) + "\n" + news_container + "\n" + m.group(3), content, flags=re.DOTALL)
-    else: content = content.replace(f'<div id="{news_id}"></div>', f'<div id="{news_id}">\n{news_container}\n</div>')
+    
+    # 移除 news_content 中重複的 id 屬性，避免多層卡片樣式疊加
+    news_content = news_content.replace(f'id="{news_id}"', '')
+    
+    # 僅當內容被外層容器包裹時才移除 (向下相容)
+    if f'<div >' in news_content: # 如果 id 已經被移除了，這裡會變成 <div >
+        news_content = re.sub(r'^<div >', '', news_content)
+        news_content = re.sub(r'</div>$', '', news_content).strip()
+    
+    # 使用更穩健的替換邏輯：匹配整個 div 容器並重新生成
+    if f'id="{news_id}"' in content:
+        # 匹配 <div id="weekly-news-focus">...</div> 其中內容可能包含 nested divs
+        # 這裡採用非貪婪匹配到下一個可能的同級區塊起始點或 footer 前的最後一個 </div>
+        pattern_news = rf'(<div id="{news_id}">).*?(?=\s*<div id="ai-analysis-report"|\s*<footer)'
+        if re.search(pattern_news, content, re.DOTALL):
+            # 確保最後補回原本容器的閉合標籤
+            content = re.sub(pattern_news, f'\\1\n{news_content}\n</div>', content, flags=re.DOTALL)
+        else:
+            # 如果是空標籤 <div id="..."></div>
+            content = content.replace(f'<div id="{news_id}"></div>', f'<div id="{news_id}">\n{news_content}\n</div>')
+
+    # --- Inject AI Analysis ---
+    with open("ai.html", "r", encoding="utf-8") as f: ai_content = f.read().strip()
+    ai_id = 'ai-analysis-report'
+    
+    # 僅當內容被外層容器包裹時才移除
+    if f'<div id="{ai_id}"' in ai_content:
+        ai_content = re.sub(rf'^<div id="{ai_id}">', '', ai_content)
+        ai_content = re.sub(r'</div>$', '', ai_content).strip()
+    
+    if f'id="{ai_id}"' in content:
+        # 匹配到 footer 前
+        pattern_ai = rf'(<div id="{ai_id}">).*?(?=\s*<footer)'
+        if re.search(pattern_ai, content, re.DOTALL):
+            # 確保最後補回原本容器的閉合標籤
+            content = re.sub(pattern_ai, f'\\1\n{ai_content}\n</div>', content, flags=re.DOTALL)
+        else:
+            content = content.replace(f'<div id="{ai_id}"></div>', f'<div id="{ai_id}">\n{ai_content}\n</div>')
 
     with open(report_file, "w", encoding="utf-8") as f: f.write(content)
     import shutil

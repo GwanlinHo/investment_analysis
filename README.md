@@ -10,6 +10,9 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 ## 更新紀錄 (Changelog)
 
+- **2026-03-07**:
+  - **新聞卡片巢狀顯示修復**: 修改 `update_report.py` 注入新聞的邏輯。藉由自動移除 `news.html` 中可能重複的 `id="weekly-news-focus"` 屬性，解決報告中因重複套用 CSS 而導致「卡片包著卡片」的多層錯覺問題。
+
 - **2026-03-06**:
   - **黃金價格改為追蹤GC=F**: 原本追蹤 `^XAU` ，後來發現這是礦業股價，所以改為追蹤黃金期貨價格 `GC=F`，這樣比較能夠觀察到風險趨避。 
 - **2026-03-03**:
