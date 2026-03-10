@@ -296,7 +296,9 @@
                     // Taiwan Chinese Voice Selection
                     let voice = null;
                     if (isIOS) {
-                        voice = voices.find(v => v.lang.includes('zh-TW') && (v.name.includes('Mei-Jia') || v.name.includes('Ting-Ting')));
+                        // Priority: Siri -> Mei-Jia -> Ting-Ting
+                        voice = voices.find(v => v.lang.includes('zh-TW') && v.name.includes('Siri')) || 
+                                voices.find(v => v.lang.includes('zh-TW') && (v.name.includes('Mei-Jia') || v.name.includes('Ting-Ting')));
                     } else if (isAndroid) {
                         voice = voices.find(v => v.lang.includes('zh-TW') && v.name.includes('Google'));
                     }
