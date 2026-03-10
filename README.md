@@ -10,6 +10,10 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 ## 更新紀錄 (Changelog)
 
+- **2026-03-10**:
+  - **新增語音朗讀功能**: 為「週報焦點」與「AI 深度分析」區塊加入 Web Speech API 語音朗讀功能，並針對 iOS 與 Android 平台優化台灣腔調 (zh-TW) 及預設英文字音選取。
+  - **模板結構優化**: 更新 `templates/report_template.html` 並強化 `update_report.py` 的注入邏輯，使用 HTML 註釋錨點 (`anchor`) 確保動態注入內容時不會破壞 TTS 控制按鈕與佈局。
+
 - **2026-03-07**:
   - **新聞卡片巢狀顯示修復**: 修改 `update_report.py` 注入新聞的邏輯。藉由自動移除 `news.html` 中可能重複的 `id="weekly-news-focus"` 屬性，解決報告中因重複套用 CSS 而導致「卡片包著卡片」的多層錯覺問題。
 

@@ -89,12 +89,19 @@
         img { max-width: 100%; height: auto; }
 
         /* AI Content Sections */
-        #weekly-news-focus, #ai-analysis-report { margin-top: 40px; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); overflow: hidden; }
-        #weekly-news-focus h2, #ai-analysis-report h2 { color: var(--accent-color); border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 25px; font-size: 24px; font-weight: 700; }
+        .ai-section-container { margin-top: 40px; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); overflow: hidden; }
+        .ai-section-container h2 { color: var(--accent-color); border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 25px; font-size: 24px; font-weight: 700; margin-top: 0; }
+        
+        .tts-controls { display: flex; align-items: center; gap: 10px; }
+        .tts-btn { background: #f0f2f5; border: 1px solid #ddd; border-radius: 20px; padding: 5px 15px; font-size: 14px; font-weight: 600; color: #555; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
+        .tts-btn:hover { background: #e4e6e9; border-color: #ccc; }
+        .tts-btn.playing { background: #e8f5e9; color: #2e7d32; border-color: #c8e6c9; }
+        .tts-btn svg { width: 16px; height: 16px; fill: currentColor; }
         
         @media (max-width: 768px) {
             .charts-grid { grid-template-columns: 1fr; }
             .summary-bar { grid-template-columns: repeat(2, 1fr); }
+            .ai-section-container { padding: 20px; }
         }
     </style>
 </head>
@@ -202,8 +209,31 @@
         </div>
         {% endif %}
 
-        <div id="weekly-news-focus"></div>
-        <div id="ai-analysis-report"></div>
+        <div class="ai-section-container card">
+            <div class="group-header">
+                <h2 class="group-title">週報焦點 (Weekly News Focus)</h2>
+                <div class="tts-controls">
+                    <button id="btn-tts-news" class="tts-btn" onclick="toggleTTS('weekly-news-focus', 'btn-tts-news')">
+                        <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                        <span>朗讀新聞</span>
+                    </button>
+                </div>
+            </div>
+            <div id="weekly-news-focus"></div><!-- news-anchor -->
+        </div>
+
+        <div class="ai-section-container card">
+            <div class="group-header">
+                <h2 class="group-title">AI 深度分析 (AI Comprehensive Analysis)</h2>
+                <div class="tts-controls">
+                    <button id="btn-tts-ai" class="tts-btn" onclick="toggleTTS('ai-analysis-report', 'btn-tts-ai')">
+                        <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                        <span>朗讀分析</span>
+                    </button>
+                </div>
+            </div>
+            <div id="ai-analysis-report"></div><!-- ai-anchor -->
+        </div>
 
         <footer style="text-align: center; margin-top: 50px; padding: 20px; color: #777; font-size: 12px; border-top: 1px solid #eee;">
             <p>[Warning] 免責聲明：本報告僅供研究參考，不構成任何投資建議。內容由 AI 自動收集與整理，可能包含錯誤或過時資訊，建議投資人與官方數據或其他來源交叉驗證。</p>
@@ -211,5 +241,109 @@
         </footer>
         <a href="#top" class="back-to-top" title="回到頁首">↑</a>
     </div>
+
+    <script>
+        // Web Speech API Controller
+        const synth = window.speechSynthesis;
+        let currentUtterance = null;
+        let activeBtnId = null;
+
+        function toggleTTS(elementId, btnId) {
+            if (synth.speaking && activeBtnId === btnId) {
+                stopTTS();
+                return;
+            }
+            
+            if (synth.speaking) {
+                stopTTS();
+            }
+
+            const element = document.getElementById(elementId);
+            if (!element) return;
+
+            // Extract text and clean it
+            const text = element.innerText || element.textContent;
+            const cleanedText = text.replace(/\s+/g, ' ').trim();
+            
+            if (!cleanedText) return;
+
+            activeBtnId = btnId;
+            const btn = document.getElementById(btnId);
+            if (btn) btn.classList.add('playing');
+
+            // Split text into chunks to prevent Web Speech API issues with long text
+            const chunks = cleanedText.match(/[^。！？；]+[。！？；]?/g) || [cleanedText];
+            let currentChunk = 0;
+
+            function speakChunk() {
+                if (currentChunk >= chunks.length || !activeBtnId) {
+                    stopTTS();
+                    return;
+                }
+
+                const utterance = new SpeechSynthesisUtterance(chunks[currentChunk]);
+                currentUtterance = utterance;
+
+                // Detect platform and set voice
+                const voices = synth.getVoices();
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                const isAndroid = /Android/.test(navigator.userAgent);
+                
+                // Content detection for language
+                const hasChinese = /[\u4E00-\u9FFF]/.test(chunks[currentChunk]);
+                
+                if (hasChinese) {
+                    // Taiwan Chinese Voice Selection
+                    let voice = null;
+                    if (isIOS) {
+                        voice = voices.find(v => v.lang.includes('zh-TW') && (v.name.includes('Mei-Jia') || v.name.includes('Ting-Ting')));
+                    } else if (isAndroid) {
+                        voice = voices.find(v => v.lang.includes('zh-TW') && v.name.includes('Google'));
+                    }
+                    if (!voice) {
+                        voice = voices.find(v => v.lang.includes('zh-TW')) || voices.find(v => v.lang.includes('zh'));
+                    }
+                    if (voice) utterance.voice = voice;
+                    utterance.lang = 'zh-TW';
+                } else {
+                    // English default
+                    utterance.lang = 'en-US';
+                }
+
+                utterance.onend = () => {
+                    currentChunk++;
+                    speakChunk();
+                };
+
+                utterance.onerror = () => {
+                    stopTTS();
+                };
+
+                synth.speak(utterance);
+            }
+
+            speakChunk();
+        }
+
+        function stopTTS() {
+            synth.cancel();
+            if (activeBtnId) {
+                const btn = document.getElementById(activeBtnId);
+                if (btn) btn.classList.remove('playing');
+            }
+            activeBtnId = null;
+            currentUtterance = null;
+        }
+
+        // Handle page visibility change
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) stopTTS();
+        });
+
+        // Initialize voices
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = () => synth.getVoices();
+        }
+    </script>
 </body>
 </html>

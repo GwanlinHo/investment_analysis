@@ -149,16 +149,14 @@ def main():
         news_content = re.sub(r'^<div >', '', news_content)
         news_content = re.sub(r'</div>$', '', news_content).strip()
     
-    # 使用更穩健的替換邏輯：匹配整個 div 容器並重新生成
+    # 使用更穩健的替換邏輯：匹配 div 並利用 anchor 標籤定位
     if f'id="{news_id}"' in content:
-        # 匹配 <div id="weekly-news-focus">...</div> 其中內容可能包含 nested divs
-        # 這裡採用非貪婪匹配到下一個可能的同級區塊起始點或 footer 前的最後一個 </div>
-        pattern_news = rf'(<div id="{news_id}">).*?(?=\s*<div id="ai-analysis-report"|\s*<footer)'
+        # 使用錨點 <!-- news-anchor --> 作為精準匹配終點
+        pattern_news = rf'(<div id="{news_id}">).*?(?=<!-- news-anchor -->)'
         if re.search(pattern_news, content, re.DOTALL):
-            # 確保最後補回原本容器的閉合標籤
             content = re.sub(pattern_news, f'\\1\n{news_content}\n</div>', content, flags=re.DOTALL)
         else:
-            # 如果是空標籤 <div id="..."></div>
+            # 如果是初次生成的空標籤
             content = content.replace(f'<div id="{news_id}"></div>', f'<div id="{news_id}">\n{news_content}\n</div>')
 
     # --- Inject AI Analysis ---
@@ -171,10 +169,9 @@ def main():
         ai_content = re.sub(r'</div>$', '', ai_content).strip()
     
     if f'id="{ai_id}"' in content:
-        # 匹配到 footer 前
-        pattern_ai = rf'(<div id="{ai_id}">).*?(?=\s*<footer)'
+        # 使用錨點 <!-- ai-anchor --> 作為精準匹配終點
+        pattern_ai = rf'(<div id="{ai_id}">).*?(?=<!-- ai-anchor -->)'
         if re.search(pattern_ai, content, re.DOTALL):
-            # 確保最後補回原本容器的閉合標籤
             content = re.sub(pattern_ai, f'\\1\n{ai_content}\n</div>', content, flags=re.DOTALL)
         else:
             content = content.replace(f'<div id="{ai_id}"></div>', f'<div id="{ai_id}">\n{ai_content}\n</div>')
