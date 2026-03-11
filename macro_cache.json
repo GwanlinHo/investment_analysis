@@ -10,9 +10,9 @@
         {
             "name": "消費者物價指數 (CPI)",
             "value": "2.4%",
-            "note": "2026-01 (YoY)",
-            "trend": "down",
-            "last_updated": "2026-02-26"
+            "note": "2026-02 (YoY)",
+            "trend": "neutral",
+            "last_updated": "2026-03-12"
         },
         {
             "name": "生產者物價指數 (PPI)",
@@ -30,17 +30,17 @@
         },
         {
             "name": "非農就業人口",
-            "value": "+13.0萬",
-            "note": "2026-01",
-            "trend": "up",
-            "last_updated": "2026-02-26"
+            "value": "-9.2萬",
+            "note": "2026-02",
+            "trend": "down",
+            "last_updated": "2026-03-12"
         },
         {
             "name": "失業率",
-            "value": "4.3%",
-            "note": "2026-01",
-            "trend": "neutral",
-            "last_updated": "2026-02-26"
+            "value": "4.4%",
+            "note": "2026-02",
+            "trend": "up",
+            "last_updated": "2026-03-12"
         },
         {
             "name": "初領失業金人數",
@@ -81,10 +81,10 @@
     "TW_MACRO": [
         {
             "name": "景氣對策信號",
-            "value": "38分 (紅燈)",
-            "note": "2025-12",
+            "value": "39分 (紅燈)",
+            "note": "2026-01",
             "trend": "up",
-            "last_updated": "2026-02-26"
+            "last_updated": "2026-03-12"
         },
         {
             "name": "外銷訂單",
@@ -137,10 +137,10 @@
         },
         {
             "name": "融資餘額",
-            "value": "3680.47億",
-            "note": "截至 2/26",
-            "trend": "down",
-            "last_updated": "2026-02-26"
+            "value": "3761.48億",
+            "note": "截至 3/11",
+            "trend": "up",
+            "last_updated": "2026-03-12"
         },
         {
             "name": "信用卡逾期率",
@@ -151,10 +151,10 @@
         },
         {
             "name": "融券餘額",
-            "value": "24.8萬張",
-            "note": "截至 2/26",
+            "value": "24.3萬張",
+            "note": "截至 3/11",
             "trend": "down",
-            "last_updated": "2026-02-26"
+            "last_updated": "2026-03-12"
         },
         {
             "name": "製造業加班工時",
