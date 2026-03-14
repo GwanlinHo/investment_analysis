@@ -10,6 +10,10 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 ## 更新紀錄 (Changelog)
 
+- **2026-03-14**:
+  - **部分分析執行**: 由於無法檢索即時新聞，本次分析未能產生「新聞焦點」和完整的「AI綜合分析」。報告是基於已有的宏觀經濟數據和技術指標生成的精簡版。
+  - **數據更新**: 更新了部分美國和台灣的宏觀經濟數據。
+
 - **2026-03-10**:
   - **新增語音朗讀功能**: 為「週報焦點」與「AI 深度分析」區塊加入 Web Speech API 語音朗讀功能，並針對 iOS 與 Android 平台優化台灣腔調 (zh-TW) 及預設英文字音選取。
   - **模板結構優化**: 更新 `templates/report_template.html` 並強化 `update_report.py` 的注入邏輯，使用 HTML 註釋錨點 (`anchor`) 確保動態注入內容時不會破壞 TTS 控制按鈕與佈局。

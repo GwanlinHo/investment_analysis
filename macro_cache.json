@@ -2,10 +2,10 @@
     "US_MACRO": [
         {
             "name": "國內生產毛額 (GDP) Q4",
-            "value": "1.4%",
-            "note": "2025 Q4 (年化初值)",
+            "value": "0.7%",
+            "note": "2025 Q4 (第二次預估)",
             "trend": "down",
-            "last_updated": "2026-02-26"
+            "last_updated": "2026-03-13"
         },
         {
             "name": "消費者物價指數 (CPI)",
@@ -23,10 +23,10 @@
         },
         {
             "name": "零售銷售 (Retail Sales)",
-            "value": "+5.72%",
-            "note": "2026-01 (YoY)",
+            "value": "+6.24%",
+            "note": "2026-02 (YoY, NRF)",
             "trend": "up",
-            "last_updated": "2026-02-26"
+            "last_updated": "2026-03-10"
         },
         {
             "name": "非農就業人口",
@@ -44,17 +44,17 @@
         },
         {
             "name": "初領失業金人數",
-            "value": "20.6萬",
-            "note": "截至 2/14",
+            "value": "21.3萬",
+            "note": "截至 3/7",
             "trend": "down",
-            "last_updated": "2026-02-26"
+            "last_updated": "2026-03-12"
         },
         {
             "name": "ISM 製造業指數",
-            "value": "52.6",
-            "note": "2026-01 (擴張)",
-            "trend": "up",
-            "last_updated": "2026-02-26"
+            "value": "52.4",
+            "note": "2026-02 (擴張)",
+            "trend": "down",
+            "last_updated": "2026-03-02"
         },
         {
             "name": "M2 貨幣供給",
@@ -65,17 +65,17 @@
         },
         {
             "name": "美元指數 (DXY)",
-            "value": "97.80",
-            "note": "2026-02-26",
+            "value": "100.4",
+            "note": "2026-03-13",
             "trend": "up",
-            "last_updated": "2026-02-26"
+            "last_updated": "2026-03-13"
         },
         {
             "name": "實質私人投資",
-            "value": "3.8%",
+            "value": "1.6%",
             "note": "2025 Q4 (成長率)",
-            "trend": "up",
-            "last_updated": "2026-02-26"
+            "trend": "down",
+            "last_updated": "2026-03-13"
         }
     ],
     "TW_MACRO": [
@@ -84,48 +84,48 @@
             "value": "39分 (紅燈)",
             "note": "2026-01",
             "trend": "up",
-            "last_updated": "2026-03-12"
+            "last_updated": "2026-03-09"
         },
         {
             "name": "外銷訂單",
-            "value": "762.0億美元",
-            "note": "2025-12 (+43.8%)",
+            "value": "769.1億美元",
+            "note": "2026-01 (+60.1%)",
             "trend": "up",
-            "last_updated": "2026-02-26"
+            "last_updated": "2026-03-04"
         },
         {
             "name": "消費者物價指數 (CPI)",
-            "value": "0.69%",
-            "note": "2026-01 (YoY)",
-            "trend": "down",
-            "last_updated": "2026-02-26"
+            "value": "1.75%",
+            "note": "2026-02 (YoY)",
+            "trend": "up",
+            "last_updated": "2026-03-06"
         },
         {
             "name": "工業生產指數",
-            "value": "+21.57%",
-            "note": "2025-12 (YoY)",
+            "value": "+28.51%",
+            "note": "2026-01 (YoY)",
             "trend": "up",
-            "last_updated": "2026-02-26"
+            "last_updated": "2026-03-05"
         },
         {
             "name": "消費者信心指數 (CCI)",
-            "value": "67.16",
+            "value": "66.58",
+            "note": "2026-02",
+            "trend": "down",
+            "last_updated": "2026-03-02"
+        },
+        {
+            "name": "M1B 年增率",
+            "value": "5.59%",
             "note": "2026-01",
             "trend": "up",
             "last_updated": "2026-02-26"
         },
         {
-            "name": "M1B 年增率",
-            "value": "4.85%",
-            "note": "2025-12",
-            "trend": "down",
-            "last_updated": "2026-02-26"
-        },
-        {
             "name": "M2 年增率",
-            "value": "5.00%",
-            "note": "2025-12",
-            "trend": "down",
+            "value": "5.16%",
+            "note": "2026-01",
+            "trend": "up",
             "last_updated": "2026-02-26"
         },
         {
@@ -133,7 +133,7 @@
             "value": "3.29%",
             "note": "2026-01",
             "trend": "down",
-            "last_updated": "2026-02-26"
+            "last_updated": "2026-02-25"
         },
         {
             "name": "融資餘額",
@@ -144,7 +144,7 @@
         },
         {
             "name": "信用卡逾期率",
-            "value": "0.25%",
+            "value": "N/A",
             "note": "2025-10",
             "trend": "neutral",
             "last_updated": "2026-02-26"
@@ -158,7 +158,7 @@
         },
         {
             "name": "製造業加班工時",
-            "value": "17.6小時",
+            "value": "N/A",
             "note": "2025-12",
             "trend": "up",
             "last_updated": "2026-02-26"
