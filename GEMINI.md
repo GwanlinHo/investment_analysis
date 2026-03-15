@@ -23,6 +23,8 @@
 - **US Indicators**: GDP, CPI, PPI, Retail Sales, Non-farm Payrolls, Unemployment Rate, Jobless Claims, ISM Mfg Index, M2, Credit Card Delinquency, Real Private Invest, DXY.
 - **TW Indicators**: Monitoring Indicator (Query NDC site for score/color), Export Orders YoY, Industrial Production, Consumer Confidence, M1B/M2, Credit Card Delinquency, Real Private Invest, Unemployment, Overtime Hours, Margin/Short Balance (Display Total & Daily Change).
 - **Local Cache**: Use `macro_cache.json` to store and retrieve historical data when latest figures are not yet released. Update cache only when newer official data is found.
+- **Cache Update Rule**: When updating `macro_cache.json`, you MUST follow the **Upsert logic**: Update the values for specific indicators while strictly preserving all other existing historical data. Direct overwriting of the entire JSON object is strictly prohibited.
+- **Data Integrity**: Before saving the cache, verify that the total count of indicators has not decreased significantly.
 
 ### 2. News Focus (20 Items)
 - **Authority**: Tier-1 ONLY (Bloomberg, Reuters, WSJ, FT, CNBC, Barron's, BBC, CNN, Economic Daily, Commercial Times, CNA, Anue).
