@@ -6,11 +6,81 @@ import re
 # --- Cache Management ---
 CACHE_FILE = "macro_cache.json"
 
+class MacroHTMLParser(json.JSONEncoder): # 使用繼承來避開類別定義衝突
+    pass
+
+from html.parser import HTMLParser
+class MacroParser(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.results = {"US_MACRO": [], "TW_MACRO": []}
+        self.current_region = None
+        self.current_row = None
+        self.td_index = 0
+        self.capture = False
+        self.text_buffer = ""
+
+    def handle_starttag(self, tag, attrs):
+        attr_dict = dict(attrs)
+        if tag == "table":
+            if attr_dict.get("id") == "us-macro-table": self.current_region = "US_MACRO"
+            elif attr_dict.get("id") == "tw-macro-table": self.current_region = "TW_MACRO"
+        elif tag == "tr" and self.current_region:
+            self.current_row = {}
+            self.td_index = 0
+        elif tag == "td" and self.current_region:
+            self.capture = True
+            self.text_buffer = ""
+
+    def handle_data(self, data):
+        if self.capture: self.text_buffer += data
+
+    def handle_endtag(self, tag):
+        if tag == "td" and self.current_region:
+            self.capture = False
+            self.td_index += 1
+            val = self.text_buffer.strip()
+            if self.td_index == 1: self.current_row["name"] = val
+            elif self.td_index == 2:
+                self.current_row["value"] = val.replace("▲", "").replace("▼", "").replace("-", "").strip()
+                self.current_row["trend"] = "up" if "▲" in self.text_buffer else "down" if "▼" in self.text_buffer else "neutral"
+            elif self.td_index == 3: self.current_row["note"] = val
+        elif tag == "tr" and self.current_region:
+            if self.current_row and "name" in self.current_row and self.current_row["name"] != "指標名稱":
+                self.results[self.current_region].append(self.current_row)
+            self.current_row = None
+        elif tag == "table":
+            self.current_region = None
+
 def load_cache():
+    cache = {"US_MACRO": [], "TW_MACRO": []}
     if os.path.exists(CACHE_FILE):
-        with open(CACHE_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return {"US_MACRO": [], "TW_MACRO": []}
+        try:
+            with open(CACHE_FILE, "r", encoding="utf-8") as f:
+                cache = json.load(f)
+        except: pass
+    
+    # 穩健性檢查：如果快取指標太少，嘗試從最新報告中還原
+    if len(cache.get("US_MACRO", [])) < 5 or len(cache.get("TW_MACRO", [])) < 5:
+        print("[Info] 快取數據不完整，嘗試從現有報告還原...")
+        reports = [f for f in os.listdir("report") if f.startswith("invest_analysis_") and f.endswith(".html")]
+        if reports:
+            latest_report = os.path.join("report", sorted(reports)[-1])
+            try:
+                with open(latest_report, "r", encoding="utf-8") as f:
+                    parser = MacroParser()
+                    parser.feed(f.read())
+                    # 合併數據
+                    for region in ["US_MACRO", "TW_MACRO"]:
+                        existing_names = {item["name"] for item in cache[region]}
+                        for item in parser.results[region]:
+                            if item["name"] not in existing_names:
+                                item["last_updated"] = "Restored"
+                                cache[region].append(item)
+                print(f"[Success] 已從 {latest_report} 還原缺失的指標。")
+            except Exception as e:
+                print(f"[Warning] 還原失敗: {e}")
+    return cache
 
 def save_cache(cache_data):
     with open(CACHE_FILE, "w", encoding="utf-8") as f:
@@ -134,9 +204,24 @@ def main():
     with open(report_file, "r", encoding="utf-8") as f: content = f.read()
     macro_cache = load_cache()
     
-    content = content.replace('<div id="us-macro-placeholder"></div>', generate_macro_table(macro_cache.get("US_MACRO", []), "us-macro-table"))
-    content = content.replace('<div id="tw-macro-placeholder"></div>', generate_macro_table(macro_cache.get("TW_MACRO", []), "tw-macro-table"))
+    # --- Inject Macro Tables (Robust Replacement) ---
+    us_table_html = generate_macro_table(macro_cache.get("US_MACRO", []), "us-macro-table")
+    tw_table_html = generate_macro_table(macro_cache.get("TW_MACRO", []), "tw-macro-table")
     
+    # 邏輯：先嘗試匹配 placeholder, 若無則匹配已存在的 table
+    patterns = {
+        "US": (r'<div id="us-macro-placeholder"></div>', r'<table class="macro-table" id="us-macro-table">.*?</table>'),
+        "TW": (r'<div id="tw-macro-placeholder"></div>', r'<table class="macro-table" id="tw-macro-table">.*?</table>')
+    }
+    
+    for region, (placeholder_p, table_p) in patterns.items():
+        replacement = us_table_html if region == "US" else tw_table_html
+        if re.search(placeholder_p, content):
+            content = re.sub(placeholder_p, replacement, content)
+        else:
+            # 使用 re.DOTALL 確保跨行匹配
+            content = re.sub(table_p, replacement, content, flags=re.DOTALL)
+
     # --- Inject AI News ---
     with open("news.html", "r", encoding="utf-8") as f: news_content = f.read().strip()
     news_id = 'weekly-news-focus'
