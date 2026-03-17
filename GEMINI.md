@@ -21,7 +21,7 @@
 - **Accuracy**: Data must match official press releases exactly. If sources conflict, prioritize the primary government agency.
 - **Lag Compliance**: GDP/Investment (Min 1 Quarter lag); Other indicators (Min 1 Month lag).
 - **US Indicators**: GDP, CPI, PPI, Retail Sales, Non-farm Payrolls, Unemployment Rate, Jobless Claims, ISM Mfg Index, M2, Credit Card Delinquency, Real Private Invest, DXY.
-- **TW Indicators**: 加權指數 (TAIEX), 景氣對策信號 (Query NDC site for score/color), Export Orders YoY, Industrial Production, Consumer Confidence, M1B/M2, Credit Card Delinquency, Real Private Invest, Unemployment, Overtime Hours, Margin/Short Balance (Display Total & Daily Change).
+- **TW Indicators**: TAIEX (Taiwan Capitalization Weighted Stock Index), Monitoring Indicator (Signal - Query NDC site for score/color), Export Orders YoY, Industrial Production, Consumer Confidence, M1B/M2, Credit Card Delinquency, Real Private Invest, Unemployment, Overtime Hours, Margin/Short Balance (Display Total & Daily Change).
 - **Local Cache**: Use `macro_cache.json` to store and retrieve historical data when latest figures are not yet released. Update cache only when newer official data is found.
 - **Cache Update Rule**: When updating `macro_cache.json`, you MUST follow the **Upsert logic**: Update the values for specific indicators while strictly preserving all other existing historical data. Direct overwriting of the entire JSON object is strictly prohibited.
 - **Data Integrity**: Before saving the cache, verify that the total count of indicators has not decreased significantly.
@@ -40,13 +40,13 @@
 - **Format**: 
   - Line 1: **[Source] Title (YYYY-MM-DD)** (No links allowed).
   - Line 2: Concise summary focusing on impact and facts, not speculation.
-- **Date Check Mechanism**: AI must verify the date against the system date (2026-03-17). Any news dated before 2026-03-10 must be discarded.
+- **Date Check Mechanism**: AI must verify the publication date of each news item against the **current system date**. Any news item published more than **7 days prior to the current date** must be discarded. (Calculation: `Current_Date - 7 days`).
 - **HTML Target**: `#weekly-news-focus` (Use `<ul><li>`, NO `<a>` tags or URLs in the final HTML).
+
 ### 3. AI Comprehensive Analysis (Persona-Driven Framework)
 AI must dynamically generate analysis based on current real-world data. The use of static templates containing hardcoded data (e.g., fixed VIX values, inflation rates, interest rate spread descriptions) is strictly prohibited. AI MUST first retrieve the current **TAIEX Index** value from `technical_data.json` before generating any Taiwan-related analysis.
 
 #### 1. Atlas - Macro Strategist
-...
 - **Responsibilities**:
   - **Yield Monitoring Logic**: Calculate the spreads between 3M, 10Y, and 30Y yields.
   - **Trigger Rule**: Mention the yield curve state (e.g., flattening or inverted) in the report ONLY when the spread between any two is **< 0.25% (25bps)** or an **inversion (spread < 0)** occurs.
@@ -63,7 +63,7 @@ AI must dynamically generate analysis based on current real-world data. The use 
 - **Responsibilities**:
   - Evaluate performance based on real ROE, Gross Margin, and PEG from the `fundamental-data` script tags.
 
-#### 4. Kenji - Technical Chartist
+#### 3. Kenji - Technical Chartist
 - **Responsibilities**:
   - Detect real KD and MACD divergence situations and Moving Average Bias (BIAS).
 
