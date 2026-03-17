@@ -21,14 +21,14 @@
 - **Accuracy**: Data must match official press releases exactly. If sources conflict, prioritize the primary government agency.
 - **Lag Compliance**: GDP/Investment (Min 1 Quarter lag); Other indicators (Min 1 Month lag).
 - **US Indicators**: GDP, CPI, PPI, Retail Sales, Non-farm Payrolls, Unemployment Rate, Jobless Claims, ISM Mfg Index, M2, Credit Card Delinquency, Real Private Invest, DXY.
-- **TW Indicators**: Monitoring Indicator (Query NDC site for score/color), Export Orders YoY, Industrial Production, Consumer Confidence, M1B/M2, Credit Card Delinquency, Real Private Invest, Unemployment, Overtime Hours, Margin/Short Balance (Display Total & Daily Change).
+- **TW Indicators**: 加權指數 (TAIEX), 景氣對策信號 (Query NDC site for score/color), Export Orders YoY, Industrial Production, Consumer Confidence, M1B/M2, Credit Card Delinquency, Real Private Invest, Unemployment, Overtime Hours, Margin/Short Balance (Display Total & Daily Change).
 - **Local Cache**: Use `macro_cache.json` to store and retrieve historical data when latest figures are not yet released. Update cache only when newer official data is found.
 - **Cache Update Rule**: When updating `macro_cache.json`, you MUST follow the **Upsert logic**: Update the values for specific indicators while strictly preserving all other existing historical data. Direct overwriting of the entire JSON object is strictly prohibited.
 - **Data Integrity**: Before saving the cache, verify that the total count of indicators has not decreased significantly.
 
 ### 2. News Focus (20 Items)
 - **Authority**: Tier-1 ONLY (Bloomberg, Reuters, WSJ, FT, CNBC, Barron's, BBC, CNN, Economic Daily, Commercial Times, CNA, Anue).
-- **Freshness**: All news must be published within the **LAST 7 DAYS**.
+- **Freshness**: All news must be published within the **LAST 7 DAYS**. **MANDATORY**: Each news item must include its publication date in (YYYY-MM-DD) format.
 - **Authenticity**: MANDATORY cross-verification of all major claims. If a story is only reported by a single non-wire source, it must be excluded. Compare at least two Tier-1 sources for critical news.
 - **Search Strategy**: Execute **4 distinct searches**: 
     1. Global Macro/Fed
@@ -38,14 +38,15 @@
 - **Dynamic Injection**: Strictly prohibit hardcoding news content in scripts. News must be dynamically injected into the script or report by AI after each search.
 - **Selection**: 20 items total. Maintain a **70% Global / 30% Taiwan** ratio.
 - **Format**: 
-  - Line 1: **[Source] Title** (No links allowed).
+  - Line 1: **[Source] Title (YYYY-MM-DD)** (No links allowed).
   - Line 2: Concise summary focusing on impact and facts, not speculation.
+- **Date Check Mechanism**: AI must verify the date against the system date (2026-03-17). Any news dated before 2026-03-10 must be discarded.
 - **HTML Target**: `#weekly-news-focus` (Use `<ul><li>`, NO `<a>` tags or URLs in the final HTML).
-
 ### 3. AI Comprehensive Analysis (Persona-Driven Framework)
-AI must dynamically generate analysis based on current real-world data. The use of static templates containing hardcoded data (e.g., fixed VIX values, inflation rates, interest rate spread descriptions) is strictly prohibited.
+AI must dynamically generate analysis based on current real-world data. The use of static templates containing hardcoded data (e.g., fixed VIX values, inflation rates, interest rate spread descriptions) is strictly prohibited. AI MUST first retrieve the current **TAIEX Index** value from `technical_data.json` before generating any Taiwan-related analysis.
 
 #### 1. Atlas - Macro Strategist
+...
 - **Responsibilities**:
   - **Yield Monitoring Logic**: Calculate the spreads between 3M, 10Y, and 30Y yields.
   - **Trigger Rule**: Mention the yield curve state (e.g., flattening or inverted) in the report ONLY when the spread between any two is **< 0.25% (25bps)** or an **inversion (spread < 0)** occurs.

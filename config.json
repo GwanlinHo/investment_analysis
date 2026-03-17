@@ -1,8 +1,8 @@
 {
     "stock_groups": [
         {
-            "title": "美股主要指數",
-            "symbols": ["^VIX", "^GSPC", "^SOX", "^IXIC", "^DJI", "^NYFANG", "^RUT", "^N225", "GC=F"],
+            "title": "主要指數",
+            "symbols": ["^TWII", "^VIX", "^GSPC", "^SOX", "^IXIC", "^DJI", "^NYFANG", "^RUT", "^N225", "GC=F"],
             "description": ""
         },
         {
@@ -46,6 +46,7 @@
         }
     },
     "symbol_name_map": {
+        "^TWII": "加權指數",
         "^VIX": "恐慌指數",
         "^GSPC": "標普 500",
         "^SOX": "費城半導體",
