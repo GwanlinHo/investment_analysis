@@ -39,8 +39,8 @@
             "name": "失業率",
             "value": "4.4%",
             "trend": "up",
-            "note": "2026-02",
-            "last_updated": "2026-03-28"
+            "note": "2026-02 (勞動力放緩)",
+            "last_updated": "2026-03-29"
         },
         {
             "name": "初領失業金人數",
@@ -90,15 +90,36 @@
             "trend": "down",
             "note": "2026-03 (初值)",
             "last_updated": "2026-03-28"
+        },
+        {
+            "name": "聯準會基準利率",
+            "value": "3.50%-3.75%",
+            "trend": "neutral",
+            "note": "2026-03-18 會議維持不變",
+            "last_updated": "2026-03-29"
+        },
+        {
+            "name": "布蘭特原油 (Brent)",
+            "value": "$126.0",
+            "trend": "up",
+            "note": "中東衝突與海峽封鎖溢價",
+            "last_updated": "2026-03-29"
+        },
+        {
+            "name": "核心 PCE 通膨預期",
+            "value": "2.7%",
+            "trend": "up",
+            "note": "Fed 上修 2026 全年展望",
+            "last_updated": "2026-03-29"
         }
     ],
     "TW_MACRO": [
         {
             "name": "景氣對策信號",
             "value": "39分 (紅燈)",
-            "trend": "neutral",
+            "trend": "up",
             "note": "2026-01 (AI需求強勁)",
-            "last_updated": "2026-03-28"
+            "last_updated": "2026-03-29"
         },
         {
             "name": "外銷訂單",
@@ -183,6 +204,20 @@
             "trend": "up",
             "note": "2025 Q4 (yoy)",
             "last_updated": "2026-03-28"
+        },
+        {
+            "name": "台股加權指數",
+            "value": "33,112",
+            "trend": "down",
+            "note": "2026-03-27 收盤",
+            "last_updated": "2026-03-29"
+        },
+        {
+            "name": "外資台積電買賣超",
+            "value": "-21.5萬張",
+            "trend": "down",
+            "note": "2026-03 累計調節",
+            "last_updated": "2026-03-29"
         }
     ]
 }

@@ -151,7 +151,13 @@
                                 <th>價格</th>
                                 <th>漲跌%</th>
                                 <th>技術訊號</th>
+                                {% if group.show_vol %}
                                 <th>量比%</th>
+                                {% endif %}
+                                {% if group.chip_header_1 %}
+                                <th>{{ group.chip_header_1 }}</th>
+                                <th>{{ group.chip_header_2 }}</th>
+                                {% endif %}
                                 <th>K{{ kd_window }}</th>
                                 <th>D{{ kd_window }}</th>
                                 {% for period in bias_periods %}
@@ -180,6 +186,29 @@
             </div>
         </div>
         {% endfor %}
+
+        <div class="ai-section-container card">
+            <h2 class="group-title">籌碼分析判讀教學</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                <div>
+                    <h4 style="color: var(--accent-color); margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 5px;">台股：三大法人鎖碼 (Flow)</h4>
+                    <ul style="font-size: 14px; padding-left: 20px; line-height: 1.8;">
+                        <li><strong style="color: #e53935;">紅線 (投信)</strong>：波段行情主力。若紅線持續陡峭上升，代表法人鎖碼，股價最具噴發力。</li>
+                        <li><strong style="color: #1976d2;">藍線 (外資)</strong>：長線趨勢基石。決定權值股長線天花板，藍線上揚代表長線資金進駐。</li>
+                        <li><strong style="color: #43a047;">綠線 (自營商)</strong>：短線客與避險動態。波動快且短，常用於判斷短線獲利了結壓力。</li>
+                        <li><strong>觀察重點</strong>：當紅藍線同步向上（土洋合作），是極強的多頭續攻訊號。</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="color: var(--accent-color); margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 5px;">美股：OBV 資金能量潮</h4>
+                    <ul style="font-size: 14px; padding-left: 20px; line-height: 1.8;">
+                        <li><strong style="color: #455a64;">灰/藍線 (OBV)</strong>：每日累計量能。反映資金流入與流出的淨值。</li>
+                        <li><strong>觀察重點</strong>：反映量價配合關係。當股價平盤但 OBV 持續墊高，通常代表大戶正在接刀或悄悄收貨。</li>
+                        <li><strong>籌碼背離</strong>：若股價創新高但 OBV 未同步創新高，需提防量能動能衰退。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
 
         {% if yield_curve_plot_b64 %}
         <div id="macro-analysis" class="group-section">
