@@ -24,8 +24,6 @@ This is an investment assistance tool that combines **Python automation scripts*
     - **權重平衡調整**：將「加權指數 (^TWII)」從美股指數群組移至「台股 ETF」群組首位，優化台股分析的視覺流向。
     - **導覽功能擴充**：於報告導覽列新增「財經節目」按鈕，串接外部 YouTube 分析平台 `yt_podcast_analysis`。
 
-- **2026-03-21**:
-...
 - **2026-03-17**:
   - **GEMINI.md 規範強化**: 
     - 新增 TAIEX 指數強制引用規則：強制要求 AI 在進行台灣分析前，必須先從 `technical_data.json` 提取當前加權指數，確保分析數據的連貫性。
