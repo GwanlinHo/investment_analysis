@@ -10,6 +10,11 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 ## 更新紀錄 (Changelog)
 
+- **2026-04-02**:
+  - **系統 Bug 修復與時區校準**:
+    - **時區轉換邏輯修正**：將 `investment_analysis.py` 中 naive 的 `utcnow()` 替換為 `now(datetime.timezone.utc)`，解決在特定時段執行時因 naive 對象轉換時區導致報告檔名日期錯誤（誤判為前一日）的問題。
+    - **自動化數據同步增強**：優化了 `update_report.py` 的注入流程，確保在生成跨日報告時，`index.html` 與 `report/` 目錄下的歷史存檔能精確同步。
+
 - **2026-03-29**:
   - **重大功能更新：籌碼分析系統**:
     - **台股三大法人追蹤**：整合 FinMind API，於 K 線圖新增第三層籌碼流向 (Flow) 面板，即時繪製投信、外資、自營商累計買賣超曲線，精確識別法人鎖碼與出貨訊號。

@@ -210,15 +210,22 @@ def process_stock_group(group, start_date, utc_now):
     for symbol, df in stock_data.items():
         print(f"  - 分析: {symbol}")
         df_ind = calculate_all_indicators(df)
+        
+        # 處理有效數據回溯 (處理 Yahoo Finance 最後一行 NaN 的問題)
+        df_valid = df_ind.dropna(subset=['Close'])
+        if df_valid.empty: continue
+        latest = df_valid.iloc[-1]
+        prev = df_valid.iloc[-2] if len(df_valid) > 1 else latest
+        
         inst_df = fetch_tw_institutional_data(symbol, start_date) if (".TW" in symbol or ".TWO" in symbol) else None
         f_data = get_fundamental_data(symbol) if not symbol.startswith('^') else None
         if f_data: fundamental.append(f_data)
         # 表格顯示邏輯：指數群組不顯示量比與籌碼
-        g_res["table_rows"] += format_data_row(symbol, df_ind.iloc[-1], df_ind.iloc[-2], inst_df, f_data, show_chips=not is_idx_group, show_vol=not is_idx_group)
+        g_res["table_rows"] += format_data_row(symbol, latest, prev, inst_df, f_data, show_chips=not is_idx_group, show_vol=not is_idx_group)
         disp_name = SYMBOL_NAME_MAP.get(symbol, symbol)
         # 圖表顯示邏輯：不論群組，只要標的有成交量就嘗試繪製副圖
         g_res["plots"][disp_name] = create_ma_plot_base64(df_ind.tail(PLOT_DAYS), symbol, inst_df, show_extra=True)
-        if symbol in KEY_INDICATORS: summary.append({'symbol': disp_name, 'close': df_ind.iloc[-1]['Close'], 'change': df_ind.iloc[-1]['Change %'], 'orig_symbol': symbol})
+        if symbol in KEY_INDICATORS: summary.append({'symbol': disp_name, 'close': latest['Close'], 'change': latest['Change %'], 'orig_symbol': symbol})
         rd = df_ind.tail(AI_ANALYSIS_DAYS).copy().reset_index(); rd.rename(columns={rd.columns[0]: 'Date'}, inplace=True); rd['Date'] = rd['Date'].dt.strftime('%Y-%m-%d')
         market[disp_name] = rd.to_dict(orient='records')
         if inst_df is not None:
@@ -227,7 +234,7 @@ def process_stock_group(group, start_date, utc_now):
     return g_res, summary, market, fundamental
 
 def main():
-    utc_now = datetime.datetime.utcnow(); start_date = utc_now - datetime.timedelta(days=HISTORY_DAYS)
+    utc_now = datetime.datetime.now(datetime.timezone.utc); start_date = utc_now - datetime.timedelta(days=HISTORY_DAYS)
     all_rep, all_sum, all_fun, all_mkt = [], [], [], {}
     for group in STOCK_GROUPS:
         print(f"\n--- 正在處理群組: {group['title']} ---")

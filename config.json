@@ -16,7 +16,7 @@
             "description": ""
         }
     ],
-    "key_indicators": ["^VIX", "^GSPC", "^SOX", "^NYFANG", "2330.TW", "00719B.TWO"],
+    "key_indicators": ["^TWII", "^VIX", "^GSPC", "^SOX", "^NYFANG", "2330.TW", "00719B.TWO"],
     "inverse_symbols": ["^VIX", "00677U.TW"],
     "parameters": {
         "kd_window": 9,
