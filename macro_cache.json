@@ -1,11 +1,11 @@
 {
     "US_MACRO": [
         {
-            "name": "國內生產毛額 (GDP) 最終值",
-            "value": "0.7%",
+            "name": "國內生產毛額 (GDP) 修正值",
+            "value": "1.4%",
             "trend": "down",
-            "note": "2025 Q4 (受政府停擺影響)",
-            "last_updated": "2026-03-28"
+            "note": "2025 Q4 (年化增長率修正值)",
+            "last_updated": "2026-04-02"
         },
         {
             "name": "消費者物價指數 (CPI)",
@@ -18,63 +18,63 @@
             "name": "生產者物價指數 (PPI)",
             "value": "3.4%",
             "trend": "up",
-            "note": "2026-02 (YoY)",
-            "last_updated": "2026-03-28"
+            "note": "2026-02 (YoY，創一年來最大增幅)",
+            "last_updated": "2026-04-02"
         },
         {
             "name": "零售銷售 (Retail Sales)",
             "value": "+0.6%",
             "trend": "up",
-            "note": "2026-02 (優於預期)",
+            "note": "2026-02 (顯示消費韌性)",
             "last_updated": "2026-04-01"
         },
         {
             "name": "非農就業人口",
             "value": "-9.2萬",
             "trend": "down",
-            "note": "2026-02 (意外減少)",
+            "note": "2026-02 (受天氣與罷工影響意外減少)",
             "last_updated": "2026-03-28"
         },
         {
             "name": "失業率",
             "value": "4.4%",
             "trend": "up",
-            "note": "2026-02 (勞動力放緩)",
-            "last_updated": "2026-03-29"
+            "note": "2026-02 (微升)",
+            "last_updated": "2026-04-02"
         },
         {
             "name": "初領失業金人數",
-            "value": "21.0萬",
-            "trend": "up",
-            "note": "截至 3/21 (符合預期)",
-            "last_updated": "2026-03-30"
+            "value": "20.2萬",
+            "trend": "down",
+            "note": "截至 3/28 (低於預期)",
+            "last_updated": "2026-04-02"
         },
         {
             "name": "ISM 製造業指數",
             "value": "52.7",
             "trend": "up",
-            "note": "2026-03 (優於預期，連三月擴張)",
-            "last_updated": "2026-04-01"
+            "note": "2026-03 (連三月擴張，價格付費指數飆升至 78.3)",
+            "last_updated": "2026-04-02"
         },
         {
             "name": "M2 貨幣供給",
             "value": "22.67兆",
             "trend": "up",
-            "note": "2026-02 (YoY +4.9%)",
-            "last_updated": "2026-03-28"
+            "note": "2026-02",
+            "last_updated": "2026-04-02"
         },
         {
             "name": "美元指數 (DXY)",
-            "value": "99.54",
-            "trend": "down",
-            "note": "2026-04-01 (中東避險情緒稍緩)",
-            "last_updated": "2026-04-01"
+            "value": "100.13",
+            "trend": "up",
+            "note": "2026-04-02 (中東局勢避險情緒支撐)",
+            "last_updated": "2026-04-02"
         },
         {
             "name": "實質私人投資",
             "value": "3.8%",
             "trend": "up",
-            "note": "2025 Q4 (成長率)",
+            "note": "2025 Q4",
             "last_updated": "2026-03-28"
         },
         {
@@ -82,13 +82,6 @@
             "value": "2.94%",
             "trend": "down",
             "note": "2025 Q4 (SA)",
-            "last_updated": "2026-03-28"
-        },
-        {
-            "name": "消費者信心指數 (UMich)",
-            "value": "55.5",
-            "trend": "down",
-            "note": "2026-03 (初值)",
             "last_updated": "2026-03-28"
         },
         {
@@ -102,43 +95,29 @@
             "name": "聯準會基準利率",
             "value": "3.50%-3.75%",
             "trend": "neutral",
-            "note": "2026-03-18 會議維持不變/預期 2026 僅降息一次",
+            "note": "2026-03 維持不變",
             "last_updated": "2026-03-30"
         },
         {
-            "name": "布蘭特原油 (Brent)",
-            "value": "$119.0",
-            "trend": "up",
-            "note": "荷姆茲海峽封鎖風險溢價，避險資金湧入",
-            "last_updated": "2026-04-01"
-        },
-        {
             "name": "美國 10 年期公債殖利率",
-            "value": "4.315%",
+            "value": "4.38%",
             "trend": "up",
-            "note": "2026-04-01 (反映通膨預期與中東局勢)",
-            "last_updated": "2026-04-01"
+            "note": "2026-04-02 (通膨預期升溫)",
+            "last_updated": "2026-04-02"
         },
         {
-            "name": "美國 2 年期公債殖利率",
-            "value": "3.821%",
+            "name": "美國 30 年期公債殖利率",
+            "value": "4.91%",
             "trend": "up",
-            "note": "與 3M 價差收窄至 12.7bps",
-            "last_updated": "2026-04-01"
+            "note": "2026-04-02",
+            "last_updated": "2026-04-02"
         },
         {
             "name": "美國 3 個月期公債殖利率",
-            "value": "3.694%",
+            "value": "3.69%",
             "trend": "up",
-            "note": "短期資金成本上升",
-            "last_updated": "2026-04-01"
-        },
-        {
-            "name": "核心 PCE 通膨預期",
-            "value": "2.7%",
-            "trend": "up",
-            "note": "Fed 上修 2026 全年展望",
-            "last_updated": "2026-03-29"
+            "note": "2026-04-02",
+            "last_updated": "2026-04-02"
         }
     ],
     "TW_MACRO": [
@@ -146,15 +125,15 @@
             "name": "景氣對策信號",
             "value": "40分 (紅燈)",
             "trend": "up",
-            "note": "2026-02 (連3紅，AI 需求強勁帶動)",
-            "last_updated": "2026-03-30"
+            "note": "2026-02 (連2紅，創21個月新高)",
+            "last_updated": "2026-04-02"
         },
         {
             "name": "外銷訂單",
             "value": "+23.8%",
             "trend": "up",
-            "note": "2026-02 (YoY 連13紅)",
-            "last_updated": "2026-03-28"
+            "note": "2026-02 (YoY 連13紅，AI需求強勁)",
+            "last_updated": "2026-04-02"
         },
         {
             "name": "消費者物價指數 (CPI)",
@@ -165,10 +144,10 @@
         },
         {
             "name": "工業生產指數",
-            "value": "+19.64%",
+            "value": "+17.83%",
             "trend": "up",
-            "note": "2026-02 (YoY，製造業動能極強)",
-            "last_updated": "2026-04-01"
+            "note": "2026-02 (YoY，製造業受AI帶動)",
+            "last_updated": "2026-04-02"
         },
         {
             "name": "消費者信心指數 (CCI)",
@@ -181,49 +160,49 @@
             "name": "M1B 年增率",
             "value": "7.12%",
             "trend": "up",
-            "note": "2026-02 (資金動能維持高檔)",
-            "last_updated": "2026-03-28"
+            "note": "2026-02 (黃金交叉，資金動能強)",
+            "last_updated": "2026-04-02"
         },
         {
             "name": "M2 年增率",
             "value": "5.38%",
             "trend": "up",
             "note": "2026-02",
-            "last_updated": "2026-03-28"
+            "last_updated": "2026-04-02"
         },
         {
             "name": "失業率",
             "value": "3.32%",
             "trend": "neutral",
-            "note": "2026-02 (26年來同月最低)",
+            "note": "2026-02",
             "last_updated": "2026-03-28"
         },
         {
             "name": "融資餘額",
-            "value": "3849億",
+            "value": "3849.1億",
             "trend": "up",
-            "note": "2026-04-01 (報復性反彈伴隨資增)",
-            "last_updated": "2026-04-01"
+            "note": "2026-04-01",
+            "last_updated": "2026-04-02"
         },
         {
             "name": "融券餘額",
-            "value": "16.9萬張",
+            "value": "17.36萬張",
             "trend": "up",
             "note": "2026-04-01",
-            "last_updated": "2026-04-01"
+            "last_updated": "2026-04-02"
         },
         {
             "name": "信用卡逾期率",
             "value": "0.24%",
             "trend": "neutral",
-            "note": "2026-01 (資產品質穩定)",
+            "note": "2026-01",
             "last_updated": "2026-03-28"
         },
         {
             "name": "製造業加班工時",
             "value": "年增13.9%",
             "trend": "up",
-            "note": "2026-02 (燈號轉紅，訂單動能無虞)",
+            "note": "2026-02 (燈號轉紅)",
             "last_updated": "2026-04-01"
         },
         {
@@ -237,15 +216,8 @@
             "name": "台股加權指數",
             "value": "33174.82",
             "trend": "up",
-            "note": "2026-04-01 (報復性大漲領軍回升)",
-            "last_updated": "2026-04-01"
-        },
-        {
-            "name": "外資台積電買賣超",
-            "value": "-21.5萬張",
-            "trend": "down",
-            "note": "2026-03 累計調節，因地緣避險需求",
-            "last_updated": "2026-04-01"
+            "note": "2026-04-01",
+            "last_updated": "2026-04-02"
         }
     ]
 }
