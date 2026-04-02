@@ -2,10 +2,10 @@
     "US_MACRO": [
         {
             "name": "國內生產毛額 (GDP) 修正值",
-            "value": "1.4%",
-            "trend": "down",
-            "note": "2025 Q4 (年化增長率修正值)",
-            "last_updated": "2026-04-02"
+            "value": "2.4%",
+            "trend": "up",
+            "note": "2026 展望上調 (Fed 預測)",
+            "last_updated": "2026-04-03"
         },
         {
             "name": "消費者物價指數 (CPI)",
@@ -65,10 +65,10 @@
         },
         {
             "name": "美元指數 (DXY)",
-            "value": "100.13",
+            "value": "100.01",
             "trend": "up",
             "note": "2026-04-02 (中東局勢避險情緒支撐)",
-            "last_updated": "2026-04-02"
+            "last_updated": "2026-04-03"
         },
         {
             "name": "實質私人投資",
@@ -100,24 +100,24 @@
         },
         {
             "name": "美國 10 年期公債殖利率",
-            "value": "4.38%",
-            "trend": "up",
-            "note": "2026-04-02 (通膨預期升溫)",
-            "last_updated": "2026-04-02"
+            "value": "4.31%",
+            "trend": "neutral",
+            "note": "2026-04-02 (殖利率小幅回落)",
+            "last_updated": "2026-04-03"
         },
         {
             "name": "美國 30 年期公債殖利率",
-            "value": "4.91%",
-            "trend": "up",
+            "value": "4.89%",
+            "trend": "neutral",
             "note": "2026-04-02",
-            "last_updated": "2026-04-02"
+            "last_updated": "2026-04-03"
         },
         {
             "name": "美國 3 個月期公債殖利率",
-            "value": "3.69%",
-            "trend": "up",
+            "value": "3.61%",
+            "trend": "neutral",
             "note": "2026-04-02",
-            "last_updated": "2026-04-02"
+            "last_updated": "2026-04-03"
         }
     ],
     "TW_MACRO": [
@@ -125,8 +125,8 @@
             "name": "景氣對策信號",
             "value": "40分 (紅燈)",
             "trend": "up",
-            "note": "2026-02 (連2紅，創21個月新高)",
-            "last_updated": "2026-04-02"
+            "note": "2026-02 (連3紅，創21個月新高)",
+            "last_updated": "2026-04-03"
         },
         {
             "name": "外銷訂單",
