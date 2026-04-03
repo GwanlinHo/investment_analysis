@@ -26,10 +26,11 @@
 - **Cache Update Rule**: When updating `macro_cache.json`, you MUST follow the **Upsert logic**: Update the values for specific indicators while strictly preserving all other existing historical data. Direct overwriting of the entire JSON object is strictly prohibited.
 - **Data Integrity**: Before saving the cache, verify that the total count of indicators has not decreased significantly.
 
-### 2. News Focus (20 Items)
+- **News Focus (20 Items)**
 - **Authority**: Tier-1 ONLY (Bloomberg, Reuters, WSJ, FT, CNBC, Barron's, BBC, CNN, Economic Daily, Commercial Times, CNA, Anue).
 - **Freshness**: All news must be published within the **LAST 7 DAYS**. **MANDATORY**: Each news item must include its publication date in (YYYY-MM-DD) format.
 - **Authenticity**: MANDATORY cross-verification of all major claims. If a story is only reported by a single non-wire source, it must be excluded. Compare at least two Tier-1 sources for critical news.
+- **Language & Translation**: **MANDATORY**. All news titles and summaries MUST be translated into **Traditional Chinese**. Strictly prohibit direct copy-pasting of English text for international news.
 - **Search Strategy**: Execute **4 distinct searches**: 
     1. Global Macro/Fed
     2. TW Stock/Tech/TSMC
@@ -40,7 +41,7 @@
 - **Format**: 
   - Line 1: **[Source] Title (YYYY-MM-DD)** (No links allowed).
   - Line 2: Concise summary focusing on impact and facts, not speculation.
-- **Date Check Mechanism**: AI must verify the publication date of each news item against the **current system date**. Any news item published more than **7 days prior to the current date** must be discarded. (Calculation: `Current_Date - 7 days`).
+- **Date & Language Check**: AI must verify the publication date (within 7 days) and the language (Traditional Chinese) of each news item before saving. Any item in English or from more than 7 days ago must be discarded or translated/re-sourced.
 - **HTML Target**: `#weekly-news-focus` (Use `<ul><li>`, NO `<a>` tags or URLs in the final HTML).
 
 ### 3. AI Comprehensive Analysis (Persona-Driven Framework)

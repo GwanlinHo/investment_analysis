@@ -169,6 +169,16 @@ def generate_macro_table(data, region_id):
     html += '</tbody></table>'
     return html
 
+def is_mostly_chinese(text):
+    """檢查文字是否主要由中文字元組成，防止英文內容誤入"""
+    clean_text = re.sub(r'<[^>]+>', '', text)
+    # 移除空白與數字
+    clean_text = re.sub(r'[\s\d]', '', clean_text)
+    if not clean_text: return True
+    chinese_chars = len(re.findall(r'[\u4e00-\u9fff]', clean_text))
+    # 若中文字元比例低於 30%，判定為非中文內容
+    return (chinese_chars / len(clean_text)) > 0.3
+
 def main():
     report_file = get_latest_report_file()
     if not report_file: 
@@ -224,6 +234,9 @@ def main():
 
     # --- Inject AI News ---
     with open("news.html", "r", encoding="utf-8") as f: news_content = f.read().strip()
+    if not is_mostly_chinese(news_content):
+        print("[Error] 'news.html' content is mostly non-Chinese. Please translate it to Traditional Chinese before updating.")
+        return
     news_id = 'weekly-news-focus'
     
     # 移除 news_content 中重複的 id 屬性，避免多層卡片樣式疊加
@@ -246,6 +259,9 @@ def main():
 
     # --- Inject AI Analysis ---
     with open("ai.html", "r", encoding="utf-8") as f: ai_content = f.read().strip()
+    if not is_mostly_chinese(ai_content):
+        print("[Error] 'ai.html' content is mostly non-Chinese. Please translate it to Traditional Chinese before updating.")
+        return
     ai_id = 'ai-analysis-report'
     
     # 僅當內容被外層容器包裹時才移除

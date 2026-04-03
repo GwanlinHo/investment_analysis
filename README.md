@@ -10,6 +10,12 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 ## 更新紀錄 (Changelog)
 
+- **2026-04-03**:
+  - **新聞內容語言與安全防護機制**:
+    - **強制翻譯準則**：更新 `GEMINI.md`，明確定義所有非中文來源的新聞必須翻譯為繁體中文，禁止直接複製英文摘要，確保報告內容的一致性。
+    - **注入攔截機制**：於 `update_report.py` 中新增 `is_mostly_chinese` 語言檢查邏輯。若偵測到 `news.html` 或 `ai.html` 內容之英文字元佔比過高，系統將自動中止注入流程並報錯，有效攔截不合規內容。
+    - **流程強化**：完善 AI 執行新聞搜尋後的彙整規範，要求生成後必須進行語系與時效性（7天內）的雙重核對。
+
 - **2026-04-02**:
   - **系統 Bug 修復與時區校準**:
     - **時區轉換邏輯修正**：將 `investment_analysis.py` 中 naive 的 `utcnow()` 替換為 `now(datetime.timezone.utc)`，解決在特定時段執行時因 naive 對象轉換時區導致報告檔名日期錯誤（誤判為前一日）的問題。
