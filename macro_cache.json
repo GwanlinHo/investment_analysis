@@ -2,17 +2,17 @@
     "US_MACRO": [
         {
             "name": "國內生產毛額 (GDP) 修正值",
-            "value": "2.4%",
-            "trend": "up",
-            "note": "2025 Q4 實績 (2026 展望上調)",
-            "last_updated": "2026-04-09"
+            "value": "0.5%",
+            "trend": "down",
+            "note": "2025 Q4 終值下修 (顯示增長放緩)",
+            "last_updated": "2026-04-10"
         },
         {
             "name": "消費者物價指數 (CPI)",
             "value": "2.4%",
-            "trend": "neutral",
-            "note": "2026-02 (YoY); 3月預期3.4%於4/10公布",
-            "last_updated": "2026-04-09"
+            "trend": "up",
+            "note": "2026-02 (YoY); 3月數據預計4/10公布，預期跳升至3.3%-3.7%",
+            "last_updated": "2026-04-10"
         },
         {
             "name": "生產者物價指數 (PPI)",
@@ -95,36 +95,36 @@
             "name": "聯準會基準利率",
             "value": "3.50%-3.75%",
             "trend": "neutral",
-            "note": "2026-03 會議紀要顯示升息機率上升",
-            "last_updated": "2026-04-09"
+            "note": "2026-04-09 官員暗示若通膨居高不下可能升息",
+            "last_updated": "2026-04-10"
         },
         {
             "name": "美國 10 年期公債殖利率",
-            "value": "4.35%",
-            "trend": "up",
+            "value": "4.29%",
+            "trend": "neutral",
             "note": "2026-04-09",
-            "last_updated": "2026-04-09"
+            "last_updated": "2026-04-10"
         },
         {
             "name": "美國 30 年期公債殖利率",
-            "value": "4.92%",
-            "trend": "up",
+            "value": "4.89%",
+            "trend": "neutral",
             "note": "2026-04-09",
-            "last_updated": "2026-04-09"
+            "last_updated": "2026-04-10"
         },
         {
             "name": "美國 3 個月期公債殖利率",
-            "value": "3.72%",
-            "trend": "up",
+            "value": "3.58%",
+            "trend": "neutral",
             "note": "2026-04-09",
-            "last_updated": "2026-04-09"
+            "last_updated": "2026-04-10"
         },
         {
             "name": "恐慌指數 (VIX)",
-            "value": "21.04",
+            "value": "19.49",
             "trend": "down",
-            "note": "2026-04-09 (美伊停火緩解極端恐慌)",
-            "last_updated": "2026-04-09"
+            "note": "2026-04-09",
+            "last_updated": "2026-04-10"
         }
     ],
     "TW_MACRO": [
@@ -146,8 +146,8 @@
             "name": "消費者物價指數 (CPI)",
             "value": "1.75%",
             "trend": "up",
-            "note": "2026-02 (YoY); 3月漲幅預期擴大",
-            "last_updated": "2026-04-09"
+            "note": "2026-02 (YoY); 3月漲幅預期因能源價格擴大",
+            "last_updated": "2026-04-10"
         },
         {
             "name": "工業生產指數",
@@ -189,7 +189,7 @@
             "value": "3877.35億",
             "trend": "up",
             "note": "2026-04-08 (籌碼面創歷史新高)",
-            "last_updated": "2026-04-09"
+            "last_updated": "2026-04-10"
         },
         {
             "name": "融券餘額",
@@ -221,10 +221,10 @@
         },
         {
             "name": "台股加權指數",
-            "value": "33229.82",
+            "value": "34861",
             "trend": "up",
             "note": "2026-04-09 (收盤價)",
-            "last_updated": "2026-04-09"
+            "last_updated": "2026-04-10"
         }
     ]
 }
