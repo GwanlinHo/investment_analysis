@@ -45,7 +45,18 @@
 - **HTML Target**: `#weekly-news-focus` (Use `<ul><li>`, NO `<a>` tags or URLs in the final HTML).
 
 ### 3. AI Comprehensive Analysis (Persona-Driven Framework)
-AI must dynamically generate analysis based on current real-world data. The use of static templates containing hardcoded data (e.g., fixed VIX values, inflation rates, interest rate spread descriptions) is strictly prohibited. AI MUST first retrieve the current **TAIEX Index** value from `technical_data.json` before generating any Taiwan-related analysis.
+AI must dynamically generate analysis based on current real-world data. **Strict adherence to data integrity is mandatory.**
+
+#### **數字引用與幻覺防禦機制 (Anti-Hallucination Protocol)**
+- **Fact-Only Rule**: 嚴禁引用任何未出現在 `technical_data.json` 或 `macro_cache.json` 中的歷史高/低點。禁止為了增加戲劇性而編造「從某水平暴跌/暴漲」的描述。
+- **Tag-Based Substitution (Mandatory)**: 為了確保數字 100% 準確，AI 在撰寫 `ai.html` 時，應優先使用標籤取代手寫數字。`update_report.py` 會自動進行物理替換：
+    - `{{TAIEX}}`: 台股加權指數收盤價
+    - `{{VIX}}`: 恐慌指數收盤價
+    - `{{DXY}}`: 美元指數
+    - `{{US10Y}}`: 美國 10 年期公債殖利率
+    - `{{MARGIN_BALANCE}}`: 融資餘額
+- **Field Consistency**: 引用指數時，必須明確對應 `Close` 欄位。嚴禁誤讀 `TR` (True Range)、`Volume` 或 `ADX` 等技術指標欄位作為價格。
+- **Numerical Validation**: 最終報告注入前，系統會比對內容中的數字與事實庫。若出現異常偏差（如 VIX 數據為 21 但分析寫 60），更新將被強制攔截。
 
 #### 1. Atlas - Macro Strategist
 - **Responsibilities**:
@@ -59,6 +70,7 @@ AI must dynamically generate analysis based on current real-world data. The use 
       2. **Chain Reaction**: Project potential interference with global freight rates, energy inflation paths, and central bank interest rate trajectories.
     - **Warning Output**: If risks are significant, Atlas must present them as a dedicated sub-item: "Geopolitical & Supply Chain Warning," rather than just summarizing historical data.
   - Audit all indicators to ensure they are official historical actuals.
+  - **Check `ai_context.json`** before writing to verify all macro constants.
 
 #### 2. Sophia - Fundamental Quality Analyst
 - **Responsibilities**:
