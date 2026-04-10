@@ -251,7 +251,18 @@ def main():
     if all_rep:
         with open("technical_data.json", 'w', encoding='utf-8') as f: json.dump({"fundamental": all_fun, "yield": y_data, "market": all_mkt, "summary": all_sum, "last_updated": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}, f, ensure_ascii=False, indent=2)
         env = Environment(loader=FileSystemLoader(TEMPLATE_DIR)); tpl = env.get_template(TEMPLATE_FILE)
-        html = tpl.render(date_str=utc_now.astimezone(TZ).strftime('%Y-%m-%d'), summary_html=sum_html, report_data=all_rep, kd_window=KD_WINDOW, bias_periods=BIAS_PERIODS, yield_curve_plot_b64=y_plot, yield_data=y_data)
+        html = tpl.render(
+            date_str=utc_now.astimezone(TZ).strftime('%Y-%m-%d'), 
+            summary_html=sum_html, 
+            report_data=all_rep, 
+            kd_window=KD_WINDOW, 
+            bias_periods=BIAS_PERIODS, 
+            yield_curve_plot_b64=y_plot, 
+            yield_data=y_data,
+            fundamental_json=all_fun,
+            yield_json=y_data,
+            market_json=all_mkt
+        )
         os.makedirs("report", exist_ok=True); fname = f"report/invest_analysis_{utc_now.astimezone(TZ).strftime('%Y%m%d')}.html"; open(fname, 'w', encoding='utf-8').write(html); shutil.copy2(fname, "index.html"); print("[Success] 分析完成")
 
 if __name__ == "__main__": main()

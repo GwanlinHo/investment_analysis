@@ -10,6 +10,13 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 ## 更新紀錄 (Changelog)
 
+- **2026-04-10**:
+  - **報告數據注入與台股同步修復**:
+    - **JSON 注入修復**：修正 `investment_analysis.py` 在渲染模板時未傳遞市場數據 JSON 的問題，並同步更新 `report_template.html` 以支援 Jinja2 變數，解決報告中技術圖表數據為空的 Bug。
+    - **總經表格注入邏輯優化**：修正 `update_report.py` 僅能替換現有表格而無法處理初始占位符的邏輯，確保宏觀經濟指標能正確填入報告。
+    - **台股數據同步確認**：解決台股加權指數數據抓取延遲問題，目前報告已完整包含昨（4/9）與今（4/10）的最新盤後數據。
+
+
 - **2026-04-09**:
   - **數值精確度修復與自動化防護系統 (Anti-Hallucination System)**:
     - **重大幻覺修復**：修正 AI 將 VIX 技術指標欄位 `TR` (真實波幅) 誤認為 `Close` (收盤價) 導致的數據錯誤。

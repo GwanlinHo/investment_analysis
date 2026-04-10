@@ -8,9 +8,9 @@
     HIDDEN DATA FOR AI ANALYSIS
     AI Agents should read technical_data.json instead.
     -->
-    <script id="fundamental-data" type="application/json">{}</script>
-    <script id="yield-data" type="application/json">{}</script>
-    <script id="market-data" type="application/json">{}</script>
+    <script id="fundamental-data" type="application/json">{{ fundamental_json | tojson }}</script>
+    <script id="yield-data" type="application/json">{{ yield_json | tojson }}</script>
+    <script id="market-data" type="application/json">{{ market_json | tojson }}</script>
     <style>
         :root {
             --bg-color: #f4f6f8;

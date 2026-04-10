@@ -187,8 +187,10 @@ def main():
     with open(report_file, "r", encoding="utf-8") as f: content = f.read()
     us_table = generate_macro_table(macro_cache.get("US_MACRO", []), "us-macro-table")
     tw_table = generate_macro_table(macro_cache.get("TW_MACRO", []), "tw-macro-table")
-    content = re.sub(r'<table.*?id="us-macro-table">.*?</table>', us_table, content, flags=re.DOTALL)
-    content = re.sub(r'<table.*?id="tw-macro-table">.*?</table>', tw_table, content, flags=re.DOTALL)
+    
+    # 支援占位符與現有表格的替換
+    content = re.sub(r'<div id="us-macro-placeholder"></div>|<table.*?id="us-macro-table">.*?</table>', us_table, content, flags=re.DOTALL)
+    content = re.sub(r'<div id="tw-macro-placeholder"></div>|<table.*?id="tw-macro-table">.*?</table>', tw_table, content, flags=re.DOTALL)
 
     if os.path.exists("news.html"):
         with open("news.html", "r", encoding="utf-8") as f: news_html = f.read().strip()
