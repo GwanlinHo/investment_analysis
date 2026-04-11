@@ -210,9 +210,9 @@
             </div>
         </div>
 
-        {% if yield_curve_plot_b64 %}
         <div id="macro-analysis" class="group-section">
             <h2 class="group-title">總體經濟指標</h2>
+            {% if yield_curve_plot_b64 %}
             <div class="card chart-card" style="max-width: 900px; margin: 0 auto;">
                  <div class="chart-header">美國長短期國庫券殖利率</div>
                  <img src="data:image/png;base64,{{ yield_curve_plot_b64 }}" alt="Yield Curve Plot">
@@ -224,6 +224,7 @@
                     {% endif %}
                  </div>
             </div>
+            {% endif %}
             
             <div class="card" style="margin-top: 25px; padding: 20px;">
                 <h3 class="subsection-title" style="margin-top: 0; margin-bottom: 20px;">美台重要經濟指標</h3>
@@ -237,7 +238,6 @@
                 </div>
             </div>
         </div>
-        {% endif %}
 
         <div class="ai-section-container card">
             <div class="group-header">
