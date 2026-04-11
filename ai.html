@@ -1,40 +1,56 @@
-<div class="ai-analysis-container">
-    <!-- Atlas: Macro Strategist -->
-    <section class="persona Atlas">
-        <h3>Atlas - 宏觀策略家</h3>
-        <p>當前全球宏觀環境正處於「增長焦慮」與「通膨復燃」的拉鋸戰中。美國 2025 Q4 GDP 終值下修至 0.5%，顯示高利率對實體經濟的壓抑已開始顯現；然而，即將公布的 3 月 CPI 數據市場預期將受能源價格推升而大幅跳升至 3.3% 以上，這使得聯準會官員 Beth Hammack 明確暗示「若通膨持續，不排除再度升息」。</p>
-        <p><b>地緣政治與供應鏈警告：</b>中東停火協議顯得極其脆弱，以色列對黎巴嫩的空襲引發伊朗對荷姆茲海峽通行權的威脅，布蘭特原油已逼近 96 美元。Atlas 警告，能源價格的二度通膨路徑正逐漸成形，這將延後全球降息時程，美元指數 ({{DXY}}) 受到避險與高利率預期支撐，短期內將維持在 105 以上的高位。</p>
-        <p>目前 10Y-3M 利差為 0.71%，曲線結構尚屬正常，顯示市場並未反映即刻的經濟衰退風險。</p>
-    </section>
-
-    <!-- Sophia: Fundamental Quality Analyst -->
-    <section class="persona Sophia">
-        <h3>Sophia - 基本面品質分析師</h3>
-        <p>基本面動能依然由 AI 產業主導。根據最新數據，全球半導體產值在 2026 年預計突破 1.3 兆美元，其中 AI 晶片佔比達 30%。台積電 (2330.TW) 作為核心節點，獲廣發證券上修目標價至 NT$2,808，反映 3 奈米與 5 奈米產能利用率持續飽和。</p>
-        <p>儘管記憶體族群近期遭外資提款，但 AI 基礎設施的長期供應協議（如 Broadcom 與 Google）顯示，雲端服務商 (CSP) 的資本支出並未縮減。Sophia 建議專注於具備高定價權與技術壁壘的「質優增長股」，避開受能源成本上升壓抑毛利的傳統製造業。</p>
-    </section>
-
-    <!-- Kenji: Technical Chartist -->
-    <section class="persona Kenji">
-        <h3>Kenji - 技術面圖表家</h3>
-        <p>從技術圖表來看，台股加權指數 ({{TAIEX}}) 在台積電尾盤大單敲進下，成功站穩 34,000 點大關並持續創高。然而，美股 S&P 500 與 NASDAQ 的 K 值均已進入 80 以上的超買區，顯示短期技術面過熱，需提防高檔震盪。KD 指標雖維持多頭排列，但若 3 月 CPI 公布後引發利率預期劇震，不排除出現技術性回檔測試 20 日均線 (20MA) 支撐。</p>
-    </section>
-
-    <!-- Crow: Flow & Sentiment Sentinel -->
-    <section class="persona Crow">
-        <h3>Crow - 籌碼與情緒哨兵</h3>
-        <p>市場情緒正處於高度敏感狀態。恐慌指數 ({{VIX}}) 雖回落至 19.49，顯示短期恐慌緩解，但台灣市場的融資餘額 ({{MARGIN_BALANCE}}) 創下 3,877 億元的歷史新高，顯示散戶進場積極，籌碼面已顯現「過度樂觀」的警訊。Crow 提醒，當籌碼高度集中於融資盤時，任何地緣政治的突發利空都可能引發多殺多的連鎖反應。</p>
-    </section>
-
-    <!-- Rain: Portfolio Manager -->
-    <section class="persona Rain">
-        <h3>Rain - 投資組合經理</h3>
-        <p>綜合以上分析，我們正處於一個「高增長、高通膨預期、高籌碼集中」的三高環境。投資策略建議如下：</p>
+<div id="ai-comprehensive-analysis">
+  <!-- Atlas - 總體經濟策略師 -->
+  <section class="persona-analysis" data-persona="Atlas">
+    <h3>Atlas - 總體經濟策略師：地緣政治風險與通膨警報</h3>
+    <div class="analysis-content">
+      <p>目前全球宏觀環境進入高度動盪期。美國 3 月 CPI 數據跳升至 {{CPI}}%，顯著高於前期，主要動力來自能源價格暴漲。地緣政治局勢緊張，中東伊朗與以色列的衝突直接推升布蘭特原油一度突破每桶 100 美元。儘管目前達成臨時停火，但荷姆茲海峽的「收費站」爭議與紅海航運風險依然嚴峻，全球供應鏈面臨高度不確定性。</p>
+      
+      <div class="warning-box">
+        <h4>地緣政治與供應鏈警告</h4>
         <ul>
-            <li><b>牛市情境 (40%)</b>：CPI 數據低於預期，聯準會維持鴿派，台股目標上看 36,000。策略：持有核心 AI 持股 (如 00757, 2330)。</li>
-            <li><b>常態情境 (45%)</b>：CPI 符合預期，高利率維持更久，市場進入震盪。策略：適度減碼融資盤，增持投等債 (00937B) 鎖定高殖利率。</li>
-            <li><b>熊市情境 (15%)</b>：中東爆發直接衝突導致油價破百，CPI 意外飆升。策略：大幅提高現金比重，買入避險資產如黃金 (GC=F) 或反向 ETF。</li>
+          <li><strong>即時衝擊：</strong> 地緣風險引發避險情緒，美元指數 {{DXY}} 與 VIX {{VIX}} 維持高檔震盪。</li>
+          <li><strong>連鎖反應：</strong> 若衝突未能轉化為長期和平，能源成本高企將迫使聯準會延後降息路徑，甚至重啟升息討論。</li>
         </ul>
-        <p><b>本週操作建議：</b>目前市場位於高位，切忌追高，建議將部分獲利轉向波動率較低且具防禦性質的債券資產，等待 CPI 數據落地後的方向確認。</p>
-    </section>
+      </div>
+      <p>目前美元指數穩定在 {{DXY}}，反映市場對高利率環境將持續更久的預期。需密切關注巴基斯坦和平談判的進展。</p>
+    </div>
+  </section>
+
+  <!-- Sophia - 基本面品質分析師 -->
+  <section class="persona-analysis" data-persona="Sophia">
+    <h3>Sophia - 基本面品質分析師：AI 浪潮帶動硬體爆發</h3>
+    <div class="analysis-content">
+      <p>從基本面來看，台灣科技產業正處於史上最強勁的增長週期。台積電第一季營收高達 1.134 兆元，年增 35%，展現 AI 先進製程的壟斷地位。台灣 3 月出口額首度突破 800 億美元大關，AI 與雲端基礎設施的需求是核心驅動力。中經院上調 2026 年台灣 GDP 預測至 4.14%，顯示實體經濟基本面極其穩固。</p>
+    </div>
+  </section>
+
+  <!-- Kenji - 技術面圖表大師 -->
+  <section class="persona-analysis" data-persona="Kenji">
+    <h3>Kenji - 技術面圖表大師：加權指數創高後的技術修正風險</h3>
+    <div class="analysis-content">
+      <p>台股加權指數 {{TAIEX}} 再次創下歷史新高。技術指標顯示，KD 指數出現黃金交叉，但 K 值已進入 84 的超買區間。MACD 柱狀體持續擴大，顯示多頭動能強勁。然而，5 日乖離率（BIAS）偏高，短期內需防範獲利了結的賣壓回檔。建議關注 10 日線支撐，若未跌破，多頭格局不變。</p>
+    </div>
+  </section>
+
+  <!-- Crow - 籌碼與情緒哨兵 -->
+  <section class="persona-analysis" data-persona="Crow">
+    <h3>Crow - 籌碼與情緒哨兵：融資餘額警訊與避險情緒</h3>
+    <div class="analysis-content">
+      <p>市場情緒正處於極端亢奮與不安的交界。融資餘額 {{MARGIN_BALANCE}} 億元已突破 4,000 億大關，創下歷史新高，籌碼面趨於浮躁。恐慌指數 VIX {{VIX}} 回升至 20 附近，反映避險資金開始湧入美債與黃金。融券餘額雖有微幅變動，但整體散戶參與度過高，一旦市場出現利空，多殺多的風險不容忽視。</p>
+    </div>
+  </section>
+
+  <!-- Rain - 投資組合經理 -->
+  <section class="persona-analysis" data-persona="Rain">
+    <h3>Rain - 投資組合經理：情境分析與操作策略</h3>
+    <div class="analysis-content">
+      <p>綜合以上分析，本週採取「防禦型進攻」策略：</p>
+      <ul>
+        <li><strong>樂觀情境 (Bull)：</strong> 中東和平談判圓滿，油價回落，台積電法說會給出超預期指引，指數看望 37,000 點。</li>
+        <li><strong>基準情境 (Base)：</strong> 地緣局勢維持武裝和平，通膨壓力緩步消化，台股高檔震盪。</li>
+        <li><strong>悲觀情境 (Bear)：</strong> 荷姆茲海峽封鎖升級，能源引發全球惡性通膨，Fed 意外升息，指數回測季線支撐。</li>
+      </ul>
+      <p><strong>行動建議：</strong> 減碼高融資佔比之投機股，增持具備定價能力的 AI 先進製程供應鏈及受惠避險資金流向的公債 ETF。</p>
+    </div>
+  </section>
 </div>

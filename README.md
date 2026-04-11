@@ -10,6 +10,12 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 ## 更新紀錄 (Changelog)
 
+- **2026-04-11**:
+  - **報告標籤系統擴充與分析優化**:
+    - **CPI 標籤支援**：優化 `update_report.py` 數據提取邏輯，新增 `{{CPI}}` 標籤支援，確保分析內容能精確引用最新消費者物價指數數據。
+    - **地緣政治風險分析**：在 AI 分析中引入地緣政治預警機制，針對 3 月 CPI 跳升與中東局勢提供多維度情境分析。
+    - **數據精準度提升**：修復 AI 報告中數值單位的顯示問題，確保百分比與金額單位的正確映射。
+
 - **2026-04-10**:
   - **報告數據注入與台股同步修復**:
     - **JSON 注入修復**：修正 `investment_analysis.py` 在渲染模板時未傳遞市場數據 JSON 的問題，並同步更新 `report_template.html` 以支援 Jinja2 變數，解決報告中技術圖表數據為空的 Bug。
