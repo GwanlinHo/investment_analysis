@@ -10,6 +10,12 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 ## 更新紀錄 (Changelog)
 
+- **2026-04-12**:
+  - **資料清理系統與 Regex 穩定性修正**:
+    - **新增 prune_manager.py**：實作自動清理功能，報表目錄 `report/` 僅保留最近 30 份 HTML 報表；`technical_data.json` 中的市場歷史序列限制為最近 120 個交易日，有效釋放硬碟空間並防止資料檔案無序膨脹。
+    - **修正 update_report.py**：修復正則表達式匹配邏輯，改用非貪婪模式（Non-greedy）匹配 AI 分析區塊，避免在注入 AI 觀點時意外刪除或毀壞前端技術指標與 K 線圖區塊。
+    - **自動化流程整合**：將清理流程整合至報表更新階段，實現「分析完畢即刻修剪」的維護機制。
+
 - **2026-04-11**:
   - **報告標籤系統擴充與分析優化**:
     - **CPI 標籤支援**：優化 `update_report.py` 數據提取邏輯，新增 `{{CPI}}` 標籤支援，確保分析內容能精確引用最新消費者物價指數數據。

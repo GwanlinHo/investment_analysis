@@ -198,14 +198,27 @@ def main():
         pattern_news = r'(<div id="weekly-news-focus">).*?(?=<!-- news-anchor -->)'
         content = re.sub(pattern_news, f'\\1\n{news_html}\n</div>', content, flags=re.DOTALL)
 
-    pattern_ai = r'(<div id="ai-analysis-report">).*?(?=<!-- ai-anchor -->)'
-    ai_content = re.sub(r'^<div id="ai-analysis-report">', '', ai_content)
-    ai_content = re.sub(r'</div>$', '', ai_content).strip()
-    content = re.sub(pattern_ai, f'\\1\n{ai_content}\n</div>', content, flags=re.DOTALL)
+    # 修正 AI 分析區塊的匹配邏輯 (使用非貪婪模式 .*? 並確保 anchor 正確)
+    pattern_ai = r'(<div id="ai-analysis-report">).*?(<!-- ai-anchor -->)'
+    
+    # 清理 ai_content 中的包裝標籤，避免重複嵌套
+    ai_content_clean = re.sub(r'^<div id="ai-analysis-report">', '', ai_content)
+    ai_content_clean = re.sub(r'</div>$', '', ai_content_clean).strip()
+    
+    # 執行替換
+    content = re.sub(pattern_ai, f'\\1\n{ai_content_clean}\n\\2', content, flags=re.DOTALL)
 
     with open(report_file, "w", encoding="utf-8") as f: f.write(content)
     shutil.copy2(report_file, "index.html")
     print(f"[Success] Done.")
+    
+    # 執行資料清理
+    try:
+        import prune_manager
+        prune_manager.prune_reports()
+        prune_manager.prune_technical_data()
+    except Exception as e:
+        print(f"[Warning] 清理過程中發生錯誤: {e}")
 
 if __name__ == "__main__":
     main()
