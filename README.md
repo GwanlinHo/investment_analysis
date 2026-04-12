@@ -11,6 +11,9 @@ This is an investment assistance tool that combines **Python automation scripts*
 ## 更新紀錄 (Changelog)
 
 - **2026-04-12**:
+  - **開發流程規範化與 GEMINI.md 翻譯**:
+    - **新增開發流程規定**：在 `GEMINI.md` 中加入強制性開發流程，要求所有功能、格式或規則的修改必須在獨立分支進行，並在通過完整測試且取得使用者同意後方可合併至 `main`。
+    - **內容完整翻譯**：將 `GEMINI.md` 中的「數字引用與幻覺防禦機制」等中文區塊翻譯為英文，以確保專案規則的一致性。
   - **資料清理系統與 Regex 穩定性修正**:
     - **新增 prune_manager.py**：實作自動清理功能，報表目錄 `report/` 僅保留最近 30 份 HTML 報表；`technical_data.json` 中的市場歷史序列限制為最近 120 個交易日，有效釋放硬碟空間並防止資料檔案無序膨脹。
     - **修正 update_report.py**：修復正則表達式匹配邏輯，改用非貪婪模式（Non-greedy）匹配 AI 分析區塊，避免在注入 AI 觀點時意外刪除或毀壞前端技術指標與 K 線圖區塊。
