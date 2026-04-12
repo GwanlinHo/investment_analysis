@@ -8,6 +8,12 @@
 - **Documentation**: A summary of changes and the date must be added to the "Changelog" section at the top of `README.md` ONLY when modifying the source code or `GEMINI.md` itself.
 - **Tool Usage Standard**: Prohibit guessing string positions in files (e.g., using offset). MUST use `grep_search` or the `grep` tool via `run_shell_command` for precise positioning and content reading.
 
+## Development Workflow
+- **Branch-based Development**: ALL modifications to source code, project configuration, formatting, or rules (including `GEMINI.md`) **MUST** be performed in a dedicated feature branch (e.g., `feature/xxx`).
+- **Verification & Debugging**: Changes must be fully developed, verified, and debugged within the feature branch.
+- **Full Testing**: Before proposing a merge, the contributor must execute a complete analysis cycle (`uv run investment_analysis.py` followed by `uv run update_report.py`) and verify the integrity of the generated `index.html` and `report/*.html`.
+- **Merge & Upload Policy**: Merging changes to the `main` branch and pushing to GitHub is **STRICTLY PROHIBITED** until the user has reviewed the results and provided explicit consent.
+
 ## Workflow: Investment Analysis
 
 ### 0. Technical Data Generation
@@ -47,16 +53,16 @@
 ### 3. AI Comprehensive Analysis (Persona-Driven Framework)
 AI must dynamically generate analysis based on current real-world data. **Strict adherence to data integrity is mandatory.**
 
-#### **數字引用與幻覺防禦機制 (Anti-Hallucination Protocol)**
-- **Fact-Only Rule**: 嚴禁引用任何未出現在 `technical_data.json` 或 `macro_cache.json` 中的歷史高/低點。禁止為了增加戲劇性而編造「從某水平暴跌/暴漲」的描述。
-- **Tag-Based Substitution (Mandatory)**: 為了確保數字 100% 準確，AI 在撰寫 `ai.html` 時，應優先使用標籤取代手寫數字。`update_report.py` 會自動進行物理替換：
-    - `{{TAIEX}}`: 台股加權指數收盤價
-    - `{{VIX}}`: 恐慌指數收盤價
-    - `{{DXY}}`: 美元指數
-    - `{{US10Y}}`: 美國 10 年期公債殖利率
-    - `{{MARGIN_BALANCE}}`: 融資餘額
-- **Field Consistency**: 引用指數時，必須明確對應 `Close` 欄位。嚴禁誤讀 `TR` (True Range)、`Volume` 或 `ADX` 等技術指標欄位作為價格。
-- **Numerical Validation**: 最終報告注入前，系統會比對內容中的數字與事實庫。若出現異常偏差（如 VIX 數據為 21 但分析寫 60），更新將被強制攔截。
+#### **Numerical Integrity & Anti-Hallucination Protocol**
+- **Fact-Only Rule**: Strictly prohibit referencing any historical high/low points not present in `technical_data.json` or `macro_cache.json`. Do not invent descriptions like "plunged/surged from level X" for dramatic effect.
+- **Tag-Based Substitution (Mandatory)**: To ensure 100% numerical accuracy, AI must prioritize using tags instead of manual numbering when writing `ai.html`. `update_report.py` will automatically perform physical replacement:
+    - `{{TAIEX}}`: TAIEX Closing Price
+    - `{{VIX}}`: VIX Index Closing Price
+    - `{{DXY}}`: US Dollar Index (DXY)
+    - `{{US10Y}}`: US 10-Year Treasury Yield
+    - `{{MARGIN_BALANCE}}`: Margin Balance
+- **Field Consistency**: When quoting indices, you must explicitly correspond to the `Close` field. It is strictly forbidden to misinterpret technical indicator fields like `TR` (True Range), `Volume`, or `ADX` as price levels.
+- **Numerical Validation**: Before the final report injection, the system will compare the numbers in the content with the fact repository. If an abnormal deviation occurs (e.g., the VIX data is 21 but the analysis writes 60), the update will be forcibly intercepted.
 
 #### 1. Atlas - Macro Strategist
 - **Responsibilities**:
