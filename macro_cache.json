@@ -44,10 +44,10 @@
         },
         {
             "name": "初領失業金人數",
-            "value": "20.2萬",
-            "trend": "down",
-            "note": "截至 3/28 (低於預期)",
-            "last_updated": "2026-04-02"
+            "value": "21.9萬",
+            "trend": "up",
+            "note": "截至 4/4 (高於預期)",
+            "last_updated": "2026-04-13"
         },
         {
             "name": "ISM 製造業指數",
@@ -64,11 +64,25 @@
             "last_updated": "2026-04-02"
         },
         {
+            "name": "布蘭特原油 (Brent Oil)",
+            "value": "100.5",
+            "trend": "up",
+            "note": "2026-04-13 霍爾木茲海峽封鎖消息",
+            "last_updated": "2026-04-13"
+        },
+        {
+            "name": "布蘭特原油壓力目標 (Brent Oil Target)",
+            "value": "120.0",
+            "trend": "up",
+            "note": "悲觀劇本情境基準",
+            "last_updated": "2026-04-13"
+        },
+        {
             "name": "美元指數 (DXY)",
-            "value": "98.65",
-            "trend": "down",
-            "note": "2026-04-10 (微幅收低，市場消化通膨數據)",
-            "last_updated": "2026-04-11"
+            "value": "98.85",
+            "trend": "up",
+            "note": "2026-04-13 (地緣政治緊張帶動避險資金回流)",
+            "last_updated": "2026-04-13"
         },
         {
             "name": "實質私人投資",
@@ -101,30 +115,30 @@
         {
             "name": "美國 10 年期公債殖利率",
             "value": "4.34%",
-            "trend": "up",
-            "note": "2026-04-10",
-            "last_updated": "2026-04-11"
+            "trend": "neutral",
+            "note": "2026-04-13",
+            "last_updated": "2026-04-13"
         },
         {
             "name": "美國 30 年期公債殖利率",
             "value": "4.92%",
-            "trend": "up",
-            "note": "2026-04-10",
-            "last_updated": "2026-04-11"
+            "trend": "neutral",
+            "note": "2026-04-13",
+            "last_updated": "2026-04-13"
         },
         {
             "name": "美國 3 個月期公債殖利率",
-            "value": "3.68%",
+            "value": "3.69%",
             "trend": "up",
-            "note": "2026-04-10",
-            "last_updated": "2026-04-11"
+            "note": "2026-04-13",
+            "last_updated": "2026-04-13"
         },
         {
             "name": "恐慌指數 (VIX)",
-            "value": "19.23",
-            "trend": "down",
-            "note": "2026-04-10 地緣風險降溫但仍處高位",
-            "last_updated": "2026-04-11"
+            "value": "21.25",
+            "trend": "up",
+            "note": "2026-04-13 霍爾木茲海峽封鎖引發恐慌飆升",
+            "last_updated": "2026-04-13"
         }
     ],
     "TW_MACRO": [
@@ -144,10 +158,31 @@
         },
         {
             "name": "消費者物價指數 (CPI)",
-            "value": "1.75%",
+            "value": "1.20%",
+            "trend": "down",
+            "note": "2026-03 (YoY) 漲幅明顯放緩",
+            "last_updated": "2026-04-13"
+        },
+        {
+            "name": "台積電營收年增率 (TSMC Revenue YoY)",
+            "value": "35.1%",
             "trend": "up",
-            "note": "2026-02 (YoY); 3月漲幅預期因能源價格擴大",
-            "last_updated": "2026-04-10"
+            "note": "2026 Q1 (AI 需求極其強勁)",
+            "last_updated": "2026-04-13"
+        },
+        {
+            "name": "台積電單季營收 (TSMC Revenue USD)",
+            "value": "357億美元",
+            "trend": "up",
+            "note": "2026 Q1",
+            "last_updated": "2026-04-13"
+        },
+        {
+            "name": "台積電毛利率 (TSMC Gross Margin)",
+            "value": "53.0%",
+            "trend": "neutral",
+            "note": "Q1 預估下標",
+            "last_updated": "2026-04-13"
         },
         {
             "name": "工業生產指數",

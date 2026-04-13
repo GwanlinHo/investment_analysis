@@ -97,6 +97,15 @@ def get_data_context(tech_data, macro_data):
                 except: return item["value"]
         return None
 
+    # 自動將快取中所有數值指標納入事實庫
+    for region in ["US_MACRO", "TW_MACRO"]:
+        for item in macro_data.get(region, []):
+            num_str = re.sub(r'[^\d.]', '', item["value"])
+            try:
+                val = float(num_str)
+                ctx[item["name"]] = val
+            except: pass
+
     ctx["DXY"] = find_val("US_MACRO", "美元指數")
     ctx["US10Y"] = find_val("US_MACRO", "10 年期公債")
     ctx["US3M"] = find_val("US_MACRO", "3 個月期公債")
