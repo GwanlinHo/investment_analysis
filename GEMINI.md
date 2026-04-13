@@ -12,7 +12,7 @@
 - **Branch-based Development**: ALL modifications to source code, project configuration, formatting, or rules (including `GEMINI.md`) **MUST** be performed in a dedicated feature branch (e.g., `feature/xxx`).
 - **Verification & Debugging**: Changes must be fully developed, verified, and debugged within the feature branch.
 - **Full Testing**: Before proposing a merge, the contributor must execute a complete analysis cycle (`uv run investment_analysis.py` followed by `uv run update_report.py`) and verify the integrity of the generated `index.html` and `report/*.html`.
-- **Merge & Upload Policy**: Merging changes to the `main` branch and pushing to GitHub is **STRICTLY PROHIBITED** until the user has reviewed the results and provided explicit consent.
+- **Merge & Upload Policy**: Merging changes to the `main` branch and pushing to GitHub is **STRICTLY PROHIBITED** until the user has reviewed the results and provided explicit consent. Once consent is granted, the contributor must merge the feature branch back to `main`, push the changes to the remote repository, and ensure the local environment is switched back to the `main` branch.
 
 ## Workflow: Investment Analysis
 

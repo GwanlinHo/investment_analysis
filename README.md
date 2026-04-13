@@ -10,6 +10,10 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 ## 更新紀錄 (Changelog)
 
+- **2026-04-13 (v1.3)**:
+  - **開發流程規範強化 (Workflow Standard Update)**:
+    - **合併與同步要求**：於 `GEMINI.md` 中新增明確規範，要求在 feature branch 完成修改、驗證並獲得使用者同意後，必須執行合併至 `main`、推送至遠端倉庫，並將本地環境切換回 `main` 分支，確保開發環境的一致性與穩定性。
+
 - **2026-04-13 (v1.2)**:
   - **事實校驗系統升級**:
     - **動態事實庫擴展**：修改了 `update_report.py`，使校驗系統能夠自動載入 `macro_cache.json` 中所有的數值指標作為分析事實庫，大幅提升校驗靈活性。
