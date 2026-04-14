@@ -9,10 +9,13 @@
 - **Tool Usage Standard**: Prohibit guessing string positions in files (e.g., using offset). MUST use `grep_search` or the `grep` tool via `run_shell_command` for precise positioning and content reading.
 
 ## Development Workflow
-- **Branch-based Development**: ALL modifications to source code, project configuration, formatting, or rules (including `GEMINI.md`) **MUST** be performed in a dedicated feature branch (e.g., `feature/xxx`).
-- **Verification & Debugging**: Changes must be fully developed, verified, and debugged within the feature branch.
-- **Full Testing**: Before proposing a merge, the contributor must execute a complete analysis cycle (`uv run investment_analysis.py` followed by `uv run update_report.py`) and verify the integrity of the generated `index.html` and `report/*.html`.
-- **Merge & Upload Policy**: Merging changes to the `main` branch and pushing to GitHub is **STRICTLY PROHIBITED** until the user has reviewed the results and provided explicit consent. Once consent is granted, the contributor must merge the feature branch back to `main`, push the changes to the remote repository, and ensure the local environment is switched back to the `main` branch.
+- **Branch-based Development (Systematic Changes Only)**: Modifications to source code, project configuration, formatting, or rules (including `GEMINI.md` and system prompts) **MUST** be performed in a dedicated feature branch (e.g., `feature/xxx`).
+- **Daily Reports (Direct to Main)**: Daily investment analysis reports (including `index.html`, `report/*.html`, `technical_data.json`, `macro_cache.json`, `news.html`, and `ai.html`) do **NOT** require a feature branch and can be committed directly to the `main` branch.
+- **Verification & Debugging**: Systematic changes must be fully developed, verified, and debugged within the feature branch. Daily reports must pass the automated validation in `update_report.py`.
+
+## Merge & Upload Policy
+- **Systematic Changes**: Merging to `main` and pushing to GitHub is **STRICTLY PROHIBITED** until the user has reviewed the results and provided explicit consent. After consent, merge to `main`, push, and switch the local environment back to `main`.
+- **Daily Reports**: Upon successful completion of the analysis cycle (`uv run investment_analysis.py` and `uv run update_report.py`), the results must be committed and pushed to the `main` branch **IMMEDIATELY** and **AUTOMATICALLY**, without requiring manual consent or a feature branch.
 
 ## Workflow: Investment Analysis
 
