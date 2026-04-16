@@ -44,10 +44,10 @@
         },
         {
             "name": "初領失業金人數",
-            "value": "21.9萬",
-            "trend": "up",
-            "note": "截至 4/4 (高於預期)",
-            "last_updated": "2026-04-14"
+            "value": "20.7萬",
+            "trend": "down",
+            "note": "截至 4/11 (優於預期，創2月以來最大單週跌幅)",
+            "last_updated": "2026-04-16"
         },
         {
             "name": "ISM 製造業指數",
@@ -71,13 +71,6 @@
             "last_updated": "2026-04-15"
         },
         {
-            "name": "布蘭特原油壓力目標 (Brent Oil Target)",
-            "value": "120.0",
-            "trend": "up",
-            "note": "悲觀劇本情境基準",
-            "last_updated": "2026-04-13"
-        },
-        {
             "name": "美元指數 (DXY)",
             "value": "98.06",
             "trend": "down",
@@ -92,20 +85,6 @@
             "last_updated": "2026-03-28"
         },
         {
-            "name": "信用卡拖欠率",
-            "value": "2.94%",
-            "trend": "down",
-            "note": "2025 Q4 (SA)",
-            "last_updated": "2026-03-28"
-        },
-        {
-            "name": "消費者信心指數 (Conference Board)",
-            "value": "91.8",
-            "trend": "up",
-            "note": "2026-03 (現況改善)",
-            "last_updated": "2026-04-01"
-        },
-        {
             "name": "聯準會基準利率",
             "value": "3.50%-3.75%",
             "trend": "neutral",
@@ -114,38 +93,24 @@
         },
         {
             "name": "美國 10 年期公債殖利率",
-            "value": "4.28%",
-            "trend": "down",
-            "note": "2026-04-15",
-            "last_updated": "2026-04-15"
-        },
-        {
-            "name": "美國 30 年期公債殖利率",
-            "value": "4.91%",
-            "trend": "down",
-            "note": "2026-04-15",
-            "last_updated": "2026-04-15"
-        },
-        {
-            "name": "美國 3 個月期公債殖利率",
-            "value": "4.25%",
+            "value": "4.31%",
             "trend": "up",
-            "note": "2026-04-15 (殖利率曲線極度平坦)",
-            "last_updated": "2026-04-15"
+            "note": "2026-04-16",
+            "last_updated": "2026-04-16"
         },
         {
             "name": "恐慌指數 (VIX)",
-            "value": "18.06",
+            "value": "17.94",
             "trend": "down",
-            "note": "2026-04-15 (和平談判進展緩解市場恐慌)",
-            "last_updated": "2026-04-15"
+            "note": "2026-04-16 (和平談判進展緩解市場恐慌)",
+            "last_updated": "2026-04-16"
         },
         {
             "name": "標普 500 指數",
-            "value": "7125.42",
+            "value": "7210.42",
             "trend": "up",
-            "note": "2026-04-15 (受科技股強勁表現帶動)",
-            "last_updated": "2026-04-15"
+            "note": "2026-04-16 (受台積電強勁展望帶動)",
+            "last_updated": "2026-04-16"
         }
     ],
     "TW_MACRO": [
@@ -172,24 +137,45 @@
         },
         {
             "name": "台積電營收年增率 (TSMC Revenue YoY)",
-            "value": "35.1%",
+            "value": "40.6%",
             "trend": "up",
-            "note": "2026 Q1 (AI 需求極其強勁)",
-            "last_updated": "2026-04-13"
+            "note": "2026 Q1 (AI 需求支撐業績飆升)",
+            "last_updated": "2026-04-16"
         },
         {
             "name": "台積電單季營收 (TSMC Revenue USD)",
-            "value": "356億美元",
+            "value": "359億美元",
             "trend": "up",
-            "note": "2026 Q1",
-            "last_updated": "2026-04-13"
+            "note": "2026 Q1 (超越財測高標)",
+            "last_updated": "2026-04-16"
         },
         {
             "name": "台積電毛利率 (TSMC Gross Margin)",
-            "value": "53.0%",
-            "trend": "neutral",
-            "note": "Q1 預估下標",
-            "last_updated": "2026-04-13"
+            "value": "66.2%",
+            "trend": "up",
+            "note": "2026 Q1 (受惠 3 奈米放量與產能利用率提升)",
+            "last_updated": "2026-04-16"
+        },
+        {
+            "name": "台積電營業利益率",
+            "value": "58.1%",
+            "trend": "up",
+            "note": "2026 Q1",
+            "last_updated": "2026-04-16"
+        },
+        {
+            "name": "台積電淨利率",
+            "value": "50.5%",
+            "trend": "up",
+            "note": "2026 Q1",
+            "last_updated": "2026-04-16"
+        },
+        {
+            "name": "台積電每股盈餘 (TSMC EPS)",
+            "value": "22.08",
+            "trend": "up",
+            "note": "2026 Q1",
+            "last_updated": "2026-04-16"
         },
         {
             "name": "工業生產指數",
@@ -213,20 +199,6 @@
             "last_updated": "2026-04-02"
         },
         {
-            "name": "M2 年增率",
-            "value": "5.38%",
-            "trend": "up",
-            "note": "2026-02",
-            "last_updated": "2026-04-02"
-        },
-        {
-            "name": "失業率",
-            "value": "3.32%",
-            "trend": "neutral",
-            "note": "2026-02",
-            "last_updated": "2026-03-28"
-        },
-        {
             "name": "融資餘額",
             "value": "4086.51",
             "trend": "up",
@@ -234,39 +206,11 @@
             "last_updated": "2026-04-14"
         },
         {
-            "name": "融券餘額",
-            "value": "15.45萬張",
-            "trend": "down",
-            "note": "2026-04-13 較前一交易日增加 7,566 張",
-            "last_updated": "2026-04-14"
-        },
-        {
-            "name": "信用卡逾期率",
-            "value": "0.24%",
-            "trend": "neutral",
-            "note": "2026-01",
-            "last_updated": "2026-03-28"
-        },
-        {
-            "name": "製造業加班工時",
-            "value": "年增13.9%",
-            "trend": "up",
-            "note": "2026-02 (燈號轉紅)",
-            "last_updated": "2026-04-01"
-        },
-        {
-            "name": "實質私人投資",
-            "value": "10.81%",
-            "trend": "up",
-            "note": "2025 Q4 (yoy)",
-            "last_updated": "2026-03-28"
-        },
-        {
             "name": "台股加權指數",
-            "value": "36722.00",
+            "value": "37132.02",
             "trend": "up",
-            "note": "2026-04-15 (歷史收盤新高)",
-            "last_updated": "2026-04-15"
+            "note": "2026-04-16 (歷史收盤新高，超越英股成全球第7大)",
+            "last_updated": "2026-04-16"
         },
         {
             "name": "台積電收盤價 (TSMC Close)",
