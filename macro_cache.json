@@ -14,45 +14,45 @@
     },
     {
       "name": "生產者物價指數 (PPI)",
-      "value": "1.6%",
-      "trend": "neutral",
-      "note": "2026-02"
-    },
-    {
-      "name": "失業率",
-      "value": "3.8%",
-      "trend": "neutral",
-      "note": "2026-03"
-    },
-    {
-      "name": "非農就業人數",
-      "value": "30.3 萬",
+      "value": "4.0%",
       "trend": "up",
       "note": "2026-03"
     },
     {
+      "name": "失業率",
+      "value": "4.3%",
+      "trend": "up",
+      "note": "2026-03"
+    },
+    {
+      "name": "非農就業人數",
+      "value": "17.8 萬",
+      "trend": "down",
+      "note": "2026-03"
+    },
+    {
       "name": "ISM 製造業指數",
-      "value": "50.3",
+      "value": "52.7",
       "trend": "up",
       "note": "2026-03"
     },
     {
       "name": "美元指數 (DXY)",
-      "value": "98.06",
-      "trend": "down",
-      "note": "2026-04-16"
+      "value": "98.09",
+      "trend": "up",
+      "note": "2026-04-17"
     },
     {
       "name": "10 年期公債殖利率",
-      "value": "4.31%",
-      "trend": "up",
-      "note": "2026-04-16"
+      "value": "4.25%",
+      "trend": "down",
+      "note": "2026-04-17"
     },
     {
       "name": "3 個月期公債殖利率",
-      "value": "5.38%",
-      "trend": "neutral",
-      "note": "2026-04-16"
+      "value": "3.60%",
+      "trend": "down",
+      "note": "2026-04-17"
     }
   ],
   "TW_MACRO": [
@@ -76,15 +76,15 @@
     },
     {
       "name": "M1B 年增率",
-      "value": "5.59%",
-      "trend": "neutral",
-      "note": "2026-01"
+      "value": "7.12%",
+      "trend": "up",
+      "note": "2026-02"
     },
     {
       "name": "M2 年增率",
-      "value": "5.16%",
-      "trend": "neutral",
-      "note": "2026-01"
+      "value": "5.38%",
+      "trend": "up",
+      "note": "2026-02"
     },
     {
       "name": "失業率",
@@ -94,9 +94,15 @@
     },
     {
       "name": "融資餘額",
-      "value": "4086.51 億",
+      "value": "4271.2 億",
       "trend": "up",
-      "note": "2026-04-16"
+      "note": "2026-04-17"
+    },
+    {
+      "name": "融資單日變動",
+      "value": "47.1 億",
+      "trend": "up",
+      "note": "2026-04-17"
     }
   ]
 }
