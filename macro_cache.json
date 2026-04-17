@@ -1,223 +1,102 @@
 {
-    "US_MACRO": [
-        {
-            "name": "國內生產毛額 (GDP) 修正值",
-            "value": "1.4%",
-            "trend": "down",
-            "note": "2025 Q4 終值 (遠低於預期 2.7%)",
-            "last_updated": "2026-04-14"
-        },
-        {
-            "name": "消費者物價指數 (CPI)",
-            "value": "3.3%",
-            "trend": "up",
-            "note": "2026-03 (YoY) 受能源價格影響回升",
-            "last_updated": "2026-04-11"
-        },
-        {
-            "name": "生產者物價指數 (PPI)",
-            "value": "4.0%",
-            "trend": "up",
-            "note": "2026-03 (YoY) 能源價格飆升 8.5% 為主因",
-            "last_updated": "2026-04-15"
-        },
-        {
-            "name": "零售銷售 (Retail Sales)",
-            "value": "+0.5%",
-            "trend": "up",
-            "note": "2026-03 (顯示消費韌性)",
-            "last_updated": "2026-04-15"
-        },
-        {
-            "name": "非農就業人口",
-            "value": "+17.8萬",
-            "trend": "up",
-            "note": "2026-03 (優於預期)",
-            "last_updated": "2026-04-09"
-        },
-        {
-            "name": "失業率",
-            "value": "4.3%",
-            "trend": "down",
-            "note": "2026-03 (降至 4.3%)",
-            "last_updated": "2026-04-09"
-        },
-        {
-            "name": "初領失業金人數",
-            "value": "20.7萬",
-            "trend": "down",
-            "note": "截至 4/11 (優於預期，創2月以來最大單週跌幅)",
-            "last_updated": "2026-04-16"
-        },
-        {
-            "name": "ISM 製造業指數",
-            "value": "52.7",
-            "trend": "up",
-            "note": "2026-03 (連三月擴張)",
-            "last_updated": "2026-04-09"
-        },
-        {
-            "name": "M2 貨幣供給",
-            "value": "22.67兆",
-            "trend": "up",
-            "note": "2026-02",
-            "last_updated": "2026-04-02"
-        },
-        {
-            "name": "布蘭特原油 (Brent Oil)",
-            "value": "98.5",
-            "trend": "down",
-            "note": "2026-04-15 停火談判曙光使油價回落",
-            "last_updated": "2026-04-15"
-        },
-        {
-            "name": "美元指數 (DXY)",
-            "value": "98.06",
-            "trend": "down",
-            "note": "2026-04-15 (和平談判樂觀情緒回升)",
-            "last_updated": "2026-04-15"
-        },
-        {
-            "name": "實質私人投資",
-            "value": "3.8%",
-            "trend": "up",
-            "note": "2025 Q4",
-            "last_updated": "2026-03-28"
-        },
-        {
-            "name": "聯準會基準利率",
-            "value": "3.50%-3.75%",
-            "trend": "neutral",
-            "note": "2026-04-15 官員暗示降息時程可能因能源通膨推遲",
-            "last_updated": "2026-04-15"
-        },
-        {
-            "name": "美國 10 年期公債殖利率",
-            "value": "4.31%",
-            "trend": "up",
-            "note": "2026-04-16",
-            "last_updated": "2026-04-16"
-        },
-        {
-            "name": "恐慌指數 (VIX)",
-            "value": "17.94",
-            "trend": "down",
-            "note": "2026-04-16 (和平談判進展緩解市場恐慌)",
-            "last_updated": "2026-04-16"
-        },
-        {
-            "name": "標普 500 指數",
-            "value": "7210.42",
-            "trend": "up",
-            "note": "2026-04-16 (受台積電強勁展望帶動)",
-            "last_updated": "2026-04-16"
-        }
-    ],
-    "TW_MACRO": [
-        {
-            "name": "景氣對策信號",
-            "value": "40",
-            "trend": "up",
-            "note": "2026-02 (連續三個月紅燈)",
-            "last_updated": "2026-04-01"
-        },
-        {
-            "name": "外銷訂單",
-            "value": "連12紅",
-            "trend": "up",
-            "note": "2026-02 (+23.8%); 3月AI需求持續強勁",
-            "last_updated": "2026-04-09"
-        },
-        {
-            "name": "消費者物價指數 (CPI)",
-            "value": "1.20%",
-            "trend": "down",
-            "note": "2026-03 (YoY) 漲幅明顯放緩",
-            "last_updated": "2026-04-13"
-        },
-        {
-            "name": "台積電營收年增率 (TSMC Revenue YoY)",
-            "value": "40.6%",
-            "trend": "up",
-            "note": "2026 Q1 (AI 需求支撐業績飆升)",
-            "last_updated": "2026-04-16"
-        },
-        {
-            "name": "台積電單季營收 (TSMC Revenue USD)",
-            "value": "359億美元",
-            "trend": "up",
-            "note": "2026 Q1 (超越財測高標)",
-            "last_updated": "2026-04-16"
-        },
-        {
-            "name": "台積電毛利率 (TSMC Gross Margin)",
-            "value": "66.2%",
-            "trend": "up",
-            "note": "2026 Q1 (受惠 3 奈米放量與產能利用率提升)",
-            "last_updated": "2026-04-16"
-        },
-        {
-            "name": "台積電營業利益率",
-            "value": "58.1%",
-            "trend": "up",
-            "note": "2026 Q1",
-            "last_updated": "2026-04-16"
-        },
-        {
-            "name": "台積電淨利率",
-            "value": "50.5%",
-            "trend": "up",
-            "note": "2026 Q1",
-            "last_updated": "2026-04-16"
-        },
-        {
-            "name": "台積電每股盈餘 (TSMC EPS)",
-            "value": "22.08",
-            "trend": "up",
-            "note": "2026 Q1",
-            "last_updated": "2026-04-16"
-        },
-        {
-            "name": "工業生產指數",
-            "value": "+17.83%",
-            "trend": "up",
-            "note": "2026-02 (YoY，AI帶動製造業)",
-            "last_updated": "2026-04-02"
-        },
-        {
-            "name": "消費者信心指數 (CCI)",
-            "value": "62.3",
-            "trend": "down",
-            "note": "2026-03 (受中東風險引發通膨疑慮)",
-            "last_updated": "2026-03-30"
-        },
-        {
-            "name": "M1B 年增率",
-            "value": "7.12%",
-            "trend": "up",
-            "note": "2026-02 (黃金交叉，資金動能強)",
-            "last_updated": "2026-04-02"
-        },
-        {
-            "name": "融資餘額",
-            "value": "4086.51",
-            "trend": "up",
-            "note": "2026-04-13 (單位：億元) 較前一交易日增加 74.11 億",
-            "last_updated": "2026-04-14"
-        },
-        {
-            "name": "台股加權指數",
-            "value": "37132.02",
-            "trend": "up",
-            "note": "2026-04-16 (歷史收盤新高，超越英股成全球第7大)",
-            "last_updated": "2026-04-16"
-        },
-        {
-            "name": "台積電收盤價 (TSMC Close)",
-            "value": "2095.00",
-            "trend": "up",
-            "note": "2026-04-15 (歷史新高)",
-            "last_updated": "2026-04-15"
-        }
-    ]
+  "US_MACRO": [
+    {
+      "name": "國內生產毛額 (GDP)",
+      "value": "3.1%",
+      "trend": "neutral",
+      "note": "2025 Q4 實際"
+    },
+    {
+      "name": "消費者物價指數 (CPI)",
+      "value": "3.3%",
+      "trend": "up",
+      "note": "2026-03"
+    },
+    {
+      "name": "生產者物價指數 (PPI)",
+      "value": "1.6%",
+      "trend": "neutral",
+      "note": "2026-02"
+    },
+    {
+      "name": "失業率",
+      "value": "3.8%",
+      "trend": "neutral",
+      "note": "2026-03"
+    },
+    {
+      "name": "非農就業人數",
+      "value": "30.3 萬",
+      "trend": "up",
+      "note": "2026-03"
+    },
+    {
+      "name": "ISM 製造業指數",
+      "value": "50.3",
+      "trend": "up",
+      "note": "2026-03"
+    },
+    {
+      "name": "美元指數 (DXY)",
+      "value": "98.06",
+      "trend": "down",
+      "note": "2026-04-16"
+    },
+    {
+      "name": "10 年期公債殖利率",
+      "value": "4.31%",
+      "trend": "up",
+      "note": "2026-04-16"
+    },
+    {
+      "name": "3 個月期公債殖利率",
+      "value": "5.38%",
+      "trend": "neutral",
+      "note": "2026-04-16"
+    }
+  ],
+  "TW_MACRO": [
+    {
+      "name": "景氣對策信號 (分數)",
+      "value": "40",
+      "trend": "up",
+      "note": "2026-02 (紅燈)"
+    },
+    {
+      "name": "外銷訂單 (YoY)",
+      "value": "23.8%",
+      "trend": "up",
+      "note": "2026-02"
+    },
+    {
+      "name": "工業生產指數 (YoY)",
+      "value": "17.83%",
+      "trend": "up",
+      "note": "2026-02"
+    },
+    {
+      "name": "M1B 年增率",
+      "value": "5.59%",
+      "trend": "neutral",
+      "note": "2026-01"
+    },
+    {
+      "name": "M2 年增率",
+      "value": "5.16%",
+      "trend": "neutral",
+      "note": "2026-01"
+    },
+    {
+      "name": "失業率",
+      "value": "3.32%",
+      "trend": "up",
+      "note": "2026-02"
+    },
+    {
+      "name": "融資餘額",
+      "value": "4086.51 億",
+      "trend": "up",
+      "note": "2026-04-16"
+    }
+  ]
 }
