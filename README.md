@@ -10,6 +10,14 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 ## 更新紀錄 (Changelog)
 
+- **2026-04-17 (v1.4)**:
+  - **資料顯示強健性優化 (Data Robustness Update)**:
+    - **修正區塊日期邏輯**：重構 `investment_analysis.py` 中的 `process_stock_group` 函式，將區塊日期選取邏輯由「首個標的日期」改為「群組內所有標的之最大日期」，解決因單一指標（如加權指數）更新延遲導致整個市場區塊顯示日期落後的問題。
+  - **AI 分析敘事規範升級**:
+    - **禁止固定模板**：於 `GEMINI.md` 加入 `Dynamic Narrative Rule`，嚴禁 AI 使用固定句式，確保分析內容具備自然流動的專業敘事感。
+    - **強制變數描述**：實施 `Variable Description Mandate`，要求所有標籤變數（如 {{VIX}}）必須附帶明確指標名稱描述，消除僅有數字而無主詞的表達缺陷。
+    - **即時內容修正**：手動重構 `ai.html`，以身作則展示新版敘事風格，提升報告閱讀體驗。
+
 - **2026-04-13 (v1.3)**:
   - **開發流程規範強化 (Workflow Standard Update)**:
     - **合併與同步要求**：於 `GEMINI.md` 中新增明確規範，要求在 feature branch 完成修改、驗證並獲得使用者同意後，必須執行合併至 `main`、推送至遠端倉庫，並將本地環境切換回 `main` 分支，確保開發環境的一致性與穩定性。

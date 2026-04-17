@@ -194,8 +194,12 @@ def create_yield_curve_plot_base64():
 def process_stock_group(group, start_date, utc_now):
     stock_data = get_stock_data(group["symbols"], start_date)
     if not stock_data: return None
-    first_sym = group["symbols"][0]
-    last_date = stock_data[first_sym].index[-1].strftime('%Y-%m-%d') if first_sym in stock_data else "N/A"
+    
+    # 計算該群組中所有標的的最後日期，取其最大值作為區塊更新日期
+    all_last_dates = [df.index[-1] for df in stock_data.values() if not df.empty]
+    max_date_obj = max(all_last_dates) if all_last_dates else None
+    last_date = max_date_obj.strftime('%Y-%m-%d') if max_date_obj else "N/A"
+    
     is_closed = utc_now.replace(tzinfo=pytz.utc).astimezone(TZ).weekday() >= 5
     is_idx_group = "指數" in group['title'] or "債券" in group['title']
     ch1, ch2 = (None, None) if is_idx_group else ("籌碼1", "籌碼2")

@@ -58,6 +58,11 @@ AI must dynamically generate analysis based on current real-world data. **Strict
 
 #### **Numerical Integrity & Anti-Hallucination Protocol**
 - **Fact-Only Rule**: Strictly prohibit referencing any historical high/low points not present in `technical_data.json` or `macro_cache.json`. Do not invent descriptions like "plunged/surged from level X" for dramatic effect.
+- **Dynamic Narrative Rule (Anti-Template)**: STRICTLY PROHIBIT using fixed sentence structures or "mad-lib" style templates. Analysis must be written as a professional, dynamic narrative that flows naturally based on the data.
+- **Variable Description Mandate**: Every time a tag-based variable (e.g., `{{VIX}}`) is used, it MUST be accompanied by a clear description of what the number represents. 
+    - **WRONG**: "促使 {{VIX}} 回落至 18 以下"
+    - **RIGHT**: "促使恐慌指數 (VIX: {{VIX}}) 回落至 18 以下"
+    - **RIGHT**: "隨著加權指數 ({{TAIEX}}) 創下新高"
 - **Tag-Based Substitution (Mandatory)**: To ensure 100% numerical accuracy, AI must prioritize using tags instead of manual numbering when writing `ai.html`. `update_report.py` will automatically perform physical replacement:
     - `{{TAIEX}}`: TAIEX Closing Price
     - `{{VIX}}`: VIX Index Closing Price
