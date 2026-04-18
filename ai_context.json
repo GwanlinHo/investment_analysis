@@ -22,5 +22,6 @@
     "US10Y": 4.25,
     "US3M": 3.6,
     "CPI": 3.3,
-    "MARGIN_BALANCE": 4271.2
+    "MARGIN_BALANCE": 4271.2,
+    "MARGIN_CHANGE": 47.1
 }
