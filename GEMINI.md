@@ -69,6 +69,7 @@ AI must dynamically generate analysis based on current real-world data. **Strict
     - `{{DXY}}`: US Dollar Index (DXY)
     - `{{US10Y}}`: US 10-Year Treasury Yield
     - `{{MARGIN_BALANCE}}`: Margin Balance
+    - `{{MARGIN_CHANGE}}`: Daily Change in Margin Balance
 - **Field Consistency**: When quoting indices, you must explicitly correspond to the `Close` field. It is strictly forbidden to misinterpret technical indicator fields like `TR` (True Range), `Volume`, or `ADX` as price levels.
 - **Numerical Validation**: Before the final report injection, the system will compare the numbers in the content with the fact repository. If an abnormal deviation occurs (e.g., the VIX data is 21 but the analysis writes 60), the update will be forcibly intercepted.
 

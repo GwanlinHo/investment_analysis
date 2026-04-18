@@ -114,6 +114,9 @@ def get_data_context(tech_data, macro_data):
     margin_str = find_val("TW_MACRO", "融資餘額")
     if margin_str: ctx["MARGIN_BALANCE"] = margin_str
 
+    margin_change_str = find_val("TW_MACRO", "融資單日變動")
+    if margin_change_str: ctx["MARGIN_CHANGE"] = margin_change_str
+
     with open(AI_CONTEXT_FILE, "w", encoding="utf-8") as f:
         json.dump(ctx, f, ensure_ascii=False, indent=4)
     return ctx

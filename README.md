@@ -10,6 +10,11 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 ## 更新紀錄 (Changelog)
 
+- **2026-04-18 (v1.5)**:
+  - **AI 分析標籤擴充 (AI Tag Update)**:
+    - **新增融資單日變動標籤**：修改 `update_report.py` 中的 `get_data_context` 函式，使其能從事實庫中提取「融資單日變動」數據並對應至 `{{MARGIN_CHANGE}}` 標籤。
+    - **更新強制標籤列表**：於 `GEMINI.md` 中將 `{{MARGIN_CHANGE}}` 加入 Tag-Based Substitution 強制使用列表中，以解決 AI 分析報告中數字顯示不正確或出現幻覺的問題。
+
 - **2026-04-17 (v1.4)**:
   - **資料顯示強健性優化 (Data Robustness Update)**:
     - **修正區塊日期邏輯**：重構 `investment_analysis.py` 中的 `process_stock_group` 函式，將區塊日期選取邏輯由「首個標的日期」改為「群組內所有標的之最大日期」，解決因單一指標（如加權指數）更新延遲導致整個市場區塊顯示日期落後的問題。
