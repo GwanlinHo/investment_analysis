@@ -2,9 +2,9 @@
   "US_MACRO": [
     {
       "name": "國內生產毛額 (GDP)",
-      "value": "3.1%",
-      "trend": "neutral",
-      "note": "2025 Q4 實際"
+      "value": "5.2%",
+      "trend": "up",
+      "note": "2026 IMF 修正"
     },
     {
       "name": "消費者物價指數 (CPI)",
@@ -37,6 +37,12 @@
       "note": "2026-03"
     },
     {
+      "name": "聯邦基金利率",
+      "value": "3.50%-3.75%",
+      "trend": "neutral",
+      "note": "2026-04"
+    },
+    {
       "name": "美元指數 (DXY)",
       "value": "98.09",
       "trend": "up",
@@ -64,9 +70,9 @@
     },
     {
       "name": "外銷訂單 (YoY)",
-      "value": "23.8%",
+      "value": "61.8%",
       "trend": "up",
-      "note": "2026-02"
+      "note": "2026-03"
     },
     {
       "name": "工業生產指數 (YoY)",
