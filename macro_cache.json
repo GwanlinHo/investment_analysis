@@ -37,6 +37,24 @@
       "note": "2026-03"
     },
     {
+      "name": "零售銷售 (MoM)",
+      "value": "0.5%",
+      "trend": "up",
+      "note": "2026-03"
+    },
+    {
+      "name": "初請失業金人數",
+      "value": "20.7 萬",
+      "trend": "down",
+      "note": "2026-04-11"
+    },
+    {
+      "name": "信用卡違約率",
+      "value": "2.94%",
+      "trend": "neutral",
+      "note": "2026-Q1"
+    },
+    {
       "name": "聯邦基金利率",
       "value": "3.50%-3.75%",
       "trend": "neutral",
@@ -96,6 +114,30 @@
       "name": "失業率",
       "value": "3.32%",
       "trend": "up",
+      "note": "2026-02"
+    },
+    {
+      "name": "消費者信心指數",
+      "value": "62.30",
+      "trend": "down",
+      "note": "2026-03"
+    },
+    {
+      "name": "實質民間投資 (YoY)",
+      "value": "4.89%",
+      "trend": "neutral",
+      "note": "2026-Q1 預測"
+    },
+    {
+      "name": "製造業加班工時",
+      "value": "17 小時",
+      "trend": "up",
+      "note": "2026-02 (22年同期新高)"
+    },
+    {
+      "name": "信用卡逾放比率",
+      "value": "0.24%",
+      "trend": "neutral",
       "note": "2026-02"
     },
     {
