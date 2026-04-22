@@ -68,15 +68,15 @@
     },
     {
       "name": "10 年期公債殖利率",
-      "value": "4.30%",
-      "trend": "up",
-      "note": "2026-04-21"
+      "value": "4.29%",
+      "trend": "down",
+      "note": "2026-04-22"
     },
     {
       "name": "3 個月期公債殖利率",
-      "value": "3.69%",
-      "trend": "neutral",
-      "note": "2026-04-21"
+      "value": "3.60%",
+      "trend": "down",
+      "note": "2026-04-22"
     }
   ],
   "TW_MACRO": [
