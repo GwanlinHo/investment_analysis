@@ -110,6 +110,11 @@ def get_data_context(tech_data, macro_data):
     ctx["US10Y"] = find_val("US_MACRO", "10 年期公債")
     ctx["US3M"] = find_val("US_MACRO", "3 個月期公債")
     ctx["CPI"] = find_val("US_MACRO", "消費者物價指數")
+    ctx["PPI"] = find_val("US_MACRO", "生產者物價指數")
+    ctx["RETAIL_SALES"] = find_val("US_MACRO", "零售銷售")
+    ctx["GDP"] = find_val("US_MACRO", "國內生產毛額")
+    ctx["UNEMPLOYMENT_RATE"] = find_val("US_MACRO", "失業率")
+    ctx["NONFARM_PAYROLLS"] = find_val("US_MACRO", "非農就業人數")
     
     margin_str = find_val("TW_MACRO", "融資餘額")
     if margin_str: ctx["MARGIN_BALANCE"] = margin_str

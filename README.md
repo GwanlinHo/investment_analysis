@@ -10,6 +10,11 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 ## 更新紀錄 (Changelog)
 
+- **2026-04-25 (v1.6)**:
+  - **宏觀指標標籤映射擴充 (Macro Indicator Tag Update)**:
+    - **新增多項標籤映射**：在 `update_report.py` 中新增 `{{RETAIL_SALES}}`、`{{GDP}}`、`{{PPI}}`、`{{UNEMPLOYMENT_RATE}}` 及 `{{NONFARM_PAYROLLS}}` 等宏觀指標的自動映射，解決 AI 分析中變數名稱未被正確替換的問題。
+    - **自動化測試驗證**：已驗證 `index.html` 中的「零售銷售」等變數能正確替換為事實庫數值。
+
 - **2026-04-18 (v1.5)**:
   - **AI 分析標籤擴充 (AI Tag Update)**:
     - **新增融資單日變動標籤**：修改 `update_report.py` 中的 `get_data_context` 函式，使其能從事實庫中提取「融資單日變動」數據並對應至 `{{MARGIN_CHANGE}}` 標籤。
