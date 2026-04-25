@@ -1,6 +1,6 @@
 {
     "VIX": 18.71,
-    "TAIEX": 37714.15,
+    "TAIEX": 38932.4,
     "SP500": 7165.08,
     "國內生產毛額 (GDP)": 0.5,
     "消費者物價指數 (CPI)": 3.3,
@@ -26,9 +26,14 @@
     "融資餘額": 4409.07,
     "融資單日變動": 100.8,
     "DXY": 98.52,
-    "US10Y": 4.31,
-    "US3M": 3.68,
+    "US10Y": null,
+    "US3M": null,
     "CPI": 3.3,
+    "PPI": 4.0,
+    "RETAIL_SALES": 1.7,
+    "GDP": 0.5,
+    "UNEMPLOYMENT_RATE": 4.3,
+    "NONFARM_PAYROLLS": 17.8,
     "MARGIN_BALANCE": 4409.07,
     "MARGIN_CHANGE": 100.8
 }
