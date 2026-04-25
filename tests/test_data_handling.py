@@ -1,5 +1,6 @@
 import os
 import json
+import re
 import pytest
 from investment_analysis import save_to_json
 from update_report import load_from_json
@@ -38,10 +39,16 @@ def test_load_non_existent_file():
     assert data is None
 
 def test_html_containment_reduction():
-    """驗證 HTML 中不再包含原始 JSON 資料 (此測試需在執行過腳本後手動或透過 mock 驗證)"""
-    # 這裡可以透過讀取最新的 index.html 並檢查是否還有 "{{ fundamental_json }}" 字樣
-    # 但因為我們已经改了 template，這裡主要確認 script 標籤內是否為空 {}
+    """驗證 HTML 中包含有效的 JSON 資料"""
     if os.path.exists("index.html"):
         with open("index.html", "r", encoding="utf-8") as f:
             content = f.read()
-            assert '<script id="fundamental-data" type="application/json">{}</script>' in content
+            # 檢查標籤是否存在
+            assert '<script id="fundamental-data" type="application/json">' in content
+            # 檢查是否包含 JSON 陣列 (以 [ 開始並以 ] 結束)
+            match = re.search(r'<script id="fundamental-data" type="application/json">(.*?)</script>', content)
+            assert match is not None
+            json_str = match.group(1)
+            # 驗證它是有效的 JSON
+            json_data = json.loads(json_str)
+            assert isinstance(json_data, list)

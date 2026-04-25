@@ -237,6 +237,17 @@ def process_stock_group(group, start_date, utc_now):
             market[disp_name + "_institutional"] = ir.to_dict(orient='records')
     return g_res, summary, market, fundamental
 
+def save_to_json(fundamental, yield_data, market, summary, filename="technical_data.json"):
+    data = {
+        "fundamental": fundamental,
+        "yield": yield_data,
+        "market": market,
+        "summary": summary,
+        "last_updated": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+    with open(filename, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
 def main():
     utc_now = datetime.datetime.now(datetime.timezone.utc); start_date = utc_now - datetime.timedelta(days=HISTORY_DAYS)
     all_rep, all_sum, all_fun, all_mkt = [], [], [], {}
@@ -253,7 +264,7 @@ def main():
             sum_html += f'<div class="summary-card"><div class="summary-title">{item["symbol"]}</div><div class="summary-price">{item["close"]:.2f}</div><div class="summary-change {cls}">{icon} {item["change"]:.2f}%</div></div>'
     y_plot, y_data = create_yield_curve_plot_base64()
     if all_rep:
-        with open("technical_data.json", 'w', encoding='utf-8') as f: json.dump({"fundamental": all_fun, "yield": y_data, "market": all_mkt, "summary": all_sum, "last_updated": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}, f, ensure_ascii=False, indent=2)
+        save_to_json(all_fun, y_data, all_mkt, all_sum)
         env = Environment(loader=FileSystemLoader(TEMPLATE_DIR)); tpl = env.get_template(TEMPLATE_FILE)
         html = tpl.render(
             date_str=utc_now.astimezone(TZ).strftime('%Y-%m-%d'), 
