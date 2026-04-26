@@ -82,9 +82,9 @@
   "TW_MACRO": [
     {
       "name": "景氣對策信號 (分數)",
-      "value": "40",
-      "trend": "neutral",
-      "note": "2026-02 (紅燈)"
+      "value": "41",
+      "trend": "up",
+      "note": "2026-03 (紅燈)"
     },
     {
       "name": "外銷訂單 (YoY)",
@@ -126,7 +126,7 @@
       "name": "實質民間投資 (YoY)",
       "value": "4.89%",
       "trend": "neutral",
-      "note": "2026-Q1 預測"
+      "note": "2026-Q1"
     },
     {
       "name": "製造業加班工時",
