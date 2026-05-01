@@ -33,8 +33,8 @@
     {
       "name": "ISM 製造業指數",
       "value": "52.7",
-      "trend": "up",
-      "note": "2026-03"
+      "trend": "neutral",
+      "note": "2026-04"
     },
     {
       "name": "零售銷售 (MoM)",
@@ -58,7 +58,7 @@
       "name": "聯邦基金利率",
       "value": "3.50%-3.75%",
       "trend": "neutral",
-      "note": "2026-04"
+      "note": "2026-05"
     },
     {
       "name": "美元指數 (DXY)",
@@ -124,15 +124,15 @@
     },
     {
       "name": "失業率",
-      "value": "3.32%",
+      "value": "3.34%",
       "trend": "neutral",
-      "note": "2026-02"
+      "note": "2026-03"
     },
     {
       "name": "消費者信心指數",
-      "value": "62.30",
-      "trend": "down",
-      "note": "2026-03"
+      "value": "62.47",
+      "trend": "up",
+      "note": "2026-04"
     },
     {
       "name": "實質民間投資 (YoY)",
