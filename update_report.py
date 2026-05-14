@@ -107,8 +107,8 @@ def get_data_context(tech_data, macro_data):
             except: pass
 
     ctx["DXY"] = find_val("US_MACRO", "美元指數")
-    ctx["US10Y"] = find_val("US10Y", "10 年期公債")
-    ctx["US3M"] = find_val("US3M", "3 個月期公債")
+    ctx["US10Y"] = find_val("US_MACRO", "10 年期公債")
+    ctx["US3M"] = find_val("US_MACRO", "3 個月期公債")
     ctx["CPI"] = find_val("US_MACRO", "消費者物價指數")
     ctx["PPI"] = find_val("US_MACRO", "生產者物價指數")
     ctx["RETAIL_SALES"] = find_val("US_MACRO", "零售銷售")
