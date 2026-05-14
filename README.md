@@ -10,6 +10,13 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 ## 更新紀錄 (Changelog)
 
+- **2026-05-15 (v1.7)**:
+  - **總經數據自動化校正 (Macro Data Bug Fix)**:
+    - **修復查找區域錯誤**：修正 `update_report.py` 中 `US10Y` 與 `US3M` 指標的查找邏輯，將區域來源由不存在的 `US10Y`/`US3M` 改回 `US_MACRO`，確保事實庫中的殖利率標籤能被正確載入。
+  - **投資報告更新 (Daily Analysis Update)**:
+    - **同步最新數據**：更新 `macro_cache.json` 包含 5 月份最新失業救濟、美元指數、美債殖利率與台股融資餘額。
+    - **AI 分析深度強化**：針對 Kevin Warsh 接任聯準會主席與台積電 2026 技術論壇釋出的埃米世代製程規劃進行深度多維度評析。
+
 - **2026-04-25 (v1.6)**:
   - **宏觀指標標籤映射擴充 (Macro Indicator Tag Update)**:
     - **新增多項標籤映射**：在 `update_report.py` 中新增 `{{RETAIL_SALES}}`、`{{GDP}}`、`{{PPI}}`、`{{UNEMPLOYMENT_RATE}}` 及 `{{NONFARM_PAYROLLS}}` 等宏觀指標的自動映射，解決 AI 分析中變數名稱未被正確替換的問題。
