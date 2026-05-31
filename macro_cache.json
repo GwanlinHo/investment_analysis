@@ -156,7 +156,8 @@
       "name": "實質民間投資 (YoY)",
       "value": "5.20%",
       "neutral": "neutral",
-      "note": "2026-Q1"
+      "note": "2026-Q1",
+      "trend": "neutral"
     },
     {
       "name": "信用卡逾期比率",
