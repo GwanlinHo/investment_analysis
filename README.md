@@ -10,6 +10,13 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 ## 更新紀錄 (Changelog)
 
+- **2026-06-03 (v1.8)**:
+  - **系統優化 (System Optimization)**:
+    - **強化數據注入標籤**：修改 `update_report.py` 以支援 `TSMC`、`ISM_PMI` 與 `OIL_PRICE` 等新標籤，提升 AI 分析的數值精確度與可讀性。
+  - **每日分析報告 (Daily Analysis Update)**:
+    - **數據更新**：更新 `macro_cache.json` 至 2026 年 5 月份實績，包括 ISM 製造業指數升至 54.0。
+    - **Computex 專題分析**：AI 分析深度整合 Computex 2026 與黃仁勳加碼投資台灣之利多，並評估地緣政治引發的能源供應危機。
+
 - **2026-05-15 (v1.7)**:
   - **總經數據自動化校正 (Macro Data Bug Fix)**:
     - **修復查找區域錯誤**：修正 `update_report.py` 中 `US10Y` 與 `US3M` 指標的查找邏輯，將區域來源由不存在的 `US10Y`/`US3M` 改回 `US_MACRO`，確保事實庫中的殖利率標籤能被正確載入。

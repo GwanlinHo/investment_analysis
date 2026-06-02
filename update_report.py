@@ -104,11 +104,23 @@ def get_data_context(tech_data, macro_data):
             try:
                 val = float(num_str)
                 ctx[item["name"]] = val
+                # 增加英文別名支援
+                if "ISM 製造業指數" in item["name"]: ctx["ISM_PMI"] = val
+                if "布蘭特原油價格" in item["name"]: ctx["OIL_PRICE"] = val
             except: pass
 
     ctx["DXY"] = find_val("US_MACRO", "美元指數")
     ctx["US10Y"] = find_val("US_MACRO", "10 年期公債")
     ctx["US3M"] = find_val("US_MACRO", "3 個月期公債")
+    
+    # 增加 TSMC 支持
+    if tech_data and "market" in tech_data:
+        m = tech_data["market"]
+        tsmc_keys = ["台積電", "2330.TW"]
+        for k in tsmc_keys:
+            if k in m and m[k]:
+                ctx["TSMC"] = round(float(m[k][-1].get("Close", 0)), 2)
+                break
     ctx["CPI"] = find_val("US_MACRO", "消費者物價指數")
     ctx["PPI"] = find_val("US_MACRO", "生產者物價指數")
     ctx["RETAIL_SALES"] = find_val("US_MACRO", "零售銷售")
