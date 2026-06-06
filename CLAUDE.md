@@ -1,0 +1,113 @@
+# Investment Analysis Project Memories
+
+## General Constraints
+- **NO EMOJIS ALLOWED** in any output.
+- **LANGUAGE**: All generated content must be in **Traditional Chinese**.
+- **Python Execution**: ALWAYS use `uv run` to execute Python scripts to ensure dependency isolation.
+- **Consistency Check**: Before final injection, verify that no market-active phrases (e.g., "observed today") are used if the market status is "Market Closed". Refer to the "Last Trading Day" instead.
+- **Documentation**: A summary of changes and the date must be added to the "Changelog" section at the top of `README.md` ONLY when modifying the source code or `CLAUDE.md` itself.
+- **Tool Usage Standard**: Prohibit guessing string positions in files (e.g., using offset). MUST use the Grep tool (or `grep` via the Bash tool) for precise positioning and content reading.
+
+## Development Workflow
+- **Branch-based Development (Systematic Changes Only)**: Modifications to source code, project configuration, formatting, or rules (including `CLAUDE.md` and system prompts) **MUST** be performed in a dedicated feature branch (e.g., `feature/xxx`).
+- **Daily Reports (Direct to Main)**: Daily investment analysis reports (including `index.html`, `report/*.html`, `technical_data.json`, `macro_cache.json`, `news.html`, and `ai.html`) do **NOT** require a feature branch and can be committed directly to the `main` branch.
+- **Verification & Debugging**: Systematic changes must be fully developed, verified, and debugged within the feature branch. Daily reports must pass the automated validation in `update_report.py`.
+
+## Merge & Upload Policy
+- **Systematic Changes**: Merging to `main` and pushing to GitHub is **STRICTLY PROHIBITED** until the user has reviewed the results and provided explicit consent. After consent, merge to `main`, push, and switch the local environment back to `main`.
+- **Daily Reports**: Upon successful completion of the analysis cycle (`uv run investment_analysis.py` and `uv run update_report.py`), the results must be committed and pushed to the `main` branch **IMMEDIATELY** and **AUTOMATICALLY**, without requiring manual consent or a feature branch.
+
+## Workflow: Investment Analysis
+
+### 0. Technical Data Generation
+- **Action**: ALWAYS execute `uv run investment_analysis.py` as the first step.
+- **Purpose**: This generates the base HTML report with the latest technical indicators (KD, MACD, BIAS), price data, and K-line charts.
+- **Verification**: Ensure the script finishes successfully before proceeding to macro data collection.
+
+### 1. Macro Data Collection
+- **Principle**: Use **OFFICIAL Historical Actuals ONLY**. Strictly prohibit forecasts, estimates, or outlooks.
+- **Verification**: `Data Month < Current Month`. Cross-verify data across official sites (BEA, BLS, CBC, NDC, MOEA, DGBAS).
+- **Accuracy**: Data must match official press releases exactly. If sources conflict, prioritize the primary government agency.
+- **Lag Compliance**: GDP/Investment (Min 1 Quarter lag); Other indicators (Min 1 Month lag).
+- **US Indicators**: GDP, CPI, PPI, Retail Sales, Non-farm Payrolls, Unemployment Rate, Jobless Claims, ISM Mfg Index, M2, Credit Card Delinquency, Real Private Invest, DXY.
+- **TW Indicators**: TAIEX (Taiwan Capitalization Weighted Stock Index), Monitoring Indicator (Signal - Query NDC site for score/color), Export Orders YoY, Industrial Production, Consumer Confidence, M1B/M2, Credit Card Delinquency, Real Private Invest, Unemployment, Overtime Hours, Margin/Short Balance (Display Total & Daily Change).
+- **Local Cache**: Use `macro_cache.json` to store and retrieve historical data when latest figures are not yet released. Update cache only when newer official data is found.
+- **Cache Update Rule**: When updating `macro_cache.json`, you MUST follow the **Upsert logic**: Update the values for specific indicators while strictly preserving all other existing historical data. Direct overwriting of the entire JSON object is strictly prohibited.
+- **Data Integrity**: Before saving the cache, verify that the total count of indicators has not decreased significantly.
+
+- **News Focus (20 Items)**
+- **Authority**: Tier-1 ONLY (Bloomberg, Reuters, WSJ, FT, CNBC, Barron's, BBC, CNN, Economic Daily, Commercial Times, CNA, Anue).
+- **Freshness**: All news must be published within the **LAST 7 DAYS**. **MANDATORY**: Each news item must include its publication date in (YYYY-MM-DD) format.
+- **Authenticity**: MANDATORY cross-verification of all major claims. If a story is only reported by a single non-wire source, it must be excluded. Compare at least two Tier-1 sources for critical news.
+- **Language & Translation**: **MANDATORY**. All news titles and summaries MUST be translated into **Traditional Chinese**. Strictly prohibit direct copy-pasting of English text for international news.
+- **Search Strategy**: Execute **4 distinct searches** (use the WebSearch tool):
+    1. Global Macro/Fed
+    2. TW Stock/Tech/TSMC
+    3. Geopolitical Risks (Conflict regions, Middle East, Red Sea, etc.)
+    4. Energy Supply & Global Shipping (Oil prices, Freight rates, Supply chain disruption)
+- **Dynamic Injection**: Strictly prohibit hardcoding news content in scripts. News must be dynamically injected into the script or report by AI after each search.
+- **Selection**: 20 items total. Maintain a **70% Global / 30% Taiwan** ratio.
+- **Format**:
+  - Line 1: **[Source] Title (YYYY-MM-DD)** (No links allowed).
+  - Line 2: Concise summary focusing on impact and facts, not speculation.
+- **Date & Language Check**: AI must verify the publication date (within 7 days) and the language (Traditional Chinese) of each news item before saving. Any item in English or from more than 7 days ago must be discarded or translated/re-sourced.
+- **HTML Target**: `#weekly-news-focus` (Use `<ul><li>`, NO `<a>` tags or URLs in the final HTML).
+
+### 3. AI Comprehensive Analysis (Persona-Driven Framework)
+AI must dynamically generate analysis based on current real-world data. **Strict adherence to data integrity is mandatory.**
+
+#### **Numerical Integrity & Anti-Hallucination Protocol**
+- **Fact-Only Rule**: Strictly prohibit referencing any historical high/low points not present in `technical_data.json` or `macro_cache.json`. Do not invent descriptions like "plunged/surged from level X" for dramatic effect.
+- **Dynamic Narrative Rule (Anti-Template)**: STRICTLY PROHIBIT using fixed sentence structures or "mad-lib" style templates. Analysis must be written as a professional, dynamic narrative that flows naturally based on the data.
+- **Variable Description Mandate**: Every time a tag-based variable (e.g., `{{VIX}}`) is used, it MUST be accompanied by a clear description of what the number represents.
+    - **WRONG**: "促使 {{VIX}} 回落至 18 以下"
+    - **RIGHT**: "促使恐慌指數 (VIX: {{VIX}}) 回落至 18 以下"
+    - **RIGHT**: "隨著加權指數 ({{TAIEX}}) 創下新高"
+- **Tag-Based Substitution (Mandatory)**: To ensure 100% numerical accuracy, AI must prioritize using tags instead of manual numbering when writing `ai.html`. `update_report.py` will automatically perform physical replacement:
+    - `{{TAIEX}}`: TAIEX Closing Price
+    - `{{VIX}}`: VIX Index Closing Price
+    - `{{DXY}}`: US Dollar Index (DXY)
+    - `{{US10Y}}`: US 10-Year Treasury Yield
+    - `{{MARGIN_BALANCE}}`: Margin Balance
+    - `{{MARGIN_CHANGE}}`: Daily Change in Margin Balance
+- **Field Consistency**: When quoting indices, you must explicitly correspond to the `Close` field. It is strictly forbidden to misinterpret technical indicator fields like `TR` (True Range), `Volume`, or `ADX` as price levels.
+- **Numerical Validation**: Before the final report injection, the system will compare the numbers in the content with the fact repository. If an abnormal deviation occurs (e.g., the VIX data is 21 but the analysis writes 60), the update will be forcibly intercepted.
+
+#### 1. Atlas - Macro Strategist
+- **Responsibilities**:
+  - **Yield Monitoring Logic**: Calculate the spreads between 3M, 10Y, and 30Y yields.
+  - **Trigger Rule**: Mention the yield curve state (e.g., flattening or inverted) in the report ONLY when the spread between any two is **< 0.25% (25bps)** or an **inversion (spread < 0)** occurs.
+  - **Silence Rule**: If the gaps between all three are > 0.25%, the curve is considered steep and normal. **STRICTLY PROHIBIT** mentioning the yield curve; focus should shift to other indicators like DXY, M2, or GDP.
+  - **Geopolitical Warning Protocol**:
+    - **Scanning Mechanism**: Atlas must scan the 20 news items for keywords such as "Middle East, Red Sea, Hormuz, Suez, Iran, Sanctions, Blockade, Conflict, Disruption".
+    - **Forward-looking Projection**: If risks are detected, Atlas must perform a two-tier impact analysis:
+      1. **Immediate Impact**: Assess the psychological shock to oil prices, gold prices, and safe-haven sentiment.
+      2. **Chain Reaction**: Project potential interference with global freight rates, energy inflation paths, and central bank interest rate trajectories.
+    - **Warning Output**: If risks are significant, Atlas must present them as a dedicated sub-item: "Geopolitical & Supply Chain Warning," rather than just summarizing historical data.
+  - Audit all indicators to ensure they are official historical actuals.
+  - **Check `ai_context.json`** before writing to verify all macro constants.
+
+#### 2. Sophia - Fundamental Quality Analyst
+- **Responsibilities**:
+  - Evaluate performance based on real ROE, Gross Margin, and PEG from the `fundamental-data` script tags.
+
+#### 3. Kenji - Technical Chartist
+- **Responsibilities**:
+  - Detect real KD and MACD divergence situations and Moving Average Bias (BIAS).
+
+#### 4. Crow - Flow & Sentiment Sentinel
+- **Responsibilities**:
+  - Quantify market sentiment based on current real **VIX Index** and margin/short balance data.
+
+#### 5. Rain - Portfolio Manager
+- **Responsibilities**:
+  - Synthesize Bull/Base/Bear scenarios and action strategies based on the above dynamic analysis.
+
+### 4. Data Injection & Synchronization
+- **Mandatory Preparations**:
+  1. **Write AI News**: Format the 20 news items into an HTML `<ul><li>` structure and overwrite `news.html`.
+  2. **Write AI Analysis**: Write the persona-driven analysis into `ai.html`.
+- **Injection**: Execute `uv run update_report.py` ONLY AFTER updating the files above. The script now enforces a 5-minute recency check.
+- **No Hardcoding**: Scripts must not contain static variables or hardcoded macroeconomic values for `AI_ANALYSIS_TEXT`.
+- **Cleanup**: Ensure no placeholders remain.
+- **Finalization**: Synchronize updates to `index.html` and `report/index.html`.

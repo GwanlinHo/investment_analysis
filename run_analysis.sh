@@ -8,14 +8,14 @@ cd "$SCRIPT_DIR"
 
 echo "[Info] 開始執行投資分析工作流..."
 
-# 檢查 gemini 指令是否存在
-if ! command -v gemini &> /dev/null; then
-    echo "[Error] 找不到 'gemini' 指令。請確保已安裝 Gemini CLI 並正確設定 PATH。"
+# 檢查 claude 指令是否存在
+if ! command -v claude &> /dev/null; then
+    echo "[Error] 找不到 'claude' 指令。請確保已安裝 Claude Code 並正確設定 PATH。"
     exit 1
 fi
 
-# 執行 Gemini CLI 進行完整的投資分析工作流 (包含 Python 資料生成、AI 搜尋與報告更新)
-# 這裡使用 'investment analysis' 觸發 GEMINI.md 中定義的自動化流程
-gemini -p 'investment analysis' -y
+# 執行 Claude Code 進行完整的投資分析工作流 (包含 Python 資料生成、AI 搜尋與報告更新)
+# 這裡使用 'investment analysis' 觸發 CLAUDE.md 中定義的自動化流程
+claude -p '請依照本專案目錄的 CLAUDE.md 執行完整的 investment analysis 工作流程，從技術資料生成、總經數據蒐集、新聞、五人格AI分析到 update_report.py 報表注入與同步，全部完成。' --dangerously-skip-permissions
 
 echo "[Success] 投資分析工作流執行完畢。"
