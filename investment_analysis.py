@@ -119,7 +119,7 @@ def get_color_class(value, high=0, low=0, inverse=False):
         if value < low: return "text-up"
     return ""
 
-def format_data_row(symbol, latest, prev, inst_df=None, fund_data=None, show_chips=True, show_vol=True):
+def format_data_row(symbol, latest, prev, inst_df=None, fund_data=None, show_chips=True, show_vol=True, ref_date=None):
     def get_scalar(data, key): val = data.get(key); return val if pd.notna(val) else None
     def fmt_num(val, fmt="{:.1f}", fallback="-"): return fmt.format(val) if val is not None else fallback
     change_pct = get_scalar(latest, "Change %"); close = get_scalar(latest, "Close"); vol_change = get_scalar(latest, "Volume Change %")
@@ -131,7 +131,16 @@ def format_data_row(symbol, latest, prev, inst_df=None, fund_data=None, show_chi
         elif k < d and bias_val < th: signal, style = "空頭修正", "bearish-strong"
         elif k < d and bias_val > th: signal, style = "回檔整理", "bearish-weak"
     is_inverse = symbol in INVERSE_SYMBOLS or any(inv in symbol for inv in ["VIX", "Inverse", "Short"])
-    sym_html = f"<div>{SYMBOL_NAME_MAP.get(symbol, symbol)}</div><div style='font-size: 11px; color: #888;'>{symbol}</div>"
+    # 若該標的的實際數據日與群組基準交易日不一致 (例如尾端 NaN 導致退回前一交易日)，
+    # 明確標註該列真正反映的資料日期，避免靜默呈現過期數據而誤導。
+    date_note = ""
+    row_date = getattr(latest, 'name', None)
+    if ref_date is not None and row_date is not None:
+        try:
+            if row_date.normalize() != ref_date.normalize():
+                date_note = f"<div style='font-size: 10px; color: #e67e22;'>[!] 資料 {row_date.strftime('%m/%d')}</div>"
+        except Exception: pass
+    sym_html = f"<div>{SYMBOL_NAME_MAP.get(symbol, symbol)}</div><div style='font-size: 11px; color: #888;'>{symbol}</div>{date_note}"
     ct = COLOR_THRESHOLDS
     row = f"<tr><td class='symbol-cell'>{sym_html}</td>"
     row += f"<td class='number-cell {get_color_class(change_pct, 0, 0, is_inverse)}'><strong>{fmt_num(close, '{:,.2f}')}</strong></td>"
@@ -195,10 +204,16 @@ def process_stock_group(group, start_date, utc_now):
     stock_data = get_stock_data(group["symbols"], start_date)
     if not stock_data: return None
     
-    # 計算該群組中所有標的的最後日期，取其最大值作為區塊更新日期
-    all_last_dates = [df.index[-1] for df in stock_data.values() if not df.empty]
-    max_date_obj = max(all_last_dates) if all_last_dates else None
-    last_date = max_date_obj.strftime('%Y-%m-%d') if max_date_obj else "N/A"
+    # 群組基準交易日：取各標的「最後有效數據日」(排除尾端 NaN) 的最大值，代表本報告
+    # 涵蓋到的最新交易日。關鍵在於必須以 dropna 後的有效日計算，而非含 NaN 的
+    # df.index[-1]；尚未回補最新日的標的 (有效日落後者) 會在 format_data_row 逐列標註其
+    # 實際資料日，避免靜默呈現過期數據而與表頭日期錯位。
+    valid_last_dates = []
+    for df in stock_data.values():
+        dfv = df.dropna(subset=['Close']) if 'Close' in df.columns else df.dropna(how='all')
+        if not dfv.empty: valid_last_dates.append(dfv.index[-1])
+    ref_date_obj = max(valid_last_dates) if valid_last_dates else None
+    last_date = ref_date_obj.strftime('%Y-%m-%d') if ref_date_obj else "N/A"
     
     is_closed = utc_now.replace(tzinfo=pytz.utc).astimezone(TZ).weekday() >= 5
     is_idx_group = "指數" in group['title'] or "債券" in group['title']
@@ -225,7 +240,7 @@ def process_stock_group(group, start_date, utc_now):
         f_data = get_fundamental_data(symbol) if not symbol.startswith('^') else None
         if f_data: fundamental.append(f_data)
         # 表格顯示邏輯：指數群組不顯示量比與籌碼
-        g_res["table_rows"] += format_data_row(symbol, latest, prev, inst_df, f_data, show_chips=not is_idx_group, show_vol=not is_idx_group)
+        g_res["table_rows"] += format_data_row(symbol, latest, prev, inst_df, f_data, show_chips=not is_idx_group, show_vol=not is_idx_group, ref_date=ref_date_obj)
         disp_name = SYMBOL_NAME_MAP.get(symbol, symbol)
         # 圖表顯示邏輯：不論群組，只要標的有成交量就嘗試繪製副圖
         g_res["plots"][disp_name] = create_ma_plot_base64(df_ind.tail(PLOT_DAYS), symbol, inst_df, show_extra=True)

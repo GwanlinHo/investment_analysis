@@ -10,6 +10,11 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 ## 更新紀錄 (Changelog)
 
+- **2026-06-13 (v1.9)**:
+  - **交易日錯位修正 (Last Trading Date Bug Fix)**:
+    - **問題**：表頭「最後交易日」原以群組內所有標的（含尾端 NaN 行）的 `df.index[-1]` 取最大值，當僅少數標的（如台積電）已回補最新交易日、而多數標的（加權指數、ETF）尚未回補時，表頭日期會被拉高，與各列實際呈現的前一交易日數據錯位（例：表頭標 6/12，但加權指數實為 6/11 的數據）。
+    - **修正**：`investment_analysis.py` 改以各標的「最後有效數據日」（排除尾端 NaN）的**最大值**（即報告涵蓋到的最新交易日）作為群組基準交易日，取代原本含 NaN 的 `df.index[-1]`；並於 `format_data_row` 比對每列實際資料日，對尚未回補最新日的標的於該列標註「[!] 資料 MM/DD」，杜絕靜默呈現過期數據。
+
 - **2026-06-03 (v1.8)**:
   - **系統優化 (System Optimization)**:
     - **強化數據注入標籤**：修改 `update_report.py` 以支援 `TSMC`、`ISM_PMI` 與 `OIL_PRICE` 等新標籤，提升 AI 分析的數值精確度與可讀性。
