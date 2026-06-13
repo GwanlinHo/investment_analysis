@@ -55,9 +55,54 @@ def get_stock_data(symbols, start_date):
             if df.empty or len(df) < 2: continue
             if isinstance(df.columns, pd.MultiIndex): df.columns = df.columns.droplevel(1)
             df = df[~df.index.duplicated(keep='first')]
+            # 台股標的：以 FinMind 補 Yahoo 回補延遲所缺的最新交易日 (美股標的不受影響)
+            df = fill_latest_from_finmind(symbol, df, start_date)
             data[symbol] = df
         except Exception as e: print(f"[Error] {symbol} 抓取失敗: {e}")
     return data
+
+def _to_finmind_id(symbol):
+    """將 Yahoo 代號轉為 FinMind data_id；非台股標的回傳 None。"""
+    if symbol == "^TWII": return "TAIEX"
+    if symbol.endswith(".TWO"): return symbol[:-4]
+    if symbol.endswith(".TW"): return symbol[:-3]
+    return None
+
+def fill_latest_from_finmind(symbol, df, start_date):
+    """以 FinMind 補 Yahoo 對台股回補延遲所缺的最新交易日資料。
+
+    Yahoo 對台股 ETF/指數的當日收盤常延遲跨日回補 (Close 為 NaN)，導致報表呈現
+    前一交易日的過期數據。FinMind (本土源) 對台股 ETF、指數的當日收盤齊全且與
+    Yahoo 指數值一致，故用其原始 OHLC 補上 Yahoo 缺漏的列。
+
+    補值僅作用於「Yahoo 缺漏的日期」(該日不存在或 Close 為 NaN)，不覆蓋既有有效值；
+    且 auto_adjust 還原價在近期 ≈ 原始價 (落差為 0)，補在序列尾端口徑一致，漲跌幅與
+    技術指標皆正確。FinMind 取得失敗時原樣返回，由表頭基準日與逐列標註機制防呆。
+    """
+    fid = _to_finmind_id(symbol)
+    if fid is None: return df
+    try:
+        params = {"dataset": "TaiwanStockPrice", "data_id": fid, "start_date": start_date.strftime('%Y-%m-%d')}
+        resp = requests.get("https://api.finmindtrade.com/api/v4/data", params=params, timeout=15)
+        if resp.status_code != 200: return df
+        data = resp.json().get("data", [])
+        if not data: return df
+        fm = pd.DataFrame(data)
+        fm['date'] = pd.to_datetime(fm['date'])
+        fm = fm.set_index('date').sort_index().rename(
+            columns={'open': 'Open', 'max': 'High', 'min': 'Low', 'close': 'Close', 'Trading_Volume': 'Volume'})
+        cols = ['Open', 'High', 'Low', 'Close', 'Volume']
+        fm = fm[[c for c in cols if c in fm.columns]]
+        filled = 0
+        for dt, row in fm.iterrows():
+            if dt not in df.index or pd.isna(df.loc[dt].get('Close')):
+                for c in fm.columns: df.loc[dt, c] = row[c]
+                filled += 1
+        if filled: print(f"    [FinMind] {symbol} 補入 {filled} 個交易日 (Yahoo 缺漏)")
+        return df.sort_index()
+    except Exception as e:
+        print(f"    [FinMind] {symbol} 補值略過: {e}")
+        return df
 
 def fetch_tw_institutional_data(symbol, start_date):
     clean_symbol = symbol.split('.')[0]

@@ -10,6 +10,12 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 ## 更新紀錄 (Changelog)
 
+- **2026-06-13 (v2.0)**:
+  - **台股資料源 FinMind 補洞 (TW Data Source Fallback)**:
+    - **問題**：Yahoo Finance 對台股 ETF/指數的當日收盤回補常延遲跨日 (Close 為 NaN)，而 cron 每日 07:00 執行，結構性拿不到最新台股資料，導致報表台股區塊長期可能呈現前一交易日的過期數據、漏失當日行情 (例：國泰費半 ETF 6/12 實漲 6.6% 卻被漏掉)。
+    - **修正**：`investment_analysis.py` 新增 `fill_latest_from_finmind`，於 `get_stock_data` 抓取 Yahoo 後，對台股標的 (`^TWII`／`.TW`／`.TWO`) 以 FinMind (本土源) 補上 Yahoo 缺漏的最新交易日 OHLC。僅補 Yahoo 缺漏列、不覆蓋既有有效值；近期還原價≈原始價，補在尾端口徑一致。FinMind 失敗時由 v1.9 的表頭基準日與逐列標註機制防呆。
+    - **驗證**：FinMind 對一般 ETF、上櫃債券 ETF (`.TWO`)、槓桿 ETF (`00631L`)、指數 (`TAIEX`) 涵蓋完整，且指數值與 Yahoo 一致。
+
 - **2026-06-13 (v1.9)**:
   - **交易日錯位修正 (Last Trading Date Bug Fix)**:
     - **問題**：表頭「最後交易日」原以群組內所有標的（含尾端 NaN 行）的 `df.index[-1]` 取最大值，當僅少數標的（如台積電）已回補最新交易日、而多數標的（加權指數、ETF）尚未回補時，表頭日期會被拉高，與各列實際呈現的前一交易日數據錯位（例：表頭標 6/12，但加權指數實為 6/11 的數據）。
