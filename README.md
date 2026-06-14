@@ -10,6 +10,15 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 ## 更新紀錄 (Changelog)
 
+- **2026-06-14 (v2.1)**:
+  - **資料完整性把關 (Data Integrity Gate)**:
+    - **策略**：yfinance 取不到資料時改由 FinMind 補救；兩者皆失敗時依缺失標的數分流處理，避免殘缺或誤導性報告被上傳。
+    - **缺失計數 (以標的為單位)**：某標的取不到「最近交易日」收盤 (台股 yfinance 失敗且 FinMind 亦失敗 / 美股 yfinance 失敗且無備援) 即計 1 個缺失。
+    - **缺 0~2 個**：缺失標的整列數值以 `n/a` 呈現 (新增 `format_na_row`)，並標示「[!] API 無資料」，照常產生報告；使用者可一眼辨識數據異常源於 API 取不到。
+    - **缺 3 個(含)以上**：`investment_analysis.py` 印出 `[ABORT]` 並以非零碼結束、**不產生報告、不更新 technical_data.json**，從源頭杜絕殘缺上傳，保留前一份報告。
+    - **三道防線**：(1) py 中止不產出；(2) CLAUDE.md 規範工作流在 py 非零退出時終止、不 push；(3) `update_report.py` 於 technical_data.json 非當日更新時拒絕注入。
+    - **備援強化**：`get_stock_data` 在 yfinance 完全失敗時，對台股標的改用 FinMind 全量抓取 (先前僅補當日缺漏，yfinance 全失敗會直接跳過)。
+
 - **2026-06-13 (v2.0)**:
   - **台股資料源 FinMind 補洞 (TW Data Source Fallback)**:
     - **問題**：Yahoo Finance 對台股 ETF/指數的當日收盤回補常延遲跨日 (Close 為 NaN)，而 cron 每日 07:00 執行，結構性拿不到最新台股資料，導致報表台股區塊長期可能呈現前一交易日的過期數據、漏失當日行情 (例：國泰費半 ETF 6/12 實漲 6.6% 卻被漏掉)。

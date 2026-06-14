@@ -199,6 +199,16 @@ def main():
     if not report_file: return
     
     tech_data = load_from_json(TECHNICAL_DATA_FILE)
+    # 防線：technical_data.json 必須為今日更新。若非今日，代表上游 investment_analysis.py
+    # 因資料完整性不足(缺失標的達門檻)而中止、未產出新資料，此時拒絕注入，避免把今天的
+    # AI 分析灌進昨天的舊報告而造成新舊混雜。
+    if tech_data:
+        last_updated = str(tech_data.get("last_updated", ""))
+        today = datetime.datetime.now().strftime("%Y-%m-%d")
+        if not last_updated.startswith(today):
+            print(f"[Abort] technical_data.json 最後更新為 {last_updated!r}，非今日({today})，"
+                  "疑似上游資料抓取已中止，拒絕注入報告。")
+            return
     macro_cache = load_cache()
     context = get_data_context(tech_data, macro_cache)
     
