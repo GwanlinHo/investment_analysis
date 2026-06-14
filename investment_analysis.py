@@ -48,18 +48,39 @@ except Exception as e:
 
 # --- 資料獲取 ---
 def get_stock_data(symbols, start_date):
-    data = {}
+    """回傳 (data, failed)：data 為成功取得的 {symbol: df}，failed 為 yfinance 與
+    FinMind 皆無法取得的標的清單 (供上層做資料完整性把關)。"""
+    data, failed = {}, []
     for symbol in symbols:
+        df = None
         try:
             df = yf.download(symbol, start=start_date, progress=False, auto_adjust=True)
-            if df.empty or len(df) < 2: continue
-            if isinstance(df.columns, pd.MultiIndex): df.columns = df.columns.droplevel(1)
-            df = df[~df.index.duplicated(keep='first')]
-            # 台股標的：以 FinMind 補 Yahoo 回補延遲所缺的最新交易日 (美股標的不受影響)
-            df = fill_latest_from_finmind(symbol, df, start_date)
+            if df.empty or len(df) < 2:
+                df = None
+            else:
+                if isinstance(df.columns, pd.MultiIndex): df.columns = df.columns.droplevel(1)
+                df = df[~df.index.duplicated(keep='first')]
+                # 台股標的：以 FinMind 補 Yahoo 回補延遲所缺的最新交易日 (美股標的不受影響)
+                df = fill_latest_from_finmind(symbol, df, start_date)
+        except Exception as e:
+            print(f"[Error] {symbol} yfinance 抓取失敗: {e}"); df = None
+        # yfinance 完全失敗時，台股標的改用 FinMind 全量抓取作為備援
+        if df is None:
+            fid = _to_finmind_id(symbol)
+            if fid is not None:
+                try:
+                    fm = _fetch_finmind_df(fid, start_date)
+                    if fm is not None and len(fm) >= 2:
+                        print(f"    [FinMind] {symbol} yfinance 失敗，改用 FinMind 全量抓取 ({len(fm)} 筆)")
+                        df = fm
+                except Exception as e:
+                    print(f"    [FinMind] {symbol} 全量抓取失敗: {e}")
+        if df is not None and not df.empty:
             data[symbol] = df
-        except Exception as e: print(f"[Error] {symbol} 抓取失敗: {e}")
-    return data
+        else:
+            failed.append(symbol)
+            print(f"[Missing] {symbol} yfinance 與 FinMind 皆無法取得資料")
+    return data, failed
 
 def _to_finmind_id(symbol):
     """將 Yahoo 代號轉為 FinMind data_id；非台股標的回傳 None。"""
@@ -67,6 +88,21 @@ def _to_finmind_id(symbol):
     if symbol.endswith(".TWO"): return symbol[:-4]
     if symbol.endswith(".TW"): return symbol[:-3]
     return None
+
+def _fetch_finmind_df(fid, start_date):
+    """抓 FinMind TaiwanStockPrice，回傳標準 OHLCV DataFrame (DatetimeIndex)；失敗或無資料回 None。"""
+    params = {"dataset": "TaiwanStockPrice", "data_id": fid, "start_date": start_date.strftime('%Y-%m-%d')}
+    resp = requests.get("https://api.finmindtrade.com/api/v4/data", params=params, timeout=15)
+    if resp.status_code != 200: return None
+    data = resp.json().get("data", [])
+    if not data: return None
+    fm = pd.DataFrame(data)
+    fm['date'] = pd.to_datetime(fm['date'])
+    fm = fm.set_index('date').sort_index().rename(
+        columns={'open': 'Open', 'max': 'High', 'min': 'Low', 'close': 'Close', 'Trading_Volume': 'Volume'})
+    cols = ['Open', 'High', 'Low', 'Close', 'Volume']
+    fm = fm[[c for c in cols if c in fm.columns]]
+    return fm if not fm.empty else None
 
 def fill_latest_from_finmind(symbol, df, start_date):
     """以 FinMind 補 Yahoo 對台股回補延遲所缺的最新交易日資料。
@@ -82,17 +118,8 @@ def fill_latest_from_finmind(symbol, df, start_date):
     fid = _to_finmind_id(symbol)
     if fid is None: return df
     try:
-        params = {"dataset": "TaiwanStockPrice", "data_id": fid, "start_date": start_date.strftime('%Y-%m-%d')}
-        resp = requests.get("https://api.finmindtrade.com/api/v4/data", params=params, timeout=15)
-        if resp.status_code != 200: return df
-        data = resp.json().get("data", [])
-        if not data: return df
-        fm = pd.DataFrame(data)
-        fm['date'] = pd.to_datetime(fm['date'])
-        fm = fm.set_index('date').sort_index().rename(
-            columns={'open': 'Open', 'max': 'High', 'min': 'Low', 'close': 'Close', 'Trading_Volume': 'Volume'})
-        cols = ['Open', 'High', 'Low', 'Close', 'Volume']
-        fm = fm[[c for c in cols if c in fm.columns]]
+        fm = _fetch_finmind_df(fid, start_date)
+        if fm is None: return df
         filled = 0
         for dt, row in fm.iterrows():
             if dt not in df.index or pd.isna(df.loc[dt].get('Close')):
@@ -163,6 +190,23 @@ def get_color_class(value, high=0, low=0, inverse=False):
         if value > high: return "text-down"; 
         if value < low: return "text-up"
     return ""
+
+def format_na_row(symbol, show_chips=True, show_vol=True):
+    """缺失標的的佔位列：保留標的名稱，所有數值欄位顯示 n/a，明確標示為 API 無資料，
+    讓使用者一眼辨識某次數據異常是資料源取不到，而非真實數值。欄位順序須與 format_data_row 一致。"""
+    sym_html = (f"<div>{SYMBOL_NAME_MAP.get(symbol, symbol)}</div>"
+                f"<div style='font-size: 11px; color: #888;'>{symbol}</div>"
+                f"<div style='font-size: 10px; color: #e74c3c;'>[!] API 無資料</div>")
+    na = "<td class='number-cell'>n/a</td>"
+    row = f"<tr><td class='symbol-cell'>{sym_html}</td>"
+    row += na + na + "<td class='trend-cell'>n/a</td>"   # 收盤、漲跌%、訊號
+    if show_vol: row += na                               # 量比
+    if show_chips: row += na + na                        # 籌碼/空單兩欄
+    row += na + na                                       # K、D
+    for _ in BIAS_PERIODS: row += na                     # 各期乖離率
+    row += na + na + na                                  # ADX、+DI、-DI
+    row += "</tr>"
+    return row
 
 def format_data_row(symbol, latest, prev, inst_df=None, fund_data=None, show_chips=True, show_vol=True, ref_date=None):
     def get_scalar(data, key): val = data.get(key); return val if pd.notna(val) else None
@@ -246,8 +290,8 @@ def create_yield_curve_plot_base64():
     except: return None, {}
 
 def process_stock_group(group, start_date, utc_now):
-    stock_data = get_stock_data(group["symbols"], start_date)
-    if not stock_data: return None
+    stock_data, failed = get_stock_data(group["symbols"], start_date)
+    if not stock_data and not failed: return None
     
     # 群組基準交易日：取各標的「最後有效數據日」(排除尾端 NaN) 的最大值，代表本報告
     # 涵蓋到的最新交易日。關鍵在於必須以 dropna 後的有效日計算，而非含 NaN 的
@@ -270,14 +314,22 @@ def process_stock_group(group, start_date, utc_now):
     if "美股" in group['title']: g_res["section_id"] = "us-stocks"
     elif "台股" in group['title']: g_res["section_id"] = "tw-stocks"
     elif "債券" in group['title']: g_res["section_id"] = "bonds"
-    summary, market, fundamental = [], {}, []
+    summary, market, fundamental, missing = [], {}, [], []
+    # 完全無法取得資料的標的 (yfinance 與 FinMind 皆失敗)：列為缺失並產生 n/a 佔位列
+    for symbol in failed:
+        missing.append(symbol)
+        g_res["table_rows"] += format_na_row(symbol, show_chips=not is_idx_group, show_vol=not is_idx_group)
     for symbol, df in stock_data.items():
         print(f"  - 分析: {symbol}")
         df_ind = calculate_all_indicators(df)
-        
-        # 處理有效數據回溯 (處理 Yahoo Finance 最後一行 NaN 的問題)
+
+        # 缺失判定：完全無有效收盤，或最新有效日落後群組基準交易日 (代表 yfinance 與
+        # FinMind 皆未提供最近交易日資料) → 列為缺失、顯示 n/a，不以更舊數據魚目混珠。
         df_valid = df_ind.dropna(subset=['Close'])
-        if df_valid.empty: continue
+        if df_valid.empty or (ref_date_obj is not None and df_valid.index[-1].normalize() < ref_date_obj.normalize()):
+            missing.append(symbol)
+            g_res["table_rows"] += format_na_row(symbol, show_chips=not is_idx_group, show_vol=not is_idx_group)
+            continue
         latest = df_valid.iloc[-1]
         prev = df_valid.iloc[-2] if len(df_valid) > 1 else latest
         
@@ -295,7 +347,7 @@ def process_stock_group(group, start_date, utc_now):
         if inst_df is not None:
             ir = inst_df.reindex(df_ind.index).tail(AI_ANALYSIS_DAYS).reset_index(); ir.rename(columns={ir.columns[0]: 'date'}, inplace=True); ir['date'] = ir['date'].dt.strftime('%Y-%m-%d')
             market[disp_name + "_institutional"] = ir.to_dict(orient='records')
-    return g_res, summary, market, fundamental
+    return g_res, summary, market, fundamental, missing
 
 def save_to_json(fundamental, yield_data, market, summary, filename="technical_data.json"):
     data = {
@@ -310,11 +362,20 @@ def save_to_json(fundamental, yield_data, market, summary, filename="technical_d
 
 def main():
     utc_now = datetime.datetime.now(datetime.timezone.utc); start_date = utc_now - datetime.timedelta(days=HISTORY_DAYS)
-    all_rep, all_sum, all_fun, all_mkt = [], [], [], {}
+    all_rep, all_sum, all_fun, all_mkt, all_missing = [], [], [], {}, []
     for group in STOCK_GROUPS:
         print(f"\n--- 正在處理群組: {group['title']} ---")
         res = process_stock_group(group, start_date, utc_now)
-        if res: gr, si, md, fd = res; all_rep.append(gr); all_sum.extend(si); all_mkt.update(md); all_fun.extend(fd)
+        if res: gr, si, md, fd, ms = res; all_rep.append(gr); all_sum.extend(si); all_mkt.update(md); all_fun.extend(fd); all_missing.extend(ms)
+    # 資料完整性關卡：缺失標的達 3 個(含)以上 → 中止，不產生報告、不更新 technical_data.json，
+    # 從源頭杜絕殘缺資料被後續工作流上傳；保留前一份完整報告。缺 0~2 個則於報表標示 n/a 後照常產生。
+    if len(all_missing) >= 3:
+        print(f"\n[ABORT] 資料完整性不足：{len(all_missing)} 個標的無法取得最近交易日資料"
+              f" (yfinance 與 FinMind 皆失敗)：{all_missing}")
+        print("[ABORT] 已取消本次報告產生與更新，保留前一份報告。請檢查資料源 API 狀態。")
+        sys.exit(2)
+    if all_missing:
+        print(f"[WARN] {len(all_missing)} 個標的資料缺失，已於報表標示 n/a：{all_missing}")
     sum_html = ""
     for key in KEY_INDICATORS:
         item = next((i for i in all_sum if i['orig_symbol'] == key), None)

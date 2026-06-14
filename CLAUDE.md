@@ -16,6 +16,7 @@
 ## Merge & Upload Policy
 - **Systematic Changes**: Merging to `main` and pushing to GitHub is **STRICTLY PROHIBITED** until the user has reviewed the results and provided explicit consent. After consent, merge to `main`, push, and switch the local environment back to `main`.
 - **Daily Reports**: Upon successful completion of the analysis cycle (`uv run investment_analysis.py` and `uv run update_report.py`), the results must be committed and pushed to the `main` branch **IMMEDIATELY** and **AUTOMATICALLY**, without requiring manual consent or a feature branch.
+- **Data Integrity Abort (overrides auto-push)**: If `investment_analysis.py` aborts due to the data-completeness gate (3+ symbols missing, non-zero exit / `[ABORT]`), the auto-push rule above does NOT apply — produce nothing and push nothing for this cycle. As a final safeguard, `update_report.py` independently refuses to inject when `technical_data.json` is not updated today.
 
 ## Workflow: Investment Analysis
 
@@ -23,6 +24,7 @@
 - **Action**: ALWAYS execute `uv run investment_analysis.py` as the first step.
 - **Purpose**: This generates the base HTML report with the latest technical indicators (KD, MACD, BIAS), price data, and K-line charts.
 - **Verification**: Ensure the script finishes successfully before proceeding to macro data collection.
+- **Data Integrity Gate (MANDATORY)**: `investment_analysis.py` enforces a data-completeness gate — if 3 or more symbols cannot obtain their latest trading-day data from BOTH yfinance AND FinMind, it prints `[ABORT]` and exits with a non-zero code WITHOUT producing a report. If the script exits non-zero (or prints `[ABORT]`), you MUST **terminate the entire workflow immediately**: do NOT run macro collection / news / AI analysis / `update_report.py`, and **do NOT git commit or push**. Leave the previous report untouched and log the reason. Fewer than 3 missing symbols is acceptable: those rows are rendered as `n/a` and the workflow proceeds normally.
 
 ### 1. Macro Data Collection
 - **Principle**: Use **OFFICIAL Historical Actuals ONLY**. Strictly prohibit forecasts, estimates, or outlooks.
