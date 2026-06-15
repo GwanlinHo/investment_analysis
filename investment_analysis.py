@@ -323,16 +323,13 @@ def process_stock_group(group, start_date, utc_now):
         print(f"  - 分析: {symbol}")
         df_ind = calculate_all_indicators(df)
 
-        # 缺失判定採「絕對標準」，不可用「落後群組基準日」判定：週末/跨市場時段，群組內
-        # 持續交易或時區領先的商品 (黃金期貨 GC=F、日經 ^N225) 會把群組 max 拉高，導致
-        # 正常休市的股票指數被誤判缺失而誤觸發中止 (每週一早晨必中)。
-        # 缺失 = 完全無有效收盤，或最新資料距執行日超過 STALE_DAYS 個日曆日 (長期停更，
-        # 涵蓋一般週末與短連假)。僅落後群組基準但在期限內者不計缺失，由逐列日期標註誠實呈現。
-        STALE_DAYS = 5
+        # 缺失判定：唯一標準是「完全沒有任何有效收盤資料可顯示」(序列全為 NaN → df_valid 為空；
+        # 至於 yfinance 與 FinMind 皆整個抓不到的標的，已先歸入 failed 並產生 n/a 列)。
+        # 休市 (週末、連假、長假) 屬正常現象，不得視為缺失：只要有任何歷史有效資料，一律顯示其
+        # 「最後有效交易日 (上一交易日)」資訊，並由 format_data_row 逐列標註該資料日，不以 n/a 呈現。
+        # (不採距今天數門檻 — 長假可達九天，以天數判缺失並無道理。)
         df_valid = df_ind.dropna(subset=['Close'])
-        run_date = utc_now.astimezone(TZ).date()
-        is_stale = (not df_valid.empty) and (run_date - df_valid.index[-1].date()).days > STALE_DAYS
-        if df_valid.empty or is_stale:
+        if df_valid.empty:
             missing.append(symbol)
             g_res["table_rows"] += format_na_row(symbol, show_chips=not is_idx_group, show_vol=not is_idx_group)
             continue
