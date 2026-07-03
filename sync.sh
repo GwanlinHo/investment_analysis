@@ -3,7 +3,7 @@
 # 只發布報表產物,杜絕誤置檔案或敏感內容進公開 repo。原始碼/設定變更請人工另行 commit。
 
 set -o pipefail
-cd "$(dirname "$0")" || exit 1
+cd "$(dirname "${BASH_SOURCE[0]}")" || exit 1
 
 # 本 repo 發布白名單(自動產生的報表產物; 目錄項會納入其下新檔)。與 CLAUDE.md 每日報告定義一致。
 WHITELIST=(index.html report technical_data.json macro_cache.json news.html ai.html ai_context.json)
