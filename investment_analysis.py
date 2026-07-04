@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import mplfinance as mpf
 import json
 import sys
+import time
 from jinja2 import Environment, FileSystemLoader
 import requests
 
@@ -89,11 +90,44 @@ def _to_finmind_id(symbol):
     if symbol.endswith(".TW"): return symbol[:-3]
     return None
 
+# FinMind 免費端點：加退避重試(暫時性失敗) + 單次執行內 memoize(消除同標的重複抓取，降限流風險)。
+FINMIND_API = "https://api.finmindtrade.com/api/v4/data"
+_FINMIND_DF_CACHE = {}
+
+def _finmind_get(params, timeout=15, retries=3):
+    """對 FinMind 的 GET 加退避重試。暫時性失敗(逾時/連線錯誤/429/5xx)退避後重試；
+    回傳 requests.Response 或 None(連線層重試耗盡)。非暫時性(200/一般 4xx)直接回傳由上層判讀。"""
+    delay = 2
+    for attempt in range(retries):
+        try:
+            resp = requests.get(FINMIND_API, params=params, timeout=timeout)
+            if (resp.status_code == 429 or resp.status_code >= 500) and attempt < retries - 1:
+                print(f"    [FinMind] HTTP {resp.status_code}，{delay}s 後重試 ({attempt+1}/{retries})")
+                time.sleep(delay); delay *= 2; continue
+            return resp
+        except requests.exceptions.RequestException as e:
+            if attempt < retries - 1:
+                print(f"    [FinMind] 連線失敗({e})，{delay}s 後重試 ({attempt+1}/{retries})")
+                time.sleep(delay); delay *= 2; continue
+            print(f"    [FinMind] 請求失敗(重試耗盡): {e}")
+            return None
+    return None
+
 def _fetch_finmind_df(fid, start_date):
-    """抓 FinMind TaiwanStockPrice，回傳標準 OHLCV DataFrame (DatetimeIndex)；失敗或無資料回 None。"""
+    """抓 FinMind TaiwanStockPrice，回傳標準 OHLCV DataFrame；失敗或無資料回 None。
+    單次執行內 memoize(同 fid+start_date 只實抓一次)，回傳 copy 避免共用 DataFrame 被 mutate。"""
+    key = (fid, start_date.strftime('%Y-%m-%d'))
+    if key in _FINMIND_DF_CACHE:
+        c = _FINMIND_DF_CACHE[key]
+        return c.copy() if c is not None else None
+    result = _fetch_finmind_df_uncached(fid, start_date)
+    _FINMIND_DF_CACHE[key] = result
+    return result.copy() if result is not None else None
+
+def _fetch_finmind_df_uncached(fid, start_date):
     params = {"dataset": "TaiwanStockPrice", "data_id": fid, "start_date": start_date.strftime('%Y-%m-%d')}
-    resp = requests.get("https://api.finmindtrade.com/api/v4/data", params=params, timeout=15)
-    if resp.status_code != 200: return None
+    resp = _finmind_get(params, timeout=15)
+    if resp is None or resp.status_code != 200: return None
     data = resp.json().get("data", [])
     if not data: return None
     fm = pd.DataFrame(data)
@@ -134,11 +168,10 @@ def fill_latest_from_finmind(symbol, df, start_date):
 def fetch_tw_institutional_data(symbol, start_date):
     clean_symbol = symbol.split('.')[0]
     if not clean_symbol.isdigit(): return None
-    url = "https://api.finmindtrade.com/api/v4/data"
     params = {"dataset": "TaiwanStockInstitutionalInvestorsBuySell", "data_id": clean_symbol, "start_date": start_date.strftime('%Y-%m-%d')}
     try:
-        resp = requests.get(url, params=params, timeout=10)
-        if resp.status_code == 200:
+        resp = _finmind_get(params, timeout=10)
+        if resp is not None and resp.status_code == 200:
             data = resp.json().get('data', [])
             if not data: return None
             df_inst = pd.DataFrame(data)
