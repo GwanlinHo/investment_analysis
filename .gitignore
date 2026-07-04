@@ -155,3 +155,5 @@ cython_debug/
 .DS_Store
 Thumbs.db
 GEMINI.md.bak
+# 日期報告快照(本機封存, live 站未連結, 不進版控避免 git 歷史膨脹; prune_manager 維持本機30份)
+report/invest_analysis_*.html
