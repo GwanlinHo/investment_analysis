@@ -42,4 +42,13 @@ fi
 
 echo "發現白名單變更，提交並推送..."
 git commit -m "Auto-sync: $(date '+%Y-%m-%d %H:%M:%S')" || exit 1
-git push
+git push || exit 1
+
+# Pages 部署護欄(共用函式庫,失敗自動重觸發一次;見 _lib/pages_guard.sh)
+PAGES_GUARD=/home/pi/WorkDir/_lib/pages_guard.sh
+if [ -r "$PAGES_GUARD" ]; then
+  source "$PAGES_GUARD"
+  verify_pages_or_retrigger
+else
+  echo "[!] 找不到 $PAGES_GUARD,略過 Pages 部署驗證。"
+fi
