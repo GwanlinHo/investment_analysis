@@ -10,6 +10,11 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 ## 更新紀錄 (Changelog)
 
+- **2026-07-06 (v2.4)**:
+  - **GitHub Pages 部署護欄 (sync.sh)**:
+    - **問題**：GitHub Pages 偶發「Deployment failed, try again later」暫時性故障 (2026-07-05 本 repo 即發生一次，2026-07-03 stock_selection 連續三次)，部署失敗時網頁停留在舊版且無人察覺，直到下次 push 才有機會重試。
+    - **修正**：`sync.sh` 推送成功後改為呼叫共用函式庫 `WorkDir/_lib/pages_guard.sh` 的 `verify_pages_or_retrigger`：以公開 Actions API (免 token) 輪詢該 commit 的部署結論 (最多 3 分鐘)；若為 failure 則推一個空 commit 自動重觸發一次；API 查不到狀態時僅警告、不中斷報告流程。三個公開 repo (investment_analysis / Stock_Selection / yt_podcast_analysis) 共用同一份護欄。
+
 - **2026-06-15 (v2.3)**:
   - **休市顯示上一交易日 (移除停更天數門檻)**:
     - **問題**：v2.2 以「最新資料距執行日超過 5 天」作為缺失判定之一，但休市 (尤其過年等長假可達九天) 屬正常現象，以天數判定缺失並無道理 — 長假會讓原本有上一交易日資料的標的被誤顯示為 n/a。
