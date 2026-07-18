@@ -22,6 +22,6 @@ if [ "$published" = "$today" ]; then
 fi
 
 echo "$(date -Is) [retry-guard][!] GitHub 最新報告為 ${published:-未知},非今日(${today}),觸發重跑一次"
-/home/pi/invest_analysis.sh
+/home/pi/WorkDir/investment_analysis/invest_analysis.sh
 echo "$(date -Is) [retry-guard] 重跑結束 rc=$?"
 exit 0
