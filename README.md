@@ -10,6 +10,10 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 ## 更新紀錄 (Changelog)
 
+- **2026-07-26 (v2.5)**:
+  - **導覽列新增「動能選股」按鈕**:
+    - `templates/report_template.html` 導覽列 (nav-bar) 於「財經節目」之後新增外連按鈕「動能選股」，連往 `https://gwanlinho.github.io/Stock_Selection/` (target="_blank")，方便讀者從總經擇時報告一鍵前往攻擊型個股選股週報。同步補進現有 `index.html` 使其即時上線。
+
 - **2026-07-06 (v2.4)**:
   - **GitHub Pages 部署護欄 (sync.sh)**:
     - **問題**：GitHub Pages 偶發「Deployment failed, try again later」暫時性故障 (2026-07-05 本 repo 即發生一次，2026-07-03 stock_selection 連續三次)，部署失敗時網頁停留在舊版且無人察覺，直到下次 push 才有機會重試。
