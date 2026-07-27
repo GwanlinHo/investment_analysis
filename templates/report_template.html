@@ -279,6 +279,63 @@
         let currentUtterance = null;
         let activeBtnId = null;
 
+        // 螢幕保持與音訊保活（比照多益單字卡驗證過的定案作法）
+        let wakeLock = null;
+        let audioCtx = null;
+        let keepAliveNode = null;
+
+        async function acquireWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                }
+            } catch (e) { /* 不支援或被拒時朗讀仍可進行，只是螢幕會照常熄滅 */ }
+        }
+
+        function releaseWakeLock() {
+            try {
+                if (wakeLock) { wakeLock.release(); wakeLock = null; }
+            } catch (e) { wakeLock = null; }
+        }
+
+        function ensureAudioCtx() {
+            try {
+                if (!audioCtx) {
+                    const AC = window.AudioContext || window.webkitAudioContext;
+                    if (!AC) return null;
+                    audioCtx = new AC();
+                }
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                return audioCtx;
+            } catch (e) { return null; }
+        }
+
+        // 無聲保活：極低頻、極小音量，聽不到但讓 iOS 音訊通道常開，避免每段語音開頭被切掉
+        function startAudioKeepAlive() {
+            const ctx = ensureAudioCtx();
+            if (!ctx || keepAliveNode) return;
+            try {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                gain.gain.value = 0.0001; // 約 -80dB，實質無聲
+                osc.frequency.value = 20; // 極低頻
+                osc.connect(gain).connect(ctx.destination);
+                osc.start();
+                keepAliveNode = { osc: osc, gain: gain };
+            } catch (e) { /* 忽略 */ }
+        }
+
+        function stopAudioKeepAlive() {
+            try {
+                if (keepAliveNode) {
+                    keepAliveNode.osc.stop();
+                    keepAliveNode.osc.disconnect();
+                    keepAliveNode = null;
+                }
+                if (audioCtx && audioCtx.state === 'running') audioCtx.suspend();
+            } catch (e) { /* 忽略 */ }
+        }
+
         function toggleTTS(elementId, btnId) {
             if (synth.speaking && activeBtnId === btnId) {
                 stopTTS();
@@ -301,6 +358,10 @@
             activeBtnId = btnId;
             const btn = document.getElementById(btnId);
             if (btn) btn.classList.add('playing');
+
+            // 朗讀期間保持螢幕亮、音訊通道常開
+            acquireWakeLock();
+            startAudioKeepAlive();
 
             // Split text into chunks to prevent Web Speech API issues with long text
             const chunks = cleanedText.match(/[^。！？；]+[。！？；]?/g) || [cleanedText];
@@ -366,6 +427,8 @@
             }
             activeBtnId = null;
             currentUtterance = null;
+            releaseWakeLock();
+            stopAudioKeepAlive();
         }
 
         // Handle page visibility change
