@@ -10,7 +10,10 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 ## 更新紀錄 (Changelog)
 
-- **2026-07-26 (v2.5)**:
+- **2026-07-28 (v2.6)**:
+  - **朗讀時保持螢幕亮 (Wake Lock) 與 iOS 切音修正**:
+    - **問題**：報告的「朗讀新聞／朗讀分析」播放途中，手機待機時間一到螢幕自動熄滅，頁面轉為隱藏即觸發停止朗讀，長文無法聽完；另 iOS 每段語音開頭有被切掉一個音節的既有問題。
+    - **修正**：`templates/report_template.html`（並同步補上線上 `index.html`）的 TTS 控制器加入兩項與多益單字卡 PWA 相同的已驗證機制：(1) 朗讀開始時以 Screen Wake Lock API 保持螢幕亮，停止或唸完時釋放；(2) 朗讀期間以 Web Audio 輸出 20Hz、約 -80dB 的無聲訊號保持音訊通道常開，避免 iOS 每段開頭被切音。不支援 Wake Lock 的環境自動降級為原行為。主動切換至其他 App 時仍會停止朗讀（原設計保留）。
   - **導覽列新增「動能選股」按鈕**:
     - `templates/report_template.html` 導覽列 (nav-bar) 於「財經節目」之後新增外連按鈕「動能選股」，連往 `https://gwanlinho.github.io/Stock_Selection/` (target="_blank")，方便讀者從總經擇時報告一鍵前往攻擊型個股選股週報。同步補進現有 `index.html` 使其即時上線。
 
