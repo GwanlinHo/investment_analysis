@@ -228,9 +228,12 @@ def main():
     us_table = generate_macro_table(macro_cache.get("US_MACRO", []), "us-macro-table")
     tw_table = generate_macro_table(macro_cache.get("TW_MACRO", []), "tw-macro-table")
     
-    # 支援占位符與現有表格的替換
-    content = re.sub(r'<div id="us-macro-placeholder"></div>|<table.*?id="us-macro-table">.*?</table>', us_table, content, flags=re.DOTALL)
-    content = re.sub(r'<div id="tw-macro-placeholder"></div>|<table.*?id="tw-macro-table">.*?</table>', tw_table, content, flags=re.DOTALL)
+    # 支援占位符與現有表格的替換。
+    # 注意：開頭標籤內的 id 必須用 [^>]* 匹配，不可用 .*?——DOTALL 下 <table.*?id= 會從
+    # 全文件第一個 <table 一路吞到總經表格，把中間的 K 線圖等內容全部毀掉
+    # (2026-07-29 對已注入報告重跑本腳本時實際發生過)。
+    content = re.sub(r'<div id="us-macro-placeholder"></div>|<table[^>]*id="us-macro-table">.*?</table>', us_table, content, flags=re.DOTALL)
+    content = re.sub(r'<div id="tw-macro-placeholder"></div>|<table[^>]*id="tw-macro-table">.*?</table>', tw_table, content, flags=re.DOTALL)
 
     if os.path.exists("news.html"):
         with open("news.html", "r", encoding="utf-8") as f: news_html = f.read().strip()
