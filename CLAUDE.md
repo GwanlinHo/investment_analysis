@@ -41,6 +41,7 @@
 - **Authority**: Tier-1 ONLY (Bloomberg, Reuters, WSJ, FT, CNBC, Barron's, BBC, CNN, Economic Daily, Commercial Times, CNA, Anue).
 - **Freshness**: All news must be published within the **LAST 7 DAYS**. **MANDATORY**: Each news item must include its publication date in (YYYY-MM-DD) format.
 - **Authenticity**: MANDATORY cross-verification of all major claims. If a story is only reported by a single non-wire source, it must be excluded. Compare at least two Tier-1 sources for critical news.
+- **Event-Timing Integrity (MANDATORY)**: An event may be reported as HAVING HAPPENED only if its official announcement time is verifiably EARLIER than the report generation time (Taiwan time). Scheduled-but-unannounced events (FOMC decisions, earnings releases, economic data) MUST be written in forward-looking language (e.g., "市場預期", "將於...公布") with the release time stated in Taiwan time. **Timezone conversion is mandatory**: e.g., FOMC statements are released at 14:00 ET, which is 02:00-03:00 the NEXT DAY in Taiwan — a report generated on a Taiwan morning can NEVER contain that week's FOMC outcome before that moment. Converting search-result previews/expectations into accomplished facts, or attaching a fabricated source/date to such an item, is a critical violation — discard the item instead. (Incident: the 2026-07-29 report falsely stated FOMC had announced a rate hold before the meeting had even concluded.)
 - **Language & Translation**: **MANDATORY**. All news titles and summaries MUST be translated into **Traditional Chinese**. Strictly prohibit direct copy-pasting of English text for international news.
 - **Search Strategy**: Execute **4 distinct searches** (use the WebSearch tool):
     1. Global Macro/Fed
@@ -60,6 +61,7 @@ AI must dynamically generate analysis based on current real-world data. **Strict
 
 #### **Numerical Integrity & Anti-Hallucination Protocol**
 - **Fact-Only Rule**: Strictly prohibit referencing any historical high/low points not present in `technical_data.json` or `macro_cache.json`. Do not invent descriptions like "plunged/surged from level X" for dramatic effect.
+- **Future-Event Rule (MANDATORY)**: The analysis must NOT describe scheduled-but-unannounced events as confirmed outcomes. Before writing any "已宣布/已確認/決議/按兵不動確認" style claim, cross-check the event's official release schedule with timezone conversion to Taiwan time (see Event-Timing Integrity in the News section). If the event has not yet been announced at generation time, use forward-looking language and state when the result will be known.
 - **Dynamic Narrative Rule (Anti-Template)**: STRICTLY PROHIBIT using fixed sentence structures or "mad-lib" style templates. Analysis must be written as a professional, dynamic narrative that flows naturally based on the data.
 - **Variable Description Mandate**: Every time a tag-based variable (e.g., `{{VIX}}`) is used, it MUST be accompanied by a clear description of what the number represents.
     - **WRONG**: "促使 {{VIX}} 回落至 18 以下"
