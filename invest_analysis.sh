@@ -6,6 +6,16 @@ cd /home/pi/WorkDir/investment_analysis/
 # 確保 cron 環境能找到 claude 與 uv (皆位於 ~/.local/bin)
 export PATH=/home/pi/.local/bin:$PATH:/home/pi/.config/nvm/versions/node/v22.17.0/bin
 
+# 0. 休市前置守門:前一日美股與台股「都休市(兩市皆無新交易日)」則不出報告。
+#    在取重型鎖、啟動 claude 之前先判斷,skip 時不動任何資料、不 commit。
+#    保守原則:gate 只有回傳 10 才 skip,其餘(含例外)一律照常執行。
+uv run market_open_gate.py
+gate_rc=$?
+if [ "$gate_rc" -eq 10 ]; then
+  echo "$(date -Is) [invest] 休市守門判定 skip,本次不出報告。"
+  exit 0
+fi
+
 # 全域重型鎖(避免與其他 claude/ASR 併發 OOM);wait 模式:要出報告,寧可等前一個結束也要跑。
 source /home/pi/WorkDir/_lib/heavy_lock.sh
 acquire_heavy_lock /home/pi/WorkDir/_logs/invest_analysis_cron.log "invest_analysis" "wait" || exit 0
