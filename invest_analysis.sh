@@ -4,7 +4,7 @@ cd /home/pi/WorkDir/investment_analysis/
 
 # 2. 執行 Claude Code 進行 AI 分析 (依工作目錄 CLAUDE.md 的 investment analysis 工作流自動執行 Python 腳本)
 # 確保 cron 環境能找到 claude 與 uv (皆位於 ~/.local/bin)
-export PATH=/home/pi/.local/bin:$PATH:/home/pi/.config/nvm/versions/node/v22.17.0/bin
+export PATH=/home/pi/.local/bin:$PATH:/home/pi/.node-current/bin
 
 # 0. 休市前置守門:前一日美股與台股「都休市(兩市皆無新交易日)」則不出報告。
 #    在取重型鎖、啟動 claude 之前先判斷,skip 時不動任何資料、不 commit。
