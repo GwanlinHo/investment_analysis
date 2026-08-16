@@ -1,0 +1,1350 @@
+{
+  "US_MACRO": {
+    "國內生產毛額 (GDP)": [
+      {
+        "value": "2.1% (第三次估計)",
+        "trend": "up",
+        "note": "2026-Q1",
+        "first_seen": "2026-07-15"
+      },
+      {
+        "value": "1.5% (初估值)",
+        "trend": "down",
+        "note": "2026-Q2 (BEA 2026-07-30)",
+        "first_seen": "2026-07-31"
+      }
+    ],
+    "消費者物價指數 (CPI)": [
+      {
+        "value": "3.5%",
+        "trend": "down",
+        "note": "2026-06",
+        "first_seen": "2026-07-15"
+      },
+      {
+        "value": "3.4%",
+        "trend": "down",
+        "note": "2026-07 (BLS 2026-08-12)",
+        "first_seen": "2026-08-13"
+      }
+    ],
+    "生產者物價指數 (PPI)": [
+      {
+        "value": "6.5%",
+        "trend": "up",
+        "note": "2026-05",
+        "first_seen": "2026-07-15"
+      },
+      {
+        "value": "5.5%",
+        "trend": "down",
+        "note": "2026-06",
+        "first_seen": "2026-07-18"
+      },
+      {
+        "value": "4.7%",
+        "trend": "down",
+        "note": "2026-07 (BLS 2026-08-13)",
+        "first_seen": "2026-08-14"
+      }
+    ],
+    "失業率": [
+      {
+        "value": "4.2%",
+        "trend": "neutral",
+        "note": "2026-06",
+        "first_seen": "2026-07-15"
+      },
+      {
+        "value": "4.1%",
+        "trend": "down",
+        "note": "2026-07 (BLS 2026-08-07)",
+        "first_seen": "2026-08-08"
+      }
+    ],
+    "非農就業人數": [
+      {
+        "value": "5.7 萬",
+        "trend": "down",
+        "note": "2026-06",
+        "first_seen": "2026-07-15"
+      },
+      {
+        "value": "2.3 萬",
+        "trend": "down",
+        "note": "2026-07 (BLS 2026-08-07，首度轉負)",
+        "first_seen": "2026-08-08"
+      },
+      {
+        "value": "-2.3 萬",
+        "trend": "down",
+        "note": "2026-07 (BLS 2026-08-07，首度轉負)",
+        "first_seen": "2026-08-16"
+      }
+    ],
+    "ISM 製造業指數": [
+      {
+        "value": "53.3",
+        "trend": "down",
+        "note": "2026-06",
+        "first_seen": "2026-07-15"
+      },
+      {
+        "value": "55.6",
+        "trend": "up",
+        "note": "2026-07 (ISM 2026-08-03, 四年新高)",
+        "first_seen": "2026-08-06"
+      }
+    ],
+    "零售銷售 (YoY)": [
+      {
+        "value": "6.9%",
+        "trend": "up",
+        "note": "2026-05",
+        "first_seen": "2026-07-15"
+      },
+      {
+        "value": "9.41%",
+        "trend": "up",
+        "note": "2026-06",
+        "first_seen": "2026-07-16"
+      },
+      {
+        "value": "6.7%",
+        "trend": "up",
+        "note": "2026-06 (Census, 2026-07-16 初值)",
+        "first_seen": "2026-07-18"
+      },
+      {
+        "value": "5.0%",
+        "trend": "down",
+        "note": "2026-07 (Census, 2026-08-14)",
+        "first_seen": "2026-08-15"
+      }
+    ],
+    "初請失業金人數": [
+      {
+        "value": "21.5 萬",
+        "trend": "neutral",
+        "note": "2026-07-04 (當週)",
+        "first_seen": "2026-07-15"
+      },
+      {
+        "value": "20.8 萬",
+        "trend": "down",
+        "note": "2026-07-11 (當週)",
+        "first_seen": "2026-07-17"
+      },
+      {
+        "value": "18.7 萬",
+        "trend": "down",
+        "note": "2026-07-18 (當週)",
+        "first_seen": "2026-07-24"
+      },
+      {
+        "value": "19.7 萬",
+        "trend": "up",
+        "note": "2026-07-25 (當週)",
+        "first_seen": "2026-07-31"
+      },
+      {
+        "value": "19.9 萬",
+        "trend": "up",
+        "note": "2026-08-01 (當週，DOL 2026-08-06 公布)",
+        "first_seen": "2026-08-07"
+      },
+      {
+        "value": "20.9 萬",
+        "trend": "up",
+        "note": "2026-08-08 (當週，DOL 2026-08-13 公布)",
+        "first_seen": "2026-08-14"
+      }
+    ],
+    "聯邦基金利率": [
+      {
+        "value": "3.50%3.75%",
+        "trend": "neutral",
+        "note": "2026-06",
+        "first_seen": "2026-07-15"
+      },
+      {
+        "value": "3.50%3.75%",
+        "trend": "neutral",
+        "note": "2026-07 (FOMC 7月維持不變)",
+        "first_seen": "2026-07-29"
+      },
+      {
+        "value": "3.50%-3.75%",
+        "trend": "neutral",
+        "note": "2026-07-29 (FOMC 9-3 維持不變)",
+        "first_seen": "2026-07-30"
+      }
+    ],
+    "個人消費支出物價指數 (PCE)": [
+      {
+        "value": "4.1%",
+        "trend": "up",
+        "note": "2026-05 (BEA 2026-06-25)",
+        "first_seen": "2026-07-15"
+      },
+      {
+        "value": "3.7%",
+        "trend": "down",
+        "note": "2026-06 (BEA 2026-07-30)",
+        "first_seen": "2026-07-31"
+      }
+    ],
+    "美元指數 (DXY)": [
+      {
+        "value": "100.70",
+        "trend": "down",
+        "note": "2026-07-14",
+        "first_seen": "2026-07-15"
+      },
+      {
+        "value": "100.70",
+        "trend": "down",
+        "note": "2026-07-16",
+        "first_seen": "2026-07-17"
+      },
+      {
+        "value": "100.78",
+        "trend": "neutral",
+        "note": "2026-07-17",
+        "first_seen": "2026-07-18"
+      },
+      {
+        "value": "98.18",
+        "trend": "neutral",
+        "note": "2026-07-23",
+        "first_seen": "2026-07-24"
+      },
+      {
+        "value": "101.47",
+        "trend": "up",
+        "note": "2026-07-24",
+        "first_seen": "2026-07-27"
+      },
+      {
+        "value": "101.53",
+        "trend": "up",
+        "note": "2026-07-28",
+        "first_seen": "2026-07-29"
+      },
+      {
+        "value": "101.05",
+        "trend": "up",
+        "note": "2026-07-29",
+        "first_seen": "2026-07-30"
+      },
+      {
+        "value": "100.12",
+        "trend": "down",
+        "note": "2026-07-31",
+        "first_seen": "2026-08-01"
+      },
+      {
+        "value": "99.72",
+        "trend": "down",
+        "note": "2026-08-03",
+        "first_seen": "2026-08-04"
+      },
+      {
+        "value": "99.97",
+        "trend": "neutral",
+        "note": "2026-08-04",
+        "first_seen": "2026-08-05"
+      },
+      {
+        "value": "99.85",
+        "trend": "neutral",
+        "note": "2026-08-05",
+        "first_seen": "2026-08-06"
+      },
+      {
+        "value": "99.76",
+        "trend": "neutral",
+        "note": "2026-08-06",
+        "first_seen": "2026-08-07"
+      },
+      {
+        "value": "99.48",
+        "trend": "down",
+        "note": "2026-08-07",
+        "first_seen": "2026-08-08"
+      },
+      {
+        "value": "99.84",
+        "trend": "down",
+        "note": "2026-08-11",
+        "first_seen": "2026-08-12"
+      },
+      {
+        "value": "99.84",
+        "trend": "down",
+        "note": "2026-08-12",
+        "first_seen": "2026-08-13"
+      },
+      {
+        "value": "99.87",
+        "trend": "neutral",
+        "note": "2026-08-13",
+        "first_seen": "2026-08-14"
+      }
+    ],
+    "10 年期公債殖利率": [
+      {
+        "value": "4.585%",
+        "trend": "down",
+        "note": "2026-07-14",
+        "first_seen": "2026-07-15"
+      },
+      {
+        "value": "4.545%",
+        "trend": "down",
+        "note": "2026-07-15",
+        "first_seen": "2026-07-16"
+      },
+      {
+        "value": "4.569%",
+        "trend": "up",
+        "note": "2026-07-16",
+        "first_seen": "2026-07-17"
+      },
+      {
+        "value": "4.55%",
+        "trend": "down",
+        "note": "2026-07-17",
+        "first_seen": "2026-07-18"
+      },
+      {
+        "value": "4.60%",
+        "trend": "down",
+        "note": "2026-07-20",
+        "first_seen": "2026-07-21"
+      },
+      {
+        "value": "4.63%",
+        "trend": "down",
+        "note": "2026-07-21",
+        "first_seen": "2026-07-22"
+      },
+      {
+        "value": "4.70%",
+        "trend": "down",
+        "note": "2026-07-23",
+        "first_seen": "2026-07-24"
+      },
+      {
+        "value": "4.68%",
+        "trend": "down",
+        "note": "2026-07-24",
+        "first_seen": "2026-07-27"
+      },
+      {
+        "value": "4.64%",
+        "trend": "down",
+        "note": "2026-07-27",
+        "first_seen": "2026-07-28"
+      },
+      {
+        "value": "4.60%",
+        "trend": "down",
+        "note": "2026-07-28",
+        "first_seen": "2026-07-29"
+      },
+      {
+        "value": "4.62%",
+        "trend": "down",
+        "note": "2026-07-29",
+        "first_seen": "2026-07-30"
+      },
+      {
+        "value": "4.66%",
+        "trend": "up",
+        "note": "2026-07-30",
+        "first_seen": "2026-07-31"
+      },
+      {
+        "value": "4.74%",
+        "trend": "up",
+        "note": "2026-07-31",
+        "first_seen": "2026-08-01"
+      },
+      {
+        "value": "4.69%",
+        "trend": "down",
+        "note": "2026-08-03",
+        "first_seen": "2026-08-04"
+      },
+      {
+        "value": "4.63%",
+        "trend": "down",
+        "note": "2026-08-04",
+        "first_seen": "2026-08-05"
+      },
+      {
+        "value": "4.62%",
+        "trend": "down",
+        "note": "2026-08-05",
+        "first_seen": "2026-08-06"
+      },
+      {
+        "value": "4.67%",
+        "trend": "up",
+        "note": "2026-08-06",
+        "first_seen": "2026-08-07"
+      },
+      {
+        "value": "4.66%",
+        "trend": "neutral",
+        "note": "2026-08-07",
+        "first_seen": "2026-08-08"
+      },
+      {
+        "value": "4.70%",
+        "trend": "neutral",
+        "note": "2026-08-10",
+        "first_seen": "2026-08-11"
+      },
+      {
+        "value": "4.68%",
+        "trend": "neutral",
+        "note": "2026-08-11",
+        "first_seen": "2026-08-12"
+      },
+      {
+        "value": "4.68%",
+        "trend": "neutral",
+        "note": "2026-08-12",
+        "first_seen": "2026-08-13"
+      },
+      {
+        "value": "4.64%",
+        "trend": "down",
+        "note": "2026-08-13",
+        "first_seen": "2026-08-14"
+      },
+      {
+        "value": "4.70%",
+        "trend": "up",
+        "note": "2026-08-14",
+        "first_seen": "2026-08-15"
+      }
+    ],
+    "3 個月期公債殖利率": [
+      {
+        "value": "3.700%",
+        "trend": "down",
+        "note": "2026-07-14",
+        "first_seen": "2026-07-15"
+      },
+      {
+        "value": "3.688%",
+        "trend": "down",
+        "note": "2026-07-15",
+        "first_seen": "2026-07-16"
+      },
+      {
+        "value": "3.697%",
+        "trend": "up",
+        "note": "2026-07-16",
+        "first_seen": "2026-07-17"
+      },
+      {
+        "value": "3.80%",
+        "trend": "up",
+        "note": "2026-07-17",
+        "first_seen": "2026-07-18"
+      },
+      {
+        "value": "3.70%",
+        "trend": "up",
+        "note": "2026-07-20",
+        "first_seen": "2026-07-21"
+      },
+      {
+        "value": "3.73%",
+        "trend": "up",
+        "note": "2026-07-21",
+        "first_seen": "2026-07-22"
+      },
+      {
+        "value": "3.80%",
+        "trend": "up",
+        "note": "2026-07-23",
+        "first_seen": "2026-07-24"
+      },
+      {
+        "value": "3.81%",
+        "trend": "up",
+        "note": "2026-07-24",
+        "first_seen": "2026-07-27"
+      },
+      {
+        "value": "3.80%",
+        "trend": "up",
+        "note": "2026-07-27",
+        "first_seen": "2026-07-28"
+      },
+      {
+        "value": "3.76%",
+        "trend": "up",
+        "note": "2026-07-28",
+        "first_seen": "2026-07-29"
+      },
+      {
+        "value": "3.66%",
+        "trend": "up",
+        "note": "2026-07-29",
+        "first_seen": "2026-07-30"
+      },
+      {
+        "value": "3.68%",
+        "trend": "up",
+        "note": "2026-07-30",
+        "first_seen": "2026-07-31"
+      },
+      {
+        "value": "3.68%",
+        "trend": "neutral",
+        "note": "2026-07-31",
+        "first_seen": "2026-08-01"
+      },
+      {
+        "value": "3.70%",
+        "trend": "neutral",
+        "note": "2026-08-03",
+        "first_seen": "2026-08-04"
+      },
+      {
+        "value": "3.73%",
+        "trend": "neutral",
+        "note": "2026-08-04",
+        "first_seen": "2026-08-05"
+      },
+      {
+        "value": "3.73%",
+        "trend": "neutral",
+        "note": "2026-08-05",
+        "first_seen": "2026-08-06"
+      },
+      {
+        "value": "3.73%",
+        "trend": "neutral",
+        "note": "2026-08-06",
+        "first_seen": "2026-08-07"
+      },
+      {
+        "value": "3.71%",
+        "trend": "neutral",
+        "note": "2026-08-07",
+        "first_seen": "2026-08-08"
+      },
+      {
+        "value": "3.72%",
+        "trend": "neutral",
+        "note": "2026-08-10",
+        "first_seen": "2026-08-11"
+      },
+      {
+        "value": "3.73%",
+        "trend": "neutral",
+        "note": "2026-08-11",
+        "first_seen": "2026-08-12"
+      },
+      {
+        "value": "3.73%",
+        "trend": "neutral",
+        "note": "2026-08-12",
+        "first_seen": "2026-08-13"
+      },
+      {
+        "value": "3.71%",
+        "trend": "down",
+        "note": "2026-08-13",
+        "first_seen": "2026-08-14"
+      },
+      {
+        "value": "3.70%",
+        "trend": "neutral",
+        "note": "2026-08-14",
+        "first_seen": "2026-08-15"
+      }
+    ],
+    "30 年期公債殖利率": [
+      {
+        "value": "5.094%",
+        "trend": "down",
+        "note": "2026-07-14",
+        "first_seen": "2026-07-15"
+      },
+      {
+        "value": "5.083%",
+        "trend": "down",
+        "note": "2026-07-15",
+        "first_seen": "2026-07-16"
+      },
+      {
+        "value": "5.098%",
+        "trend": "up",
+        "note": "2026-07-16",
+        "first_seen": "2026-07-17"
+      },
+      {
+        "value": "5.06%",
+        "trend": "down",
+        "note": "2026-07-17",
+        "first_seen": "2026-07-18"
+      },
+      {
+        "value": "5.12%",
+        "trend": "down",
+        "note": "2026-07-20",
+        "first_seen": "2026-07-21"
+      },
+      {
+        "value": "5.13%",
+        "trend": "down",
+        "note": "2026-07-21",
+        "first_seen": "2026-07-22"
+      },
+      {
+        "value": "5.17%",
+        "trend": "down",
+        "note": "2026-07-23",
+        "first_seen": "2026-07-24"
+      },
+      {
+        "value": "5.16%",
+        "trend": "down",
+        "note": "2026-07-24",
+        "first_seen": "2026-07-27"
+      },
+      {
+        "value": "5.13%",
+        "trend": "down",
+        "note": "2026-07-27",
+        "first_seen": "2026-07-28"
+      },
+      {
+        "value": "5.10%",
+        "trend": "down",
+        "note": "2026-07-28",
+        "first_seen": "2026-07-29"
+      },
+      {
+        "value": "5.14%",
+        "trend": "down",
+        "note": "2026-07-29",
+        "first_seen": "2026-07-30"
+      },
+      {
+        "value": "5.21%",
+        "trend": "up",
+        "note": "2026-07-30",
+        "first_seen": "2026-07-31"
+      },
+      {
+        "value": "5.28%",
+        "trend": "up",
+        "note": "2026-07-31",
+        "first_seen": "2026-08-01"
+      },
+      {
+        "value": "5.23%",
+        "trend": "down",
+        "note": "2026-08-03",
+        "first_seen": "2026-08-04"
+      },
+      {
+        "value": "5.19%",
+        "trend": "down",
+        "note": "2026-08-04",
+        "first_seen": "2026-08-05"
+      },
+      {
+        "value": "5.17%",
+        "trend": "down",
+        "note": "2026-08-05",
+        "first_seen": "2026-08-06"
+      },
+      {
+        "value": "5.21%",
+        "trend": "up",
+        "note": "2026-08-06",
+        "first_seen": "2026-08-07"
+      },
+      {
+        "value": "5.24%",
+        "trend": "up",
+        "note": "2026-08-10",
+        "first_seen": "2026-08-11"
+      },
+      {
+        "value": "5.24%",
+        "trend": "up",
+        "note": "2026-08-11",
+        "first_seen": "2026-08-12"
+      },
+      {
+        "value": "5.24%",
+        "trend": "up",
+        "note": "2026-08-12",
+        "first_seen": "2026-08-13"
+      },
+      {
+        "value": "5.21%",
+        "trend": "up",
+        "note": "2026-08-13",
+        "first_seen": "2026-08-14"
+      },
+      {
+        "value": "5.27%",
+        "trend": "up",
+        "note": "2026-08-14",
+        "first_seen": "2026-08-15"
+      }
+    ],
+    "布蘭特原油價格": [
+      {
+        "value": "83.01",
+        "trend": "up",
+        "note": "2026-07-14",
+        "first_seen": "2026-07-15"
+      },
+      {
+        "value": "84.63",
+        "trend": "up",
+        "note": "2026-07-16",
+        "first_seen": "2026-07-17"
+      },
+      {
+        "value": "85.95",
+        "trend": "up",
+        "note": "2026-07-17",
+        "first_seen": "2026-07-18"
+      },
+      {
+        "value": "94.29",
+        "trend": "up",
+        "note": "2026-07-23",
+        "first_seen": "2026-07-24"
+      },
+      {
+        "value": "90.95",
+        "trend": "down",
+        "note": "2026-07-26",
+        "first_seen": "2026-07-27"
+      },
+      {
+        "value": "86.58",
+        "trend": "down",
+        "note": "2026-07-28",
+        "first_seen": "2026-07-29"
+      },
+      {
+        "value": "90.74",
+        "trend": "down",
+        "note": "2026-07-29",
+        "first_seen": "2026-07-30"
+      },
+      {
+        "value": "90.04",
+        "trend": "down",
+        "note": "2026-07-30",
+        "first_seen": "2026-07-31"
+      },
+      {
+        "value": "82.92",
+        "trend": "down",
+        "note": "2026-08-03",
+        "first_seen": "2026-08-04"
+      },
+      {
+        "value": "81.77",
+        "trend": "down",
+        "note": "2026-08-04",
+        "first_seen": "2026-08-05"
+      },
+      {
+        "value": "79.26",
+        "trend": "down",
+        "note": "2026-08-05",
+        "first_seen": "2026-08-06"
+      },
+      {
+        "value": "77.75",
+        "trend": "down",
+        "note": "2026-08-06",
+        "first_seen": "2026-08-07"
+      },
+      {
+        "value": "82.27",
+        "trend": "up",
+        "note": "2026-08-07",
+        "first_seen": "2026-08-08"
+      },
+      {
+        "value": "84.18",
+        "trend": "up",
+        "note": "2026-08-10",
+        "first_seen": "2026-08-11"
+      },
+      {
+        "value": "88.23",
+        "trend": "up",
+        "note": "2026-08-11",
+        "first_seen": "2026-08-12"
+      },
+      {
+        "value": "91.60",
+        "trend": "up",
+        "note": "2026-08-12",
+        "first_seen": "2026-08-13"
+      },
+      {
+        "value": "87.07",
+        "trend": "down",
+        "note": "2026-08-13",
+        "first_seen": "2026-08-14"
+      },
+      {
+        "value": "88.38",
+        "trend": "up",
+        "note": "2026-08-14",
+        "first_seen": "2026-08-15"
+      }
+    ],
+    "實質私人國內總投資 (YoY)": [
+      {
+        "value": "8.7%",
+        "trend": "up",
+        "note": "2026-Q1",
+        "first_seen": "2026-07-15"
+      }
+    ],
+    "密西根大學消費者信心指數": [
+      {
+        "value": "49.5",
+        "trend": "up",
+        "note": "2026-06 (終值)",
+        "first_seen": "2026-07-15"
+      },
+      {
+        "value": "54.4",
+        "trend": "up",
+        "note": "2026-07 (初值)",
+        "first_seen": "2026-07-18"
+      },
+      {
+        "value": "51.0",
+        "trend": "down",
+        "note": "2026-08 (初值, 2026-08-15)",
+        "first_seen": "2026-08-15"
+      }
+    ],
+    "M2 貨幣供應量": [
+      {
+        "value": "22.8 兆",
+        "trend": "up",
+        "note": "2026-04",
+        "first_seen": "2026-07-15"
+      },
+      {
+        "value": "23.05 兆",
+        "trend": "up",
+        "note": "2026-05",
+        "first_seen": "2026-07-18"
+      }
+    ],
+    "ISM 服務業指數": [
+      {
+        "value": "54.1",
+        "trend": "up",
+        "note": "2026-07 (ISM 2026-08-05，連25個月擴張)",
+        "first_seen": "2026-08-08"
+      }
+    ]
+  },
+  "TW_MACRO": {
+    "經濟成長率 (GDP)": [
+      {
+        "value": "13.69%",
+        "trend": "up",
+        "note": "2026-Q1",
+        "first_seen": "2026-07-15"
+      },
+      {
+        "value": "12.92%",
+        "trend": "down",
+        "note": "2026-Q2 (DGBAS 2026-07-31 初值)",
+        "first_seen": "2026-08-05"
+      }
+    ],
+    "景景氣對策信號 (分數)": [
+      {
+        "value": "39",
+        "trend": "down",
+        "note": "2026-05 (紅燈)",
+        "first_seen": "2026-07-15"
+      },
+      {
+        "value": "41",
+        "trend": "up",
+        "note": "2026-06 (紅燈)",
+        "first_seen": "2026-07-29"
+      }
+    ],
+    "外銷訂單 (YoY)": [
+      {
+        "value": "47.2%",
+        "trend": "up",
+        "note": "2026-05",
+        "first_seen": "2026-07-15"
+      },
+      {
+        "value": "59.4%",
+        "trend": "up",
+        "note": "2026-06",
+        "first_seen": "2026-07-23"
+      }
+    ],
+    "外銷訂單金額": [
+      {
+        "value": "894.8 億美元",
+        "trend": "up",
+        "note": "2026-05",
+        "first_seen": "2026-07-15"
+      },
+      {
+        "value": "952.6 億美元",
+        "trend": "up",
+        "note": "2026-06",
+        "first_seen": "2026-07-23"
+      }
+    ],
+    "工業生產指數 (YoY)": [
+      {
+        "value": "11.78%",
+        "trend": "up",
+        "note": "2026-05",
+        "first_seen": "2026-07-15"
+      }
+    ],
+    "M1B 年增率": [
+      {
+        "value": "9.56%",
+        "trend": "up",
+        "note": "2026-05",
+        "first_seen": "2026-07-15"
+      }
+    ],
+    "M2 年增率": [
+      {
+        "value": "7.83%",
+        "trend": "up",
+        "note": "2026-05",
+        "first_seen": "2026-07-15"
+      }
+    ],
+    "失業率": [
+      {
+        "value": "3.32%",
+        "trend": "down",
+        "note": "2026-05",
+        "first_seen": "2026-07-15"
+      },
+      {
+        "value": "3.36%",
+        "trend": "up",
+        "note": "2026-06",
+        "first_seen": "2026-07-18"
+      }
+    ],
+    "消費者信心指數": [
+      {
+        "value": "62.08",
+        "trend": "down",
+        "note": "2026-05",
+        "first_seen": "2026-07-15"
+      },
+      {
+        "value": "65.05",
+        "trend": "up",
+        "note": "2026-06",
+        "first_seen": "2026-07-18"
+      }
+    ],
+    "實質民間投資 (YoY)": [
+      {
+        "value": "5.20%",
+        "trend": "neutral",
+        "note": "2026-Q1",
+        "first_seen": "2026-07-15"
+      }
+    ],
+    "信用卡逾期比率": [
+      {
+        "value": "0.23%",
+        "trend": "neutral",
+        "note": "2026-03",
+        "first_seen": "2026-07-15"
+      }
+    ],
+    "製造業加班工時": [
+      {
+        "value": "17.7 小時",
+        "trend": "up",
+        "note": "2026-03",
+        "first_seen": "2026-07-15"
+      }
+    ],
+    "融資餘額": [
+      {
+        "value": "6182.99 億",
+        "trend": "down",
+        "note": "2026-07-13",
+        "first_seen": "2026-07-15"
+      },
+      {
+        "value": "6155.76 億",
+        "trend": "up",
+        "note": "2026-07-16",
+        "first_seen": "2026-07-17"
+      },
+      {
+        "value": "5879.63 億",
+        "trend": "down",
+        "note": "2026-07-17",
+        "first_seen": "2026-07-20"
+      },
+      {
+        "value": "5690.4 億",
+        "trend": "down",
+        "note": "2026-07-20",
+        "first_seen": "2026-07-21"
+      },
+      {
+        "value": "5764.96 億",
+        "trend": "up",
+        "note": "2026-07-21",
+        "first_seen": "2026-07-22"
+      },
+      {
+        "value": "5826.26 億",
+        "trend": "up",
+        "note": "2026-07-23",
+        "first_seen": "2026-07-24"
+      },
+      {
+        "value": "5770.60 億",
+        "trend": "down",
+        "note": "2026-07-24",
+        "first_seen": "2026-07-27"
+      },
+      {
+        "value": "5455.35 億",
+        "trend": "down",
+        "note": "2026-07-28",
+        "first_seen": "2026-07-29"
+      },
+      {
+        "value": "5070.11 億",
+        "trend": "down",
+        "note": "2026-07-29",
+        "first_seen": "2026-07-30"
+      },
+      {
+        "value": "5074.63 億",
+        "trend": "up",
+        "note": "2026-07-31",
+        "first_seen": "2026-08-01"
+      },
+      {
+        "value": "5147.55 億",
+        "trend": "up",
+        "note": "2026-08-03",
+        "first_seen": "2026-08-04"
+      },
+      {
+        "value": "5234.92 億",
+        "trend": "up",
+        "note": "2026-08-05",
+        "first_seen": "2026-08-06"
+      },
+      {
+        "value": "5328.0 億",
+        "trend": "up",
+        "note": "2026-08-06",
+        "first_seen": "2026-08-07"
+      },
+      {
+        "value": "5376.6 億",
+        "trend": "up",
+        "note": "2026-08-07",
+        "first_seen": "2026-08-08"
+      },
+      {
+        "value": "5441.5 億",
+        "trend": "up",
+        "note": "2026-08-11",
+        "first_seen": "2026-08-12"
+      },
+      {
+        "value": "5497.8 億",
+        "trend": "up",
+        "note": "2026-08-13",
+        "first_seen": "2026-08-14"
+      }
+    ],
+    "融資單日變動": [
+      {
+        "value": "13.49 億",
+        "trend": "down",
+        "note": "2026-07-13",
+        "first_seen": "2026-07-15"
+      },
+      {
+        "value": "+2.08 億",
+        "trend": "up",
+        "note": "2026-07-16",
+        "first_seen": "2026-07-17"
+      },
+      {
+        "value": "276.13 億",
+        "trend": "down",
+        "note": "2026-07-17",
+        "first_seen": "2026-07-20"
+      },
+      {
+        "value": "189.3 億",
+        "trend": "down",
+        "note": "2026-07-20",
+        "first_seen": "2026-07-21"
+      },
+      {
+        "value": "74.61 億",
+        "trend": "up",
+        "note": "2026-07-21",
+        "first_seen": "2026-07-22"
+      },
+      {
+        "value": "1.97 億",
+        "trend": "up",
+        "note": "2026-07-23",
+        "first_seen": "2026-07-24"
+      },
+      {
+        "value": "55.67 億",
+        "trend": "down",
+        "note": "2026-07-24",
+        "first_seen": "2026-07-27"
+      },
+      {
+        "value": "231.28 億",
+        "trend": "down",
+        "note": "2026-07-28",
+        "first_seen": "2026-07-29"
+      },
+      {
+        "value": "385.23 億",
+        "trend": "down",
+        "note": "2026-07-29",
+        "first_seen": "2026-07-30"
+      },
+      {
+        "value": "135.97 億",
+        "trend": "up",
+        "note": "2026-07-31",
+        "first_seen": "2026-08-01"
+      },
+      {
+        "value": "72.93 億",
+        "trend": "up",
+        "note": "2026-08-03",
+        "first_seen": "2026-08-04"
+      },
+      {
+        "value": "23.57 億",
+        "trend": "up",
+        "note": "2026-08-05",
+        "first_seen": "2026-08-06"
+      },
+      {
+        "value": "93.1 億",
+        "trend": "up",
+        "note": "2026-08-06",
+        "first_seen": "2026-08-07"
+      },
+      {
+        "value": "48.6 億",
+        "trend": "up",
+        "note": "2026-08-07",
+        "first_seen": "2026-08-08"
+      },
+      {
+        "value": "11.4 億",
+        "trend": "down",
+        "note": "2026-08-11",
+        "first_seen": "2026-08-12"
+      },
+      {
+        "value": "▲16.9 億",
+        "trend": "up",
+        "note": "2026-08-13",
+        "first_seen": "2026-08-14"
+      }
+    ],
+    "台股 60日乖離率": [
+      {
+        "value": "3.68",
+        "trend": "down",
+        "note": "2026-07-14",
+        "first_seen": "2026-07-15"
+      },
+      {
+        "value": "5.03",
+        "trend": "up",
+        "note": "2026-07-16",
+        "first_seen": "2026-07-17"
+      },
+      {
+        "value": "1.96",
+        "trend": "down",
+        "note": "2026-07-17",
+        "first_seen": "2026-07-20"
+      },
+      {
+        "value": "2.64",
+        "trend": "down",
+        "note": "2026-07-20",
+        "first_seen": "2026-07-21"
+      },
+      {
+        "value": "1.20",
+        "trend": "up",
+        "note": "2026-07-21",
+        "first_seen": "2026-07-22"
+      },
+      {
+        "value": "2.18",
+        "trend": "up",
+        "note": "2026-07-23",
+        "first_seen": "2026-07-24"
+      },
+      {
+        "value": "0.70",
+        "trend": "down",
+        "note": "2026-07-24",
+        "first_seen": "2026-07-27"
+      },
+      {
+        "value": "5.62",
+        "trend": "down",
+        "note": "2026-07-28",
+        "first_seen": "2026-07-29"
+      },
+      {
+        "value": "9.15",
+        "trend": "down",
+        "note": "2026-07-29",
+        "first_seen": "2026-07-30"
+      },
+      {
+        "value": "9.36",
+        "trend": "down",
+        "note": "2026-07-30",
+        "first_seen": "2026-07-31"
+      },
+      {
+        "value": "2.20",
+        "trend": "up",
+        "note": "2026-07-31",
+        "first_seen": "2026-08-01"
+      },
+      {
+        "value": "1.65",
+        "trend": "up",
+        "note": "2026-08-03",
+        "first_seen": "2026-08-04"
+      },
+      {
+        "value": "1.77",
+        "trend": "down",
+        "note": "2026-08-04",
+        "first_seen": "2026-08-05"
+      },
+      {
+        "value": "+0.95",
+        "trend": "up",
+        "note": "2026-08-05",
+        "first_seen": "2026-08-06"
+      },
+      {
+        "value": "+0.37",
+        "trend": "neutral",
+        "note": "2026-08-06",
+        "first_seen": "2026-08-07"
+      },
+      {
+        "value": "0.12",
+        "trend": "down",
+        "note": "2026-08-07",
+        "first_seen": "2026-08-08"
+      },
+      {
+        "value": "1.35",
+        "trend": "up",
+        "note": "2026-08-10",
+        "first_seen": "2026-08-11"
+      },
+      {
+        "value": "1.63",
+        "trend": "up",
+        "note": "2026-08-11",
+        "first_seen": "2026-08-12"
+      },
+      {
+        "value": "2.35",
+        "trend": "up",
+        "note": "2026-08-12",
+        "first_seen": "2026-08-13"
+      },
+      {
+        "value": "3.25",
+        "trend": "up",
+        "note": "2026-08-13",
+        "first_seen": "2026-08-14"
+      },
+      {
+        "value": "2.56",
+        "trend": "down",
+        "note": "2026-08-14",
+        "first_seen": "2026-08-15"
+      }
+    ],
+    "海關出口 (YoY)": [
+      {
+        "value": "39.0%",
+        "trend": "up",
+        "note": "2026-04",
+        "first_seen": "2026-07-15"
+      },
+      {
+        "value": "32.9%",
+        "trend": "up",
+        "note": "2026-07 (財政部 2026-08-07)",
+        "first_seen": "2026-08-08"
+      }
+    ],
+    "電子零組件出口 (月)": [
+      {
+        "value": "277.3 億美元",
+        "trend": "up",
+        "note": "2026-07 (財政部 2026-08-07，月度新高)",
+        "first_seen": "2026-08-08"
+      }
+    ]
+  }
+}

@@ -10,6 +10,29 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 ## 更新紀錄 (Changelog)
 
+- **2026-08-16 (v2.9)**:
+  - **指標速覽浮動面板 (Floating Overview Panel)**:
+    - **需求**：使用者希望在報告開啟時能一眼掃過總經、技術面、情緒面的近期變化，不必逐區捲動；面板需可關閉、可再次叫出，且資料全部取自報告既有的收集結果。
+    - **設計**：`templates/report_template.html` 新增浮動面板，分三區——**總經**（近 30 日有更新的指標，現值／前值／發布日，預設 6 項）、**技術**（核心 6 檔標的的 1／5／20 日漲跌與 KD、MACD、20MA、乖離、ADX 訊號）、**情緒**（VIX 及其 60 日區間百分位、HYG 風險偏好、外資／投信買賣超與連買連賣天數、融資餘額）。三區皆可展開為完整清單，頂部另有一行規則產生的重點摘要。桌機為右下浮動卡、手機為底部抽屜。
+    - **休市標示**：面板頂端標示「資料截至　台股 YYYY-MM-DD｜美股 YYYY-MM-DD」，若與報告日期不同（週末、國定假日、08:00 retry）會以紅字註明該市場休市——避免把上一交易日的收盤誤讀為當日行情（報告本體各區塊原本就有休市標示，面板是第一個跳出來的畫面，不能漏）。
+    - **顯示行為**：`DOMContentLoaded` 即渲染（JSON 資料標籤位於 `<head>`，不必等 4MB 的 K 線圖），每份新報告自動跳出一次（以報告日期為 localStorage 記憶鍵），關閉後可用右下「速覽」按鈕或再次點擊叫出，支援 Esc 關閉。localStorage 不可用時（file:// 或隱私模式）自動降級為每次跳出。
+    - **無伺服器端注入**：面板置於 `.container` 之外、`</body>` 之前，完全避開 `update_report.py` 的四組 DOTALL 正則注入區；每一格數值皆由前端從 `<script type="application/json">` 標籤即時計算，因此對已注入報告重跑 `update_report.py` 不會影響面板（等冪）。
+  - **總經歷史紀錄 (`macro_history.json` / `macro_history.py`)**:
+    - **問題**：`macro_cache.json` 只保存每個指標的最新值，面板無法顯示「前值 → 現值」。
+    - **作法**：新增 `macro_history.py`，重用 `update_report.py` 既有的 `MacroParser` 掃描 `report/invest_analysis_*.html`（保留 30 份，約 6 週）一次性回填歷史，之後由 `update_report.py` 每日 upsert；僅在數值或備註實際變動時才追加版本。比對採正規化字串（解析器會移除 `-`、`▲`、`▼`，若不正規化，`3.50%-3.75%` 這類區間值會每天被誤判為新版本），但保留開頭負號以區分 `-2.3 萬` 與 `2.3 萬`。
+  - **修正：內嵌 JSON 含 NaN 導致前端無法解析 (既有問題)**:
+    - **問題**：`market-data` 等內嵌 JSON 由 Python `json.dumps` 產生，pandas 的缺值會輸出 `NaN`。Python 可讀，但那不是合法 JSON，瀏覽器 `JSON.parse` 會整包拋錯（線上報告實際含 45 個 `NaN`）。因先前無任何前端程式讀取這些標籤，問題一直未被發現。
+    - **修正**：`investment_analysis.py` 新增 `json_safe()`，在寫入 `technical_data.json` 與渲染模板前將 `NaN`／`Inf` 轉為 `null`；面板的 `readJSON()` 另保留一層向下相容的容錯解析。
+  - **基本面資料補齊 (零額外抓取成本)**:
+    - **問題**：`CLAUDE.md` 要求 Sophia 依據「`fundamental-data` 標籤中的真實 ROE、毛利率、PEG」評估，但 `get_fundamental_data()` 只取了 `shortPercentOfFloat`、`shortRatio` 兩個欄位，那些基本面數字**從未存在**於資料中。
+    - **作法**：該函式本來就已呼叫 `yf.Ticker().info`（為了空單資料），因此改為多取 ROE、毛利率、淨利率、本益比、預估本益比、PEG、股價淨值比、殖利率、營收年增、盈餘年增、負債權益比——**不增加任何一次網路請求**。取不到的欄位一律為 `None`，不做推估。實測 16 檔標的中 15 檔有資料：個股 (台積電) 欄位完整，ETF 多半僅有本益比與殖利率，指數與期貨則無。
+    - **呈現**：速覽面板新增「基本面」區（名稱／本益比／殖利率，並以標籤顯示 ROE、毛利率、PEG、營收年增、股價淨值比），有 ROE 者優先排序。
+  - **修正：三大法人買賣超單位標錯 1000 倍 (既有問題)**:
+    - **問題**：`investment_analysis.py` 台股表格欄位標題為「外資(張)」「投信(張)」，但 FinMind 的 `TaiwanStockInstitutionalInvestorsBuySell` 回傳單位是**股**，程式直接原值輸出——台積電單日曾顯示 `3,972,231 張`，遠超過全市場成交量。
+    - **修正**：新增 `to_lots()` 換算 (1 張 = 1000 股)，表格與速覽面板一致顯示張數 (台積電當日 -3,024 張)。K 線圖的法人流向子圖為累積趨勢線，不受單位影響。
+  - **修正：`[hidden]` 被作者樣式覆蓋**:
+    - `.ov-panel` 的 `display: flex` 會蓋過瀏覽器對 `[hidden]` 的預設隱藏，導致面板「關閉」後仍實際可見（僅屬性改變）。補上 `.ov-panel[hidden], .ov-backdrop[hidden] { display: none; }`。此問題由端到端瀏覽器測試（檢查實際可見性而非 `hidden` 屬性）攔截。
+
 - **2026-08-05 (v2.8)**:
   - **每日報告提前 + 休市不出報告**:
     - **需求**：使用者要求每日投資分析報告提前產生，且「前一日美股與台股都休市」時不要產生報告。

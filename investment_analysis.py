@@ -181,12 +181,46 @@ def fetch_tw_institutional_data(symbol, start_date):
     except: return None
     return None
 
+def to_lots(shares):
+    """股 → 張 (1 張 = 1000 股)。None/NaN 回傳 None 由呼叫端顯示為 '-'。"""
+    if shares is None: return None
+    try:
+        value = float(shares)
+    except (TypeError, ValueError):
+        return None
+    if value != value: return None  # NaN
+    return value / 1000
+
 def get_fundamental_data(symbol):
+    """取基本面資料。
+
+    yfinance 的 .info 本來就已為了空單資料抓取一次，多取幾個欄位不會增加任何網路請求。
+    個股 (如 2330.TW) 可拿到完整的 ROE/毛利率/PEG 等；ETF 多半只有本益比與殖利率；
+    指數與期貨通常全無 — 取不到的欄位一律為 None，由前端自行略過，不做任何推估。
+    """
     try:
         ticker = yf.Ticker(symbol); info = ticker.info
+        def pct(key):
+            """yfinance 的比率欄位為小數 (0.3997)，轉為百分比數值 (39.97)。"""
+            v = info.get(key)
+            return round(v * 100, 2) if isinstance(v, (int, float)) else None
+        def num(key, digits=2):
+            v = info.get(key)
+            return round(v, digits) if isinstance(v, (int, float)) else None
         return {
             "symbol": symbol, "name": SYMBOL_NAME_MAP.get(symbol, symbol),
-            "short_percent": info.get('shortPercentOfFloat'), "short_ratio": info.get('shortRatio')
+            "short_percent": info.get('shortPercentOfFloat'), "short_ratio": info.get('shortRatio'),
+            "roe": pct('returnOnEquity'),                  # 股東權益報酬率 %
+            "gross_margin": pct('grossMargins'),           # 毛利率 %
+            "profit_margin": pct('profitMargins'),         # 淨利率 %
+            "pe": num('trailingPE'),                       # 本益比 (近四季)
+            "forward_pe": num('forwardPE'),                # 預估本益比
+            "peg": num('trailingPegRatio'),                # PEG
+            "pb": num('priceToBook'),                      # 股價淨值比
+            "dividend_yield": num('dividendYield'),        # 殖利率 % (yfinance 已為百分比)
+            "revenue_growth": pct('revenueGrowth'),        # 營收年增率 %
+            "earnings_growth": pct('earningsGrowth'),      # 盈餘年增率 %
+            "debt_to_equity": num('debtToEquity'),         # 負債權益比
         }
     except: return None
 
@@ -272,7 +306,10 @@ def format_data_row(symbol, latest, prev, inst_df=None, fund_data=None, show_chi
     if show_chips:
         if inst_df is not None and not inst_df.empty:
             l_inst = inst_df.iloc[-1]
-            row += f"<td class='number-cell'>{fmt_num(l_inst.get('Foreign_Investor', 0), '{:+,.0f}')}</td><td class='number-cell'>{fmt_num(l_inst.get('Investment_Trust', 0), '{:+,.0f}')}</td>"
+            # FinMind 的三大法人買賣超單位是「股」，欄位標題為「張」，故除以 1000 換算
+            # (先前直接把股數當張數顯示，數值放大 1000 倍：台積電單日曾顯示 3,972,231 張，
+            #  已超過全市場成交量)。
+            row += f"<td class='number-cell'>{fmt_num(to_lots(l_inst.get('Foreign_Investor')), '{:+,.0f}')}</td><td class='number-cell'>{fmt_num(to_lots(l_inst.get('Investment_Trust')), '{:+,.0f}')}</td>"
         elif fund_data and fund_data.get('short_percent') is not None:
             row += f"<td class='number-cell {get_color_class(fund_data.get('short_percent')*100, 15, 5, True)}'>{fmt_num(fund_data.get('short_percent')*100, '{:.1f}%')}</td><td class='number-cell {get_color_class(fund_data.get('short_ratio'), 5, 2, True)}'>{fmt_num(fund_data.get('short_ratio'))}</td>"
         else: row += "<td>-</td><td>-</td>"
@@ -385,6 +422,20 @@ def process_stock_group(group, start_date, utc_now):
             market[disp_name + "_institutional"] = ir.to_dict(orient='records')
     return g_res, summary, market, fundamental, missing
 
+def json_safe(obj):
+    """把 NaN / Inf 轉為 None。
+
+    Python 的 json 預設允許輸出 NaN，但那不是合法 JSON——瀏覽器的 JSON.parse 會直接拋錯，
+    導致整包 market-data 無法解析（指標速覽面板需要在前端讀取這份資料）。
+    """
+    if isinstance(obj, dict):
+        return {k: json_safe(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [json_safe(v) for v in obj]
+    if isinstance(obj, float) and (obj != obj or obj in (float('inf'), float('-inf'))):
+        return None
+    return obj
+
 def save_to_json(fundamental, yield_data, market, summary, filename="technical_data.json"):
     data = {
         "fundamental": fundamental,
@@ -421,6 +472,7 @@ def main():
             sum_html += f'<div class="summary-card"><div class="summary-title">{item["symbol"]}</div><div class="summary-price">{item["close"]:.2f}</div><div class="summary-change {cls}">{icon} {item["change"]:.2f}%</div></div>'
     y_plot, y_data = create_yield_curve_plot_base64()
     if all_rep:
+        all_fun, all_mkt, all_sum = json_safe(all_fun), json_safe(all_mkt), json_safe(all_sum)
         save_to_json(all_fun, y_data, all_mkt, all_sum)
         env = Environment(loader=FileSystemLoader(TEMPLATE_DIR)); tpl = env.get_template(TEMPLATE_FILE)
         html = tpl.render(
@@ -432,7 +484,7 @@ def main():
             yield_curve_plot_b64=y_plot, 
             yield_data=y_data,
             fundamental_json=all_fun,
-            yield_json=y_data,
+            yield_json=json_safe(y_data),
             market_json=all_mkt
         )
         os.makedirs("report", exist_ok=True); fname = f"report/invest_analysis_{utc_now.astimezone(TZ).strftime('%Y%m%d')}.html"; open(fname, 'w', encoding='utf-8').write(html); shutil.copy2(fname, "index.html"); print("[Success] 分析完成")

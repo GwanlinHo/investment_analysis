@@ -94,6 +94,7 @@ AI must dynamically generate analysis based on current real-world data. **Strict
 #### 2. Sophia - Fundamental Quality Analyst
 - **Responsibilities**:
   - Evaluate performance based on real ROE, Gross Margin, and PEG from the `fundamental-data` script tags.
+  - **Data availability (as of 2026-08-16)**: `get_fundamental_data()` now populates `roe`, `gross_margin`, `profit_margin`, `pe`, `forward_pe`, `peg`, `pb`, `dividend_yield`, `revenue_growth`, `earnings_growth`, `debt_to_equity` from the same `yf.Ticker().info` call already used for short interest — no extra network cost. Coverage is uneven by design: individual stocks (2330.TW) are complete, ETFs usually carry only PE and dividend yield, indices and futures carry none. Missing fields are `None`. **Never estimate or fill a missing field** — omit the claim instead.
 
 #### 3. Kenji - Technical Chartist
 - **Responsibilities**:
@@ -107,6 +108,16 @@ AI must dynamically generate analysis based on current real-world data. **Strict
 - **Responsibilities**:
   - Synthesize the four analysts' realized-data readings into a **current market-state summary**: valuation and risk posture, flow/sentiment conditions, and what has materially changed since the previous report.
   - **Strictly NO scenario forecasting** (Bull/Base/Bear frameworks are prohibited), no probability assignments, no price targets, no predicted market direction (per Facts-Only Rule). Risk-control observations tied to already-observed data (e.g., noting that margin balance remains elevated) are acceptable; asserting future outcomes is not.
+
+### 3.5 Floating Overview Panel (指標速覽面板)
+- **What it is**: A client-side floating panel in `templates/report_template.html` summarizing 總經 / 技術 / 情緒 recent changes. It auto-opens once per report date, can be closed, and re-opened via the 速覽 button.
+- **Data flow**: The panel computes EVERY cell in the browser from the embedded `<script type="application/json">` tags (`market-data`, `macro-data`). It contains **NO server-injected HTML**. Do not "fix" the panel by writing values into it from Python.
+- **`macro-data`**: injected by `update_report.py: inject_macro_payload()` from `macro_cache.json` + `macro_history.json` (現值 / 前值 / 變動日). Replace ONLY the tag contents with the anchored pattern `(<script id="macro-data" type="application/json">).*?(</script>)`. NEVER use `<script.*?id=` (same class of bug as the 2026-07-29 table-regex incident).
+- **`macro_history.json`**: maintained by `macro_history.py` (daily upsert; `--backfill` rebuilds from `report/*.html`; `--show` inspects). Only append a version when the value or note actually changes.
+- **Placement rule**: the panel markup MUST stay outside `.container` (just before `</body>`) so it never falls inside any `update_report.py` injection zone. Re-running `update_report.py` on an injected report must remain a no-op for the panel.
+- **Market-closed labeling**: the panel header MUST show 資料截至 (last bar `Date` of 加權指數 / 標普 500) and flag it when it differs from the report date. The panel is the first thing the reader sees; presenting a previous trading day's close under today's date is the same class of error the 休市中 badge exists to prevent.
+- **JSON validity**: embedded JSON must not contain `NaN`/`Infinity` — `investment_analysis.py: json_safe()` converts them to `null` before saving/rendering. Python tolerates `NaN`; browsers do not.
+- **Verification**: after touching the template or injection code, re-run the end-to-end browser test (headful chromium) and assert **actual visibility** (`getComputedStyle().display`), not the `hidden` attribute — author styles can override `[hidden]`.
 
 ### 4. Data Injection & Synchronization
 - **Mandatory Preparations**:

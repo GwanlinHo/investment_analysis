@@ -75,19 +75,39 @@ def load_from_json(filename):
             print(f"[Warning] 讀取 {filename} 失敗: {e}")
     return None
 
+def _close_of(rows):
+    """取最後一根 K 棒的收盤價。
+
+    investment_analysis.py 的 json_safe() 會把 NaN 轉為 null(None)，因此鍵存在但值為 None
+    時 dict.get(key, 0) 仍會回傳 None；直接 float(None) 會拋 TypeError。此處統一擋掉。
+    """
+    if not rows:
+        return None
+    value = rows[-1].get("Close")
+    if value is None:
+        return None
+    try:
+        return round(float(value), 2)
+    except (TypeError, ValueError):
+        return None
+
+
 def get_data_context(tech_data, macro_data):
     ctx = {}
     if tech_data and "market" in tech_data:
         m = tech_data["market"]
-        if "恐慌指數" in m and m["恐慌指數"]:
-            ctx["VIX"] = round(float(m["恐慌指數"][-1].get("Close", 0)), 2)
+        if "恐慌指數" in m:
+            vix = _close_of(m["恐慌指數"])
+            if vix is not None: ctx["VIX"] = vix
         taiex_keys = ["台股加權指數", "^TWII", "加權指數"]
         for k in taiex_keys:
             if k in m and m[k]:
-                ctx["TAIEX"] = round(float(m[k][-1].get("Close", 0)), 2)
+                taiex = _close_of(m[k])
+                if taiex is not None: ctx["TAIEX"] = taiex
                 break
-        if "標普 500" in m and m["標普 500"]:
-            ctx["SP500"] = round(float(m["標普 500"][-1].get("Close", 0)), 2)
+        if "標普 500" in m:
+            sp = _close_of(m["標普 500"])
+            if sp is not None: ctx["SP500"] = sp
 
     def find_val(region, name_part):
         for item in macro_data.get(region, []):
@@ -119,7 +139,8 @@ def get_data_context(tech_data, macro_data):
         tsmc_keys = ["台積電", "2330.TW"]
         for k in tsmc_keys:
             if k in m and m[k]:
-                ctx["TSMC"] = round(float(m[k][-1].get("Close", 0)), 2)
+                tsmc = _close_of(m[k])
+                if tsmc is not None: ctx["TSMC"] = tsmc
                 break
     ctx["CPI"] = find_val("US_MACRO", "消費者物價指數")
     ctx["PPI"] = find_val("US_MACRO", "生產者物價指數")
@@ -187,6 +208,35 @@ def generate_macro_table(data, region_id):
     html += '</tbody></table>'
     return html
 
+def inject_macro_payload(content, macro_cache):
+    """把總經現值 + 前值寫進 <script id="macro-data"> 供速覽面板前端使用。
+
+    只替換這個 script 標籤的「內容」，前後標籤保留；不使用 <script.*?id= 這種會跨標籤
+    吞噬的寫法（2026-07-29 曾因類似正則毀掉整份報告）。
+    """
+    try:
+        import macro_history
+        today = datetime.datetime.now().strftime("%Y-%m-%d")
+        history, added = macro_history.upsert_from_cache(macro_cache, today)
+        payload = macro_history.build_payload(macro_cache, history)
+        payload["generated"] = today
+        if added:
+            print(f"[*] macro_history.json 新增 {added} 筆指標版本。")
+    except Exception as e:
+        print(f"[Warning] 總經歷史處理失敗，速覽面板將只顯示現值: {e}")
+        payload = {"US_MACRO": macro_cache.get("US_MACRO", []),
+                   "TW_MACRO": macro_cache.get("TW_MACRO", [])}
+
+    # </script> 不會出現在 JSON 數值中，但仍依慣例轉義，避免提早關閉標籤
+    payload_json = json.dumps(payload, ensure_ascii=False).replace("</", "<\\/")
+    pattern = r'(<script id="macro-data" type="application/json">).*?(</script>)'
+    if not re.search(pattern, content, flags=re.DOTALL):
+        print("[Warning] 報告中找不到 macro-data 標籤，略過總經資料注入（可能是舊版報告）。")
+        return content
+    return re.sub(pattern, lambda m: m.group(1) + payload_json + m.group(2),
+                  content, count=1, flags=re.DOTALL)
+
+
 def is_mostly_chinese(text):
     clean_text = re.sub(r'<[^>]+>', '', text)
     clean_text = re.sub(r'[\s\d]', '', clean_text)
@@ -234,6 +284,9 @@ def main():
     # (2026-07-29 對已注入報告重跑本腳本時實際發生過)。
     content = re.sub(r'<div id="us-macro-placeholder"></div>|<table[^>]*id="us-macro-table">.*?</table>', us_table, content, flags=re.DOTALL)
     content = re.sub(r'<div id="tw-macro-placeholder"></div>|<table[^>]*id="tw-macro-table">.*?</table>', tw_table, content, flags=re.DOTALL)
+
+    # 指標速覽面板所需的總經資料（現值 + 前值）
+    content = inject_macro_payload(content, macro_cache)
 
     if os.path.exists("news.html"):
         with open("news.html", "r", encoding="utf-8") as f: news_html = f.read().strip()

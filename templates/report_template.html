@@ -11,6 +11,8 @@
     <script id="fundamental-data" type="application/json">{{ fundamental_json | tojson }}</script>
     <script id="yield-data" type="application/json">{{ yield_json | tojson }}</script>
     <script id="market-data" type="application/json">{{ market_json | tojson }}</script>
+    <!-- 總經速覽資料：由 update_report.py 於注入階段填入（現值 + 前值 + 變動日） -->
+    <script id="macro-data" type="application/json">{"US_MACRO": [], "TW_MACRO": []}</script>
     <style>
         :root {
             --bg-color: #f4f6f8;
@@ -102,6 +104,62 @@
             .charts-grid { grid-template-columns: 1fr; }
             .summary-bar { grid-template-columns: repeat(2, 1fr); }
             .ai-section-container { padding: 20px; }
+        }
+
+        /* ===== 指標速覽浮動面板 ===== */
+        .ov-fab { position: fixed; bottom: 85px; right: 30px; z-index: 1000; background: #fff; color: var(--accent-color);
+                  border: 1px solid var(--accent-color); border-radius: 22px; height: 44px; padding: 0 16px; cursor: pointer;
+                  font-size: 14px; font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.2); opacity: 0.95; }
+        .ov-fab:hover { opacity: 1; transform: scale(1.04); }
+        .ov-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 1090; border: 0; }
+        .ov-panel { position: fixed; right: 24px; bottom: 24px; width: 440px; max-width: calc(100vw - 32px); max-height: 84vh;
+                    display: flex; flex-direction: column; background: var(--card-bg); border-radius: 14px;
+                    box-shadow: 0 12px 36px rgba(0,0,0,0.28); z-index: 1100; overflow: hidden; }
+        /* 作者樣式的 display 會蓋過瀏覽器對 [hidden] 的預設隱藏，必須顯式還原 */
+        .ov-panel[hidden], .ov-backdrop[hidden] { display: none; }
+        .ov-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px;
+                   background: var(--accent-color); color: #fff; flex: 0 0 auto; }
+        .ov-title { font-size: 16px; font-weight: 700; }
+        .ov-date { font-size: 12px; font-weight: 400; opacity: 0.85; margin-left: 8px; }
+        .ov-x { background: transparent; border: 0; color: #fff; font-size: 22px; line-height: 1; cursor: pointer; padding: 0 4px; }
+        .ov-highlight { padding: 10px 16px; background: #e8eaf6; color: #1a237e; font-size: 13px; font-weight: 600;
+                        border-bottom: 1px solid var(--border-color); flex: 0 0 auto; }
+        .ov-asof { font-size: 11px; font-weight: 500; color: #455a64; margin-bottom: 4px; }
+        .ov-asof-stale { color: #b71c1c; }
+        .ov-body { overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 4px 0 8px; }
+        .ov-sec { padding: 10px 16px 4px; }
+        .ov-sec + .ov-sec { border-top: 1px solid var(--border-color); }
+        .ov-sec-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px; }
+        .ov-sec-head h3 { margin: 0; font-size: 14px; font-weight: 700; color: var(--accent-color); }
+        .ov-sec-note { font-size: 11px; color: var(--text-secondary); font-weight: 400; margin-left: 6px; }
+        .ov-more { background: none; border: 0; color: var(--text-secondary); font-size: 12px; cursor: pointer;
+                   text-decoration: underline; padding: 0; }
+        .ov-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .ov-table th { font-size: 11px; color: var(--text-secondary); font-weight: 600; text-align: right; padding: 2px 4px; }
+        .ov-table th:first-child, .ov-table td:first-child { text-align: left; }
+        .ov-table td { padding: 4px; border-top: 1px solid #f0f0f0; white-space: nowrap; }
+        .ov-name { font-weight: 600; }
+        .ov-sub { display: block; font-size: 11px; color: var(--text-secondary); font-weight: 400; white-space: normal; }
+        .ov-num { text-align: right; font-variant-numeric: tabular-nums; }
+        .ov-up { color: var(--up-color); font-weight: 700; }
+        .ov-down { color: var(--down-color); font-weight: 700; }
+        .ov-flat { color: var(--text-secondary); }
+        .ov-tag { display: inline-block; font-size: 11px; padding: 1px 6px; border-radius: 10px; background: #eceff1;
+                  color: #37474f; margin: 1px 3px 1px 0; white-space: nowrap; }
+        .ov-tag-warn { background: #fdecea; color: #b71c1c; }
+        .ov-tag-good { background: #e8f5e9; color: #1b5e20; }
+        .ov-empty { font-size: 12px; color: var(--text-secondary); padding: 6px 0; }
+        .ov-foot { flex: 0 0 auto; padding: 8px 16px; font-size: 11px; color: var(--text-secondary);
+                   border-top: 1px solid var(--border-color); background: #fafafa; }
+
+        @media (max-width: 768px) {
+            .ov-panel { right: 0; left: 0; bottom: 0; width: auto; max-width: none; max-height: 80vh;
+                        border-radius: 16px 16px 0 0; }
+            .ov-fab { bottom: 80px; right: 20px; height: 40px; padding: 0 14px; font-size: 13px; }
+            .ov-table { font-size: 12px; }
+        }
+        @media (min-width: 769px) {
+            .ov-backdrop { display: none; }
         }
     </style>
 </head>
@@ -272,6 +330,455 @@
         </footer>
         <a href="#top" class="back-to-top" title="回到頁首">↑</a>
     </div>
+
+    <!-- ===== 指標速覽面板：刻意置於 .container 之外，避開 update_report.py 的注入區塊 =====
+         面板內每一格皆由前端從上方 JSON 標籤即時計算，不含任何伺服器端注入的 HTML，
+         因此重跑 update_report.py 不會影響本區塊。 -->
+    <button id="ov-fab" class="ov-fab" type="button" title="開啟指標速覽">速覽</button>
+    <div id="ov-backdrop" class="ov-backdrop" hidden></div>
+    <aside id="ov-panel" class="ov-panel" role="dialog" aria-label="指標速覽" aria-modal="false" hidden>
+        <div class="ov-head">
+            <div><span class="ov-title">指標速覽</span><span id="ov-date" class="ov-date"></span></div>
+            <button id="ov-close" class="ov-x" type="button" title="關閉" aria-label="關閉">&times;</button>
+        </div>
+        <div id="ov-highlight" class="ov-highlight"></div>
+        <div class="ov-body">
+            <section class="ov-sec">
+                <div class="ov-sec-head">
+                    <h3>總經<span class="ov-sec-note" id="ov-macro-note"></span></h3>
+                    <button class="ov-more" type="button" data-target="macro">展開全部</button>
+                </div>
+                <div id="ov-macro"></div>
+            </section>
+            <section class="ov-sec">
+                <div class="ov-sec-head">
+                    <h3>技術<span class="ov-sec-note">核心標的近期變化</span></h3>
+                    <button class="ov-more" type="button" data-target="tech">展開全部</button>
+                </div>
+                <div id="ov-tech"></div>
+            </section>
+            <section class="ov-sec">
+                <div class="ov-sec-head">
+                    <h3>情緒<span class="ov-sec-note">波動、籌碼與資金</span></h3>
+                    <button class="ov-more" type="button" data-target="senti">展開全部</button>
+                </div>
+                <div id="ov-senti"></div>
+            </section>
+            <section class="ov-sec">
+                <div class="ov-sec-head">
+                    <h3>基本面<span class="ov-sec-note">估值與獲利品質</span></h3>
+                    <button class="ov-more" type="button" data-target="fund">展開全部</button>
+                </div>
+                <div id="ov-fund"></div>
+            </section>
+        </div>
+        <div class="ov-foot">數據皆取自本報告已收集之資料，由瀏覽器即時彙整；僅供研究參考，不構成投資建議。</div>
+    </aside>
+
+    <script>
+        // ===== 指標速覽面板 =====
+        (function () {
+            'use strict';
+
+            function readJSON(id) {
+                var el = document.getElementById(id);
+                if (!el) return null;
+                var raw = el.textContent || el.innerText || 'null';
+                try {
+                    return JSON.parse(raw);
+                } catch (e) {
+                    // 保險：舊版資料可能含 pandas 的 NaN（Python 允許、JSON.parse 不允許）。
+                    // 產生端已於 investment_analysis.py 的 json_safe() 轉為 null，此處僅為向下相容。
+                    try {
+                        return JSON.parse(raw.replace(/\bNaN\b/g, 'null').replace(/\b-?Infinity\b/g, 'null'));
+                    } catch (e2) { return null; }
+                }
+            }
+
+            var MARKET = readJSON('market-data') || {};
+            var MACRO = readJSON('macro-data') || {};
+            var FUND = readJSON('fundamental-data') || [];
+            var dateEl = document.querySelector('.date-tag');
+            var REPORT_DATE = dateEl ? dateEl.textContent.trim() : '';
+
+            var CORE = ['加權指數', '台積電', '標普 500', '費城半導體', '納斯達克', '元大美債20'];
+            var BIAS_ALERT = 6;      // 20 日乖離達此值視為偏離過大
+            var ADX_TREND = 25;      // ADX 站上此值視為趨勢成形
+            var MACRO_RECENT_DAYS = 30;
+
+            function isNum(v) { return typeof v === 'number' && isFinite(v); }
+            function series(name) {
+                var rows = MARKET[name];
+                return (rows && rows.length) ? rows : null;
+            }
+            function pctChange(rows, back) {
+                if (!rows || rows.length <= back) return null;
+                var now = rows[rows.length - 1].Close, then = rows[rows.length - 1 - back].Close;
+                if (!isNum(now) || !isNum(then) || then === 0) return null;
+                return (now / then - 1) * 100;
+            }
+            function fmtPct(v) { return v === null ? '-' : (v > 0 ? '+' : '') + v.toFixed(2) + '%'; }
+            function fmtNum(v, d) {
+                if (!isNum(v)) return '-';
+                return v.toLocaleString('zh-TW', { minimumFractionDigits: d, maximumFractionDigits: d });
+            }
+            function moveClass(v, inverse) {
+                if (v === null || v === 0) return 'ov-flat';
+                var up = v > 0;
+                if (inverse) up = !up;
+                return up ? 'ov-up' : 'ov-down';
+            }
+            function percentile(rows, key) {
+                if (!rows || !rows.length) return null;
+                var vals = [], last = rows[rows.length - 1][key];
+                if (!isNum(last)) return null;
+                for (var i = 0; i < rows.length; i++) { if (isNum(rows[i][key])) vals.push(rows[i][key]); }
+                if (vals.length < 5) return null;
+                var below = 0;
+                for (var j = 0; j < vals.length; j++) { if (vals[j] <= last) below++; }
+                return Math.round(below / vals.length * 100);
+            }
+            function daysBetween(a, b) {
+                if (!a || !b) return null;
+                var d1 = Date.parse(a + 'T00:00:00'), d2 = Date.parse(b + 'T00:00:00');
+                if (isNaN(d1) || isNaN(d2)) return null;
+                return Math.round((d2 - d1) / 86400000);
+            }
+            function esc(s) {
+                return String(s === undefined || s === null ? '' : s)
+                    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            }
+            function tag(text, kind) {
+                var cls = kind === 'warn' ? 'ov-tag ov-tag-warn' : kind === 'good' ? 'ov-tag ov-tag-good' : 'ov-tag';
+                return '<span class="' + cls + '">' + esc(text) + '</span>';
+            }
+
+            // ---- 技術訊號判定 ----
+            function signals(rows) {
+                var out = [];
+                if (!rows || rows.length < 2) return out;
+                var a = rows[rows.length - 1], b = rows[rows.length - 2];
+                if (isNum(a.K) && isNum(a.D) && isNum(b.K) && isNum(b.D)) {
+                    if (b.K <= b.D && a.K > a.D) out.push(['KD 黃金交叉', 'good']);
+                    else if (b.K >= b.D && a.K < a.D) out.push(['KD 死亡交叉', 'warn']);
+                    else if (a.K >= 80) out.push(['KD 高檔 ' + a.K.toFixed(0), 'warn']);
+                    else if (a.K <= 20) out.push(['KD 低檔 ' + a.K.toFixed(0), 'good']);
+                }
+                if (isNum(a.MACD_Hist) && isNum(b.MACD_Hist)) {
+                    if (b.MACD_Hist <= 0 && a.MACD_Hist > 0) out.push(['MACD 柱轉正', 'good']);
+                    else if (b.MACD_Hist >= 0 && a.MACD_Hist < 0) out.push(['MACD 柱轉負', 'warn']);
+                }
+                if (isNum(a.Close) && isNum(a['20MA']) && isNum(b.Close) && isNum(b['20MA'])) {
+                    if (b.Close < b['20MA'] && a.Close >= a['20MA']) out.push(['站上 20MA', 'good']);
+                    else if (b.Close > b['20MA'] && a.Close < a['20MA']) out.push(['跌破 20MA', 'warn']);
+                }
+                if (isNum(a.BIAS_20)) {
+                    if (a.BIAS_20 >= BIAS_ALERT) out.push(['20日乖離 +' + a.BIAS_20.toFixed(1) + '%', 'warn']);
+                    else if (a.BIAS_20 <= -BIAS_ALERT) out.push(['20日乖離 ' + a.BIAS_20.toFixed(1) + '%', 'good']);
+                }
+                if (isNum(a.ADX) && a.ADX >= ADX_TREND) {
+                    var dir = (isNum(a['+DI']) && isNum(a['-DI'])) ? (a['+DI'] > a['-DI'] ? '多方' : '空方') : '';
+                    out.push(['ADX ' + a.ADX.toFixed(0) + ' ' + dir + '趨勢', '']);
+                }
+                return out.slice(0, 2);
+            }
+
+            // ---- 技術面 ----
+            function techRows(all) {
+                var names = all ? Object.keys(MARKET).filter(function (k) {
+                    return k.indexOf('_institutional') < 0;
+                }) : CORE;
+                var rows = [];
+                names.forEach(function (name) {
+                    var s = series(name);
+                    if (!s) return;
+                    rows.push({
+                        name: name,
+                        close: s[s.length - 1].Close,
+                        d1: pctChange(s, 1), d5: pctChange(s, 5), d20: pctChange(s, 20),
+                        sig: signals(s)
+                    });
+                });
+                return rows;
+            }
+            function renderTech(all) {
+                var rows = techRows(all);
+                if (!rows.length) return '<div class="ov-empty">無技術資料。</div>';
+                var inv = { '恐慌指數': true };
+                var html = '<table class="ov-table"><thead><tr><th>名稱</th><th>收盤</th><th>1日</th><th>5日</th><th>20日</th></tr></thead><tbody>';
+                rows.forEach(function (r) {
+                    var sub = r.sig.map(function (s) { return tag(s[0], s[1]); }).join('');
+                    html += '<tr><td><span class="ov-name">' + esc(r.name) + '</span>' +
+                        (sub ? '<span class="ov-sub">' + sub + '</span>' : '') + '</td>' +
+                        '<td class="ov-num">' + fmtNum(r.close, 2) + '</td>' +
+                        '<td class="ov-num ' + moveClass(r.d1, inv[r.name]) + '">' + fmtPct(r.d1) + '</td>' +
+                        '<td class="ov-num ' + moveClass(r.d5, inv[r.name]) + '">' + fmtPct(r.d5) + '</td>' +
+                        '<td class="ov-num ' + moveClass(r.d20, inv[r.name]) + '">' + fmtPct(r.d20) + '</td></tr>';
+                });
+                return html + '</tbody></table>';
+            }
+
+            // ---- 情緒面 ----
+            function instStreak(rows, key) {
+                if (!rows || !rows.length) return null;
+                var last = rows[rows.length - 1][key];
+                if (!isNum(last) || last === 0) return { last: last, days: 0, sign: 0 };
+                var sign = last > 0 ? 1 : -1, days = 0;
+                for (var i = rows.length - 1; i >= 0; i--) {
+                    var v = rows[i][key];
+                    if (!isNum(v) || v === 0 || (v > 0 ? 1 : -1) !== sign) break;
+                    days++;
+                }
+                return { last: last, days: days, sign: sign };
+            }
+            function macroFind(region, part) {
+                var list = MACRO[region] || [];
+                for (var i = 0; i < list.length; i++) {
+                    if ((list[i].name || '').indexOf(part) >= 0) return list[i];
+                }
+                return null;
+            }
+            function sentiRows(all) {
+                var rows = [];
+                var vix = series('恐慌指數');
+                if (vix) {
+                    var p = percentile(vix, 'Close');
+                    var kind = p === null ? '' : (p <= 20 ? 'warn' : p >= 80 ? 'good' : '');
+                    rows.push({
+                        name: '恐慌指數 VIX',
+                        value: fmtNum(vix[vix.length - 1].Close, 2),
+                        change: fmtPct(pctChange(vix, 1)),
+                        changeCls: moveClass(pctChange(vix, 1), true),
+                        state: p === null ? '' : tag('60日第 ' + p + ' 百分位', kind)
+                    });
+                }
+                var hyg = series('HYG高收益債');
+                if (hyg) {
+                    rows.push({
+                        name: '高收益債 HYG',
+                        value: fmtNum(hyg[hyg.length - 1].Close, 2),
+                        change: fmtPct(pctChange(hyg, 1)),
+                        changeCls: moveClass(pctChange(hyg, 1)),
+                        state: '<span class="ov-sub">風險偏好代理，5日 ' + fmtPct(pctChange(hyg, 5)) + '</span>'
+                    });
+                }
+                var instTargets = all
+                    ? Object.keys(MARKET).filter(function (k) { return k.indexOf('_institutional') > 0; })
+                    : ['台積電_institutional', '元大台50_institutional'];
+                instTargets.forEach(function (key) {
+                    var rowsI = MARKET[key];
+                    if (!rowsI || !rowsI.length) return;
+                    var base = key.replace('_institutional', '');
+                    [['Foreign_Investor', '外資'], ['Investment_Trust', '投信']].forEach(function (pair) {
+                        var st = instStreak(rowsI, pair[0]);
+                        if (!st || !isNum(st.last)) return;
+                        rows.push({
+                            // FinMind 回傳單位為股，1 張 = 1000 股
+                            name: pair[1] + '買賣超 (' + base + ')',
+                            value: (st.last > 0 ? '+' : '') + fmtNum(st.last / 1000, 0) + ' 張',
+                            change: st.days > 1 ? (st.sign > 0 ? '連買 ' : '連賣 ') + st.days + ' 日' : '單日',
+                            changeCls: moveClass(st.last),
+                            state: ''
+                        });
+                    });
+                });
+                var margin = macroFind('TW_MACRO', '融資餘額');
+                var marginChg = macroFind('TW_MACRO', '融資單日變動');
+                if (margin) {
+                    rows.push({
+                        name: '融資餘額',
+                        value: esc(margin.value),
+                        change: marginChg ? esc(marginChg.value) : '-',
+                        changeCls: 'ov-flat',
+                        state: margin.prev ? '<span class="ov-sub">前值 ' + esc(margin.prev) + '</span>' : ''
+                    });
+                }
+                return rows;
+            }
+            function renderSenti(all) {
+                var rows = sentiRows(all);
+                if (!rows.length) return '<div class="ov-empty">無情緒面資料。</div>';
+                var html = '<table class="ov-table"><thead><tr><th>指標</th><th>現值</th><th>近期變化</th></tr></thead><tbody>';
+                rows.forEach(function (r) {
+                    html += '<tr><td><span class="ov-name">' + esc(r.name) + '</span>' +
+                        (r.state ? '<span class="ov-sub">' + r.state + '</span>' : '') + '</td>' +
+                        '<td class="ov-num">' + r.value + '</td>' +
+                        '<td class="ov-num ' + r.changeCls + '">' + r.change + '</td></tr>';
+                });
+                return html + '</tbody></table>';
+            }
+
+            // ---- 基本面 ----
+            // 資料來自 yfinance 的 .info（產生報告時本來就已抓取）。個股欄位最完整，
+            // ETF 多半只有本益比與殖利率，指數與期貨通常完全沒有——沒有的欄位一律不顯示，不推估。
+            function fundRows(all) {
+                var rows = [];
+                for (var i = 0; i < FUND.length; i++) {
+                    var f = FUND[i];
+                    if (!f) continue;
+                    var hasAny = isNum(f.pe) || isNum(f.roe) || isNum(f.dividend_yield) || isNum(f.pb);
+                    if (hasAny) rows.push(f);
+                }
+                // 有 ROE（通常代表個股、資料最完整）者優先顯示
+                rows.sort(function (a, b) { return (isNum(b.roe) ? 1 : 0) - (isNum(a.roe) ? 1 : 0); });
+                return all ? rows : rows.slice(0, 6);
+            }
+            function renderFund(all) {
+                var rows = fundRows(all);
+                if (!rows.length) {
+                    return '<div class="ov-empty">本報告標的以指數與 ETF 為主，資料源未提供基本面欄位。</div>';
+                }
+                var html = '<table class="ov-table"><thead><tr><th>名稱</th><th>本益比</th><th>殖利率</th></tr></thead><tbody>';
+                rows.forEach(function (f) {
+                    var tags = [];
+                    if (isNum(f.roe)) tags.push(tag('ROE ' + f.roe.toFixed(1) + '%', f.roe >= 15 ? 'good' : ''));
+                    if (isNum(f.gross_margin)) tags.push(tag('毛利率 ' + f.gross_margin.toFixed(1) + '%'));
+                    if (isNum(f.peg)) tags.push(tag('PEG ' + f.peg.toFixed(2), f.peg < 1 ? 'good' : f.peg > 2 ? 'warn' : ''));
+                    if (isNum(f.revenue_growth)) {
+                        tags.push(tag('營收 YoY ' + (f.revenue_growth > 0 ? '+' : '') + f.revenue_growth.toFixed(1) + '%',
+                            f.revenue_growth > 0 ? 'good' : 'warn'));
+                    }
+                    if (isNum(f.pb)) tags.push(tag('股價淨值比 ' + f.pb.toFixed(2)));
+                    html += '<tr><td><span class="ov-name">' + esc(f.name || f.symbol) + '</span>' +
+                        (tags.length ? '<span class="ov-sub">' + tags.join('') + '</span>' : '') + '</td>' +
+                        '<td class="ov-num">' + (isNum(f.pe) ? f.pe.toFixed(1) : '-') + '</td>' +
+                        '<td class="ov-num">' + (isNum(f.dividend_yield) ? f.dividend_yield.toFixed(2) + '%' : '-') + '</td></tr>';
+                });
+                return html + '</tbody></table>';
+            }
+
+            // ---- 總經 ----
+            function macroRows(all) {
+                var out = [];
+                [['US_MACRO', '美'], ['TW_MACRO', '台']].forEach(function (pair) {
+                    (MACRO[pair[0]] || []).forEach(function (it) {
+                        var age = daysBetween(it.changed_on, REPORT_DATE);
+                        out.push({
+                            region: pair[1], name: it.name, value: it.value, prev: it.prev,
+                            note: it.note, changed_on: it.changed_on, age: age,
+                            trend: it.trend
+                        });
+                    });
+                });
+                if (all) {
+                    return out;
+                }
+                var recent = out.filter(function (r) {
+                    return r.changed_on && r.age !== null && r.age <= MACRO_RECENT_DAYS;
+                });
+                recent.sort(function (a, b) { return (a.age || 0) - (b.age || 0); });
+                return recent.slice(0, 6);
+            }
+            function renderMacro(all) {
+                var rows = macroRows(all);
+                var noteEl = document.getElementById('ov-macro-note');
+                if (noteEl) {
+                    noteEl.textContent = all ? '全部指標' : '近 ' + MACRO_RECENT_DAYS + ' 日更新';
+                }
+                if (!rows.length) {
+                    return '<div class="ov-empty">近期無總經指標更新（或歷史資料尚未累積）。</div>';
+                }
+                var html = '<table class="ov-table"><thead><tr><th>指標</th><th>現值</th><th>前值</th></tr></thead><tbody>';
+                rows.forEach(function (r) {
+                    var arrow = r.trend === 'up' ? '▲' : r.trend === 'down' ? '▼' : '-';
+                    var cls = r.trend === 'up' ? 'ov-up' : r.trend === 'down' ? 'ov-down' : 'ov-flat';
+                    // age 可能為 0 或負值（注入日晚於報告日期時），一律視為今日更新
+                    var when = r.changed_on ? (r.age <= 0 ? '今日更新' : r.age + ' 日前更新') : '';
+                    html += '<tr><td><span class="ov-name">[' + esc(r.region) + '] ' + esc(r.name) + '</span>' +
+                        '<span class="ov-sub">' + esc(r.note) + (when ? '　' + esc(when) : '') + '</span></td>' +
+                        '<td class="ov-num ' + cls + '">' + esc(r.value) + ' <span style="font-size:10px;">' + arrow + '</span></td>' +
+                        '<td class="ov-num ov-flat">' + (r.prev ? esc(r.prev) : '-') + '</td></tr>';
+                });
+                return html + '</tbody></table>';
+            }
+
+            // ---- 重點摘要 ----
+            function lastDate(name) {
+                var s = series(name);
+                if (!s) return '';
+                return (s[s.length - 1].Date || '').slice(0, 10);
+            }
+            function renderAsOf() {
+                // 休市時報告日期不等於資料日期（例如週末、國定假日、08:00 retry），
+                // 報告本體各區塊已標示「最後交易日」，面板也必須標，否則會讓人誤以為是當日行情。
+                var tw = lastDate('加權指數'), us = lastDate('標普 500');
+                var parts = [];
+                if (tw) parts.push('台股 ' + tw);
+                if (us) parts.push('美股 ' + us);
+                if (!parts.length) return '';
+                var stale = (tw && tw !== REPORT_DATE) || (us && us !== REPORT_DATE);
+                return '<div class="ov-asof' + (stale ? ' ov-asof-stale' : '') + '">資料截至　' +
+                    esc(parts.join('　|　')) + (stale ? '（非報告日，該市場休市）' : '') + '</div>';
+            }
+            function renderHighlight() {
+                var bits = [];
+                var twii = series('加權指數');
+                if (twii) bits.push('加權指數 ' + fmtNum(twii[twii.length - 1].Close, 2) + '（' + fmtPct(pctChange(twii, 1)) + '）');
+                var vix = series('恐慌指數');
+                if (vix) {
+                    var p = percentile(vix, 'Close');
+                    bits.push('VIX ' + fmtNum(vix[vix.length - 1].Close, 2) + (p === null ? '' : '，60日第 ' + p + ' 百分位'));
+                }
+                var fresh = macroRows(true).filter(function (r) { return r.age !== null && r.age <= 7; }).length;
+                if (fresh) bits.push('近 7 日總經更新 ' + fresh + ' 項');
+                var body = bits.length ? esc(bits.join('　|　')) : '本報告資料不足，無法產生摘要。';
+                return renderAsOf() + body;
+            }
+
+            // ---- 顯示控制 ----
+            var expanded = { macro: false, tech: false, senti: false, fund: false };
+            var panel = document.getElementById('ov-panel');
+            var backdrop = document.getElementById('ov-backdrop');
+            var fab = document.getElementById('ov-fab');
+
+            function paint() {
+                document.getElementById('ov-macro').innerHTML = renderMacro(expanded.macro);
+                document.getElementById('ov-tech').innerHTML = renderTech(expanded.tech);
+                document.getElementById('ov-senti').innerHTML = renderSenti(expanded.senti);
+                document.getElementById('ov-fund').innerHTML = renderFund(expanded.fund);
+                document.getElementById('ov-highlight').innerHTML = renderHighlight();
+                var d = document.getElementById('ov-date');
+                if (d) d.textContent = REPORT_DATE;
+            }
+
+            function safeStore() {
+                try {
+                    var s = window.localStorage;
+                    s.setItem('__ov_probe', '1'); s.removeItem('__ov_probe');
+                    return s;
+                } catch (e) { return null; }   // file:// 或隱私模式下不可用時退化為每次都跳
+            }
+            var STORE = safeStore();
+            var SEEN_KEY = 'ovSeen:' + REPORT_DATE;
+
+            function open() {
+                panel.hidden = false;
+                backdrop.hidden = false;
+                if (STORE) { try { STORE.setItem(SEEN_KEY, '1'); } catch (e) { } }
+            }
+            function close() {
+                panel.hidden = true;
+                backdrop.hidden = true;
+            }
+
+            fab.addEventListener('click', function () { panel.hidden ? open() : close(); });
+            document.getElementById('ov-close').addEventListener('click', close);
+            backdrop.addEventListener('click', close);
+            document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !panel.hidden) close(); });
+            Array.prototype.forEach.call(document.querySelectorAll('.ov-more'), function (btn) {
+                btn.addEventListener('click', function () {
+                    var t = btn.getAttribute('target') || btn.getAttribute('data-target');
+                    expanded[t] = !expanded[t];
+                    btn.textContent = expanded[t] ? '收合' : '展開全部';
+                    paint();
+                });
+            });
+
+            paint();
+            var seen = STORE ? STORE.getItem(SEEN_KEY) : null;
+            if (!seen) open();
+        })();
+    </script>
 
     <script>
         // Web Speech API Controller
