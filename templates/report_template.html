@@ -413,7 +413,10 @@
             var dateEl = document.querySelector('.date-tag');
             var REPORT_DATE = dateEl ? dateEl.textContent.trim() : '';
 
-            var CORE = ['加權指數', '台積電', '標普 500', '費城半導體', '納斯達克', '元大美債20'];
+            // 預設只顯示最關鍵的一小組，其餘一律收在「展開全部」裡——面板是速覽，不是第二份報告。
+            var CORE = ['加權指數', '台積電', '標普 500', '費城半導體'];
+            var MACRO_DEFAULT = 3;   // 殖利率三檔固定顯示之外，再列幾項最近更新的總經指標
+            var FUND_DEFAULT = 2;    // 基本面預設列數 (資料最完整者優先)
             var BIAS_ALERT = 6;      // 20 日乖離達此值視為偏離過大
             var ADX_TREND = 25;      // ADX 站上此值視為趨勢成形
             var MACRO_RECENT_DAYS = 30;
@@ -565,7 +568,7 @@
                     });
                 }
                 var hyg = series('HYG高收益債');
-                if (hyg) {
+                if (hyg && all) {
                     rows.push({
                         name: '高收益債 HYG',
                         value: fmtNum(hyg[hyg.length - 1].Close, 2),
@@ -576,12 +579,14 @@
                 }
                 var instTargets = all
                     ? Object.keys(MARKET).filter(function (k) { return k.indexOf('_institutional') > 0; })
-                    : ['台積電_institutional', '元大台50_institutional'];
+                    : ['台積電_institutional'];   // 預設只看台積電的外資動向，其餘展開才顯示
                 instTargets.forEach(function (key) {
                     var rowsI = MARKET[key];
                     if (!rowsI || !rowsI.length) return;
                     var base = key.replace('_institutional', '');
-                    [['Foreign_Investor', '外資'], ['Investment_Trust', '投信']].forEach(function (pair) {
+                    var flows = all ? [['Foreign_Investor', '外資'], ['Investment_Trust', '投信']]
+                                    : [['Foreign_Investor', '外資']];
+                    flows.forEach(function (pair) {
                         var st = instStreak(rowsI, pair[0]);
                         if (!st || !isNum(st.last)) return;
                         rows.push({
@@ -633,7 +638,7 @@
                 }
                 // 有 ROE（通常代表個股、資料最完整）者優先顯示
                 rows.sort(function (a, b) { return (isNum(b.roe) ? 1 : 0) - (isNum(a.roe) ? 1 : 0); });
-                return all ? rows : rows.slice(0, 6);
+                return all ? rows : rows.slice(0, FUND_DEFAULT);
             }
             function renderFund(all) {
                 var rows = fundRows(all);
@@ -716,7 +721,7 @@
                 });
                 recent.sort(function (a, b) { return (a.age || 0) - (b.age || 0); });
                 // 殖利率固定顯示（三檔一組），其餘取最近更新的 5 項
-                return yields.concat(recent.slice(0, 5));
+                return yields.concat(recent.slice(0, MACRO_DEFAULT));
             }
             function renderMacro(all) {
                 var rows = macroRows(all);
@@ -731,8 +736,9 @@
                 rows.forEach(function (r) {
                     var arrow = r.trend === 'up' ? '▲' : r.trend === 'down' ? '▼' : '-';
                     var cls = r.trend === 'up' ? 'ov-up' : r.trend === 'down' ? 'ov-down' : 'ov-flat';
-                    // age 可能為 0 或負值（注入日晚於報告日期時），一律視為今日更新
-                    var when = r.changed_on ? (r.age <= 0 ? '今日更新' : r.age + ' 日前更新') : '';
+                    // 備註本身已帶資料月份/發布日，當天更新時再寫一次「今日更新」只是噪音；
+                    // 只有隔了一天以上才需要提醒這是舊值。(age 可能為負：注入日晚於報告日期)
+                    var when = (r.changed_on && r.age > 1) ? r.age + ' 日前更新' : '';
                     var label = r.termLabel ? '[' + esc(r.region) + '] ' + r.termLabel + '　' + esc(r.name)
                                             : '[' + esc(r.region) + '] ' + esc(r.name);
                     var sub = esc(r.note) + (when ? '　' + esc(when) : '');
