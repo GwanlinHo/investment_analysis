@@ -161,6 +161,17 @@
         @media (min-width: 769px) {
             .ov-backdrop { display: none; }
         }
+        /* 橫向手機等矮視窗：標題列、摘要與頁尾會吃掉大半高度，內容區只剩兩三列。
+           壓縮周邊留白並放寬高度上限，把空間讓給資料本身。 */
+        @media (max-height: 500px) {
+            .ov-panel { max-height: 94vh; right: 12px; bottom: 12px; }
+            .ov-head { padding: 7px 12px; }
+            .ov-title { font-size: 14px; }
+            .ov-highlight { padding: 5px 12px; font-size: 12px; line-height: 1.4; }
+            .ov-asof { margin-bottom: 2px; }
+            .ov-sec { padding: 6px 12px 2px; }
+            .ov-foot { padding: 4px 12px; line-height: 1.3; }
+        }
     </style>
 </head>
 <body>

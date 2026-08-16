@@ -17,6 +17,9 @@ This is an investment assistance tool that combines **Python automation scripts*
     - **休市標示**：面板頂端標示「資料截至　台股 YYYY-MM-DD｜美股 YYYY-MM-DD」，若與報告日期不同（週末、國定假日、08:00 retry）會以紅字註明該市場休市——避免把上一交易日的收盤誤讀為當日行情（報告本體各區塊原本就有休市標示，面板是第一個跳出來的畫面，不能漏）。
     - **顯示行為**：`DOMContentLoaded` 即渲染（JSON 資料標籤位於 `<head>`，不必等 4MB 的 K 線圖），每份新報告自動跳出一次（以報告日期為 localStorage 記憶鍵），關閉後可用右下「速覽」按鈕或再次點擊叫出，支援 Esc 關閉。localStorage 不可用時（file:// 或隱私模式）自動降級為每次跳出。
     - **無伺服器端注入**：面板置於 `.container` 之外、`</body>` 之前，完全避開 `update_report.py` 的四組 DOTALL 正則注入區；每一格數值皆由前端從 `<script type="application/json">` 標籤即時計算，因此對已注入報告重跑 `update_report.py` 不會影響面板（等冪）。
+  - **RWD 補強 (矮視窗)**:
+    - 以 8 種視窗實測 (320 / 390 / 430 / 844x390 橫向 / 768 / 1024 / 1366 / 1920)：面板皆不超出視窗、無頁面或表格橫向溢出、按鈕不重疊。
+    - 橫向手機 (844x390) 原本內容區僅 222px、約兩列可見，新增 `max-height: 500px` 媒體查詢壓縮標題列/摘要/頁尾留白並放寬高度上限，內容區提升至 289px。
   - **總經歷史紀錄 (`macro_history.json` / `macro_history.py`)**:
     - **問題**：`macro_cache.json` 只保存每個指標的最新值，面板無法顯示「前值 → 現值」。
     - **作法**：新增 `macro_history.py`，重用 `update_report.py` 既有的 `MacroParser` 掃描 `report/invest_analysis_*.html`（保留 30 份，約 6 週）一次性回填歷史，之後由 `update_report.py` 每日 upsert；僅在數值或備註實際變動時才追加版本。比對採正規化字串（解析器會移除 `-`、`▲`、`▼`，若不正規化，`3.50%-3.75%` 這類區間值會每天被誤判為新版本），但保留開頭負號以區分 `-2.3 萬` 與 `2.3 萬`。
