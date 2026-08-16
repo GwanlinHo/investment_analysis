@@ -153,8 +153,9 @@
                    border-top: 1px solid var(--border-color); background: #fafafa; }
 
         @media (max-width: 768px) {
-            .ov-panel { right: 0; left: 0; bottom: 0; width: auto; max-width: none; max-height: 80vh;
-                        border-radius: 16px 16px 0 0; }
+            /* 左右與下方留邊，四角圓角：讓它看起來是浮在報告之上的視窗，而不是貼齊螢幕的頁面區塊 */
+            .ov-panel { right: 12px; left: 12px; bottom: 12px; width: auto; max-width: none; max-height: 78vh;
+                        border-radius: 14px; }
             .ov-fab { bottom: 80px; right: 20px; height: 40px; padding: 0 14px; font-size: 13px; }
             .ov-table { font-size: 12px; }
         }
@@ -659,6 +660,24 @@
             }
 
             // ---- 總經 ----
+            // 殖利率曲線：固定以 3M -> 10Y -> 30Y 由短到長排列，倒掛才看得出來
+            var YIELD_ORDER = ['3 個月期公債', '10 年期公債', '30 年期公債'];
+            var YIELD_LABEL = { '3 個月期公債': '3M', '10 年期公債': '10Y', '30 年期公債': '30Y' };
+            function toNum(text) {
+                var m = String(text || '').match(/-?\d+(\.\d+)?/);
+                return m ? parseFloat(m[0]) : null;
+            }
+            function curveState(yieldRows) {
+                // 對應 CLAUDE.md 的殖利率監控規則：任兩者利差 < 25bps 視為平坦，< 0 為倒掛
+                var v = {};
+                yieldRows.forEach(function (r) { v[YIELD_LABEL[r.matchKey]] = toNum(r.value); });
+                if (!isNum(v['3M']) || !isNum(v['10Y']) || !isNum(v['30Y'])) return null;
+                var spreads = [v['10Y'] - v['3M'], v['30Y'] - v['10Y'], v['30Y'] - v['3M']];
+                var minSpread = Math.min.apply(null, spreads);
+                if (minSpread < 0) return ['殖利率曲線倒掛', 'warn'];
+                if (minSpread < 0.25) return ['殖利率曲線平坦（最小利差 ' + Math.round(minSpread * 100) + ' bps）', 'warn'];
+                return ['殖利率曲線正常（10Y-3M ' + Math.round((v['10Y'] - v['3M']) * 100) + ' bps）', 'good'];
+            }
             function macroRows(all) {
                 var out = [];
                 [['US_MACRO', '美'], ['TW_MACRO', '台']].forEach(function (pair) {
@@ -671,14 +690,33 @@
                         });
                     });
                 });
-                if (all) {
-                    return out;
+                // 三檔公債殖利率抽出來，固定依 3M -> 10Y -> 30Y 連續排在最前面；
+                // 依「最近更新」排序會把它們打散，看不出曲線形狀。
+                var yields = [], others = [];
+                out.forEach(function (r) {
+                    var key = null;
+                    for (var i = 0; i < YIELD_ORDER.length; i++) {
+                        if (r.name.indexOf(YIELD_ORDER[i]) >= 0) { key = YIELD_ORDER[i]; break; }
+                    }
+                    if (key) { r.matchKey = key; yields.push(r); } else { others.push(r); }
+                });
+                yields.sort(function (a, b) {
+                    return YIELD_ORDER.indexOf(a.matchKey) - YIELD_ORDER.indexOf(b.matchKey);
+                });
+                if (yields.length) {
+                    var state = curveState(yields);
+                    yields[0].curveTag = state;                       // 曲線判讀掛在最短天期那一列
+                    yields.forEach(function (r) { r.termLabel = YIELD_LABEL[r.matchKey]; });
                 }
-                var recent = out.filter(function (r) {
+                if (all) {
+                    return yields.concat(others);
+                }
+                var recent = others.filter(function (r) {
                     return r.changed_on && r.age !== null && r.age <= MACRO_RECENT_DAYS;
                 });
                 recent.sort(function (a, b) { return (a.age || 0) - (b.age || 0); });
-                return recent.slice(0, 6);
+                // 殖利率固定顯示（三檔一組），其餘取最近更新的 5 項
+                return yields.concat(recent.slice(0, 5));
             }
             function renderMacro(all) {
                 var rows = macroRows(all);
@@ -695,8 +733,12 @@
                     var cls = r.trend === 'up' ? 'ov-up' : r.trend === 'down' ? 'ov-down' : 'ov-flat';
                     // age 可能為 0 或負值（注入日晚於報告日期時），一律視為今日更新
                     var when = r.changed_on ? (r.age <= 0 ? '今日更新' : r.age + ' 日前更新') : '';
-                    html += '<tr><td><span class="ov-name">[' + esc(r.region) + '] ' + esc(r.name) + '</span>' +
-                        '<span class="ov-sub">' + esc(r.note) + (when ? '　' + esc(when) : '') + '</span></td>' +
+                    var label = r.termLabel ? '[' + esc(r.region) + '] ' + r.termLabel + '　' + esc(r.name)
+                                            : '[' + esc(r.region) + '] ' + esc(r.name);
+                    var sub = esc(r.note) + (when ? '　' + esc(when) : '');
+                    if (r.curveTag) sub = tag(r.curveTag[0], r.curveTag[1]) + '<br>' + sub;
+                    html += '<tr><td><span class="ov-name">' + label + '</span>' +
+                        '<span class="ov-sub">' + sub + '</span></td>' +
                         '<td class="ov-num ' + cls + '">' + esc(r.value) + ' <span style="font-size:10px;">' + arrow + '</span></td>' +
                         '<td class="ov-num ov-flat">' + (r.prev ? esc(r.prev) : '-') + '</td></tr>';
                 });
