@@ -20,7 +20,7 @@ fi
 source /home/pi/WorkDir/_lib/heavy_lock.sh
 acquire_heavy_lock /home/pi/WorkDir/_logs/invest_analysis_cron.log "invest_analysis" "wait" || exit 0
 
-timeout 30m claude -p '請依照本專案目錄的 CLAUDE.md 執行完整的 investment analysis 工作流程，從技術資料生成、總經數據蒐集、新聞、五人格AI分析到 update_report.py 報表注入與同步，全部完成。注意：報告或日誌中若需提及今天是星期幾，務必先執行 `date` 取得系統當前的星期，不可自行用日期推算，以免算錯。' --model claude-sonnet-4-6 --dangerously-skip-permissions
+timeout 30m claude -p '請依照本專案目錄的 CLAUDE.md 執行完整的 investment analysis 工作流程，從技術資料生成、總經數據蒐集、新聞、五人格AI分析到 update_report.py 報表注入與同步，全部完成。注意：報告或日誌中若需提及今天是星期幾，務必先執行 `date` 取得系統當前的星期，不可自行用日期推算，以免算錯。' --model claude-opus-5 --dangerously-skip-permissions
 
 # 3. 順利產生後，刪除暫時的 HTML 檔案
 rm -f ai_analysis.html tw_macro_table.html us_macro_table.html weekly_news.html
