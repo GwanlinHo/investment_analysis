@@ -8,7 +8,8 @@ cd "$(dirname "${BASH_SOURCE[0]}")" || exit 1
 # 本 repo 發布白名單(自動產生的報表產物; 目錄項會納入其下新檔)。與 CLAUDE.md 每日報告定義一致。
 # technical_data.json 不再發布：內含 Yahoo 原始 OHLCV 全序列，屬 Yahoo ToS 禁止再散布的資料。
 # 報告 HTML 內嵌的 JSON 已由 publish_filter.py 淨化，發布面不含 Yahoo 原值。
-WHITELIST=(index.html report macro_cache.json news.html ai.html ai_context.json)
+# news.html / ai.html / ai_context.json 為中間產物，內容已注入 index.html，不再發布。
+WHITELIST=(index.html report macro_cache.json)
 
 # 金鑰樣式與禁列敏感檔名(推送前護欄)
 SECRET_PATTERNS='(sk-ant-[A-Za-z0-9_-]{20,}|sk-[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,}|AKIA[0-9A-Z]{16}|AIza[0-9A-Za-z_-]{30,}|xox[baprs]-[A-Za-z0-9-]{10,}|-----BEGIN [A-Z ]*PRIVATE KEY-----)'

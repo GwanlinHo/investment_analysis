@@ -10,6 +10,10 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 ## 更新紀錄 (Changelog)
 
+- **2026-08-31 (v3.0.1)**:
+  - **中間產物不再進公開 repo**：`news.html`、`ai.html`、`ai_context.json` 三者只是工作流程的中間檔——`update_report.py` 讀取後把內容注入 `index.html`，公開站台從未引用（`index.html` 內只有錨點連結，無任何指向這些檔案的 href／fetch）。三者以 `git rm --cached` 移出版控、加入 `.gitignore`，並自 `sync.sh` 白名單移除；本機檔案保留，工作流程不受影響。發布白名單縮減為 `index.html`、`report/`、`macro_cache.json`。
+  - **保留 `macro_cache.json`／`macro_history.json`**：兩者是逐月累積的官方總經數值（含發布日期註記），非暫存檔，且是這批資料唯一的異地副本，故續留版控。已核對兩者皆無價格序列或第三方原值。
+
 - **2026-08-31 (v3.0)**:
   - **發布資料淨化 (Publish Data Minimization)**:
     - **需求**：本專案的報告推送到公開 repo，而 Yahoo Finance 服務條款限「個人、非商業使用」、禁止再散布其資料。稽核發現發布面實際帶出了 Yahoo 原值：`technical_data.json`（1.5MB，33 檔標的 x 60 天完整 OHLCV）直接進版控，報告 HTML 的 `<script id="market-data">` 內嵌同一份約 1.1MB 的 OHLCV，`<script id="fundamental-data">` 則內嵌 Yahoo `.info` 的 PE／PB／殖利率／ROE 等原值。抓取端（每日一次、約 50 次請求、有休市守門）本身無虞，問題在發布端。
