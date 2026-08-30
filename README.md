@@ -10,6 +10,18 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 ## 更新紀錄 (Changelog)
 
+- **2026-08-31 (v3.0)**:
+  - **發布資料淨化 (Publish Data Minimization)**:
+    - **需求**：本專案的報告推送到公開 repo，而 Yahoo Finance 服務條款限「個人、非商業使用」、禁止再散布其資料。稽核發現發布面實際帶出了 Yahoo 原值：`technical_data.json`（1.5MB，33 檔標的 x 60 天完整 OHLCV）直接進版控，報告 HTML 的 `<script id="market-data">` 內嵌同一份約 1.1MB 的 OHLCV，`<script id="fundamental-data">` 則內嵌 Yahoo `.info` 的 PE／PB／殖利率／ROE 等原值。抓取端（每日一次、約 50 次請求、有休市守門）本身無虞，問題在發布端。
+    - **設計**：新增 `publish_filter.py`，把「Yahoo 原值」這一層只從**發布面**移除，本機面完全不動：
+      - `sanitize_market()`：移除每筆序列的 `Open`／`High`／`Low`／`Volume`，保留 `Date`、`Close` 與本專案自行計算的衍生指標（KD、RSI、MACD、乖離、MA、ADX/DI）。`*_institutional`（FinMind 三大法人，非 Yahoo 來源）不受影響。
+      - `sanitize_fundamental()`：預設不發布基本面欄位（旗標 `PUBLISH_FUNDAMENTAL`）。官方開放資料 `TWSE BWIBBU_ALL` 僅含上市個股（1081 筆，涵蓋 2330 但不含本專案主要的 ETF 標的），且殖利率定義與 Yahoo 不同，無法等值回補，故不做混源回填；報告本文的 AI 分析文字仍以敘述方式引用這些數值。速覽面板的基本面區改顯示對應說明。
+      - `sanitize_html()`：同一套規則可直接套用在已產生的報告 HTML，供既有檔案回溯處理，與 render 時等效。
+    - **套用時機**：於 `investment_analysis.py` render 模板時淨化。此時尚未進行 AI 分析，本機 `technical_data.json` 仍為完整 OHLCV，CLAUDE.md 的 Fact-Only Rule（只能引用檔案中確實存在的高低點）與 `market_open_gate.py` 皆不受影響；`update_report.py` 只改寫 `<script id="macro-data">`，不會把原值寫回。
+    - **版控與白名單**：`technical_data.json` 以 `git rm --cached` 移出版控並加入 `.gitignore`，同時從 `sync.sh` 的 `WHITELIST` 移除（僅停用白名單不足以撤下已提交的檔案）。既有的 `index.html`、`report/index.html` 與兩份殘留快照已回溯淨化。
+    - **注意**：本次只清 HEAD，不改寫公開 repo 的 git 歷史（改寫公開歷史的破壞性與本案風險不成比例），舊 commit 內仍留有原始資料。
+    - **驗證**：32 份 HTML 全數通過「market-data 內無 Open／High／Low／Volume、fundamental-data 為空、JSON 可解析、面板必要欄位齊全」檢查；以 headless chromium 逐區比對淨化前後的速覽面板，總經／技術／情緒／頂部摘要輸出完全相同，僅基本面區依設計改為說明文字。
+
 - **2026-08-16 (v2.9)**:
   - **指標速覽浮動面板 (Floating Overview Panel)**:
     - **需求**：使用者希望在報告開啟時能一眼掃過總經、技術面、情緒面的近期變化，不必逐區捲動；面板需可關閉、可再次叫出，且資料全部取自報告既有的收集結果。

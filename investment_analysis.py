@@ -13,6 +13,7 @@ import json
 import sys
 import time
 from jinja2 import Environment, FileSystemLoader
+from publish_filter import sanitize_market, sanitize_fundamental
 import requests
 
 # --- 全域設定 ---
@@ -483,9 +484,11 @@ def main():
             bias_periods=BIAS_PERIODS, 
             yield_curve_plot_b64=y_plot, 
             yield_data=y_data,
-            fundamental_json=all_fun,
+            # 發布面淨化：報告會推到公開 repo，內嵌 JSON 不帶 Yahoo 原始價量與基本面原值
+            # (本機 technical_data.json 仍為完整資料，供 AI 分析與休市守門使用)。
+            fundamental_json=sanitize_fundamental(all_fun),
             yield_json=json_safe(y_data),
-            market_json=all_mkt
+            market_json=sanitize_market(all_mkt)
         )
         os.makedirs("report", exist_ok=True); fname = f"report/invest_analysis_{utc_now.astimezone(TZ).strftime('%Y%m%d')}.html"; open(fname, 'w', encoding='utf-8').write(html); shutil.copy2(fname, "index.html"); print("[Success] 分析完成")
 

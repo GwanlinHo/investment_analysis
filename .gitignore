@@ -144,7 +144,9 @@ dmypy.json
 cython_debug/
 
 # Investment Analysis Specifics
-#technical_data.json
+# technical_data.json 內含 Yahoo 原始 OHLCV 全序列(Yahoo ToS 禁止再散布)，
+# 僅供本機 AI 分析與 market_open_gate.py 使用，不進版控、不發布。
+technical_data.json
 #news.html
 #ai.html
 *.log
