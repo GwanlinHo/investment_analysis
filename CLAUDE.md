@@ -10,7 +10,7 @@
 
 ## Development Workflow
 - **Branch-based Development (Systematic Changes Only)**: Modifications to source code, project configuration, formatting, or rules (including `CLAUDE.md` and system prompts) **MUST** be performed in a dedicated feature branch (e.g., `feature/xxx`).
-- **Daily Reports (Direct to Main)**: Daily investment analysis reports (including `index.html`, `report/index.html`, `macro_cache.json`, `news.html`, `ai.html`, and `ai_context.json`) do **NOT** require a feature branch and can be committed directly to the `main` branch.
+- **Daily Reports (Direct to Main)**: Daily investment analysis reports (including `index.html`, `report/index.html`, and `macro_cache.json`) do **NOT** require a feature branch and can be committed directly to the `main` branch.
 - **Verification & Debugging**: Systematic changes must be fully developed, verified, and debugged within the feature branch. Daily reports must pass the automated validation in `update_report.py`.
 
 ## Merge & Upload Policy
@@ -18,7 +18,7 @@
 - **Daily Reports**: Upon successful completion of the analysis cycle (`uv run investment_analysis.py` and `uv run update_report.py`), the results must be committed and pushed to the `main` branch **IMMEDIATELY** and **AUTOMATICALLY**, without requiring manual consent or a feature branch.
 - **Data Integrity Abort (overrides auto-push)**: If `investment_analysis.py` aborts due to the data-completeness gate (3+ symbols missing, non-zero exit / `[ABORT]`), the auto-push rule above does NOT apply — produce nothing and push nothing for this cycle. As a final safeguard, `update_report.py` independently refuses to inject when `technical_data.json` is not updated today.
 
-- **Publish Data Minimization**: `technical_data.json` is LOCAL ONLY — it holds Yahoo's raw OHLCV series, is gitignored, and must never be committed or added to the `sync.sh` whitelist. Report HTML is sanitized by `publish_filter.py` at render time (raw `Open`/`High`/`Low`/`Volume` and Yahoo `.info` fundamentals are stripped from the embedded JSON). Do NOT reintroduce raw Yahoo values into any published artifact. The local file stays complete for AI analysis (Fact-Only Rule) and `market_open_gate.py`.
+- **Publish Data Minimization**: `technical_data.json`, `news.html`, `ai.html` and `ai_context.json` are LOCAL ONLY — all four are gitignored and must never be committed or added to the `sync.sh` whitelist. `technical_data.json` holds Yahoo's raw OHLCV series; the other three are workflow intermediates whose content is already injected into `index.html`, and nothing on the published site links to them. Report HTML is sanitized by `publish_filter.py` at render time (raw `Open`/`High`/`Low`/`Volume` and Yahoo `.info` fundamentals are stripped from the embedded JSON). Do NOT reintroduce raw Yahoo values into any published artifact. The local file stays complete for AI analysis (Fact-Only Rule) and `market_open_gate.py`.
 
 ## Workflow: Investment Analysis
 
