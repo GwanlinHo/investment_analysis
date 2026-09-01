@@ -153,6 +153,9 @@ news.html
 ai.html
 ai_context.json
 *.log
+# gap_backfill 的本機原始 OHLCV 快取：與 technical_data.json 同性質(Yahoo 原值)，
+# 只用來補上游永久缺漏的 K 棒，不進版控、不發布。
+_ohlcv_cache.json
 #macro_cache.json
 # --- End Specifics ---
 

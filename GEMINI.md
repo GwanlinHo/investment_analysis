@@ -25,6 +25,7 @@
 - **Action**: ALWAYS execute `uv run investment_analysis.py` as the first step.
 - **Purpose**: This generates the base HTML report with the latest technical indicators (KD, MACD, BIAS), price data, and K-line charts.
 - **Verification**: Ensure the script finishes successfully before proceeding to macro data collection.
+- **Gap Backfill (`gap_backfill.py`)**: Yahoo occasionally drops a trading day's daily bar permanently. Mid-series holes are now backfilled automatically (local cache first, then Yahoo 1-hour bars aggregated into a daily bar). Check the `[backfill]` lines: a reconstructed bar has a Close that is systematically 0.002%~0.09% low and an underestimated Volume, so never quote it as an official close — cite a Tier-1 source. If you see `[!] 仍有補不到的破洞`, disclose the remaining hole in the report exactly as before. Tail lag is not a hole and is never backfilled.
 
 ### 1. Macro Data Collection
 - **Principle**: Use **OFFICIAL Historical Actuals ONLY**. Strictly prohibit forecasts, estimates, or outlooks.

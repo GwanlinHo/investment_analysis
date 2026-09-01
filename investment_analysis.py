@@ -14,6 +14,7 @@ import sys
 import time
 from jinja2 import Environment, FileSystemLoader
 from publish_filter import sanitize_market, sanitize_fundamental
+import gap_backfill
 import requests
 
 # --- 全域設定 ---
@@ -363,6 +364,14 @@ def create_yield_curve_plot_base64():
 def process_stock_group(group, start_date, utc_now):
     stock_data, failed = get_stock_data(group["symbols"], start_date)
     if not stock_data and not failed: return None
+
+    # 補序列「中間」的破洞 (Yahoo 會永久少掉某個交易日的 K 棒，見 gap_backfill 模組說明)。
+    # 不補的話單日漲跌會變成跨兩日的變動，且 MA/KD/RSI/MACD/ADX 會一路錯到該筆滾出視窗。
+    # 尾端落後不在此處理，仍由下方的逐列 `[!] 資料 MM/DD` 標註負責。
+    try:
+        stock_data = gap_backfill.apply(stock_data, start_date, utc_now + datetime.timedelta(days=1))
+    except Exception as e:
+        print(f"  [backfill] 整體略過 (不影響本次報告): {e}")
     
     # 群組基準交易日：取各標的「最後有效數據日」(排除尾端 NaN) 的最大值，代表本報告
     # 涵蓋到的最新交易日。關鍵在於必須以 dropna 後的有效日計算，而非含 NaN 的
