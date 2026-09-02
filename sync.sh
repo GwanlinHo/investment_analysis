@@ -9,7 +9,10 @@ cd "$(dirname "${BASH_SOURCE[0]}")" || exit 1
 # technical_data.json 不再發布：內含 Yahoo 原始 OHLCV 全序列，屬 Yahoo ToS 禁止再散布的資料。
 # 報告 HTML 內嵌的 JSON 已由 publish_filter.py 淨化，發布面不含 Yahoo 原值。
 # news.html / ai.html / ai_context.json 為中間產物，內容已注入 index.html，不再發布。
-WHITELIST=(index.html report macro_cache.json)
+# macro_history.json 與 macro_cache.json 同性質(逐月累積的官方總經數值與發布日期註記,
+# 無任何價量欄位或第三方原值),且是這批資料唯一的異地副本,必須一起發布。先前漏列導致
+# 每日工作流程要人工另外 commit 一次,是疏漏而非設計。
+WHITELIST=(index.html report macro_cache.json macro_history.json)
 
 # 金鑰樣式與禁列敏感檔名(推送前護欄)
 SECRET_PATTERNS='(sk-ant-[A-Za-z0-9_-]{20,}|sk-[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,}|AKIA[0-9A-Z]{16}|AIza[0-9A-Za-z_-]{30,}|xox[baprs]-[A-Za-z0-9-]{10,}|-----BEGIN [A-Z ]*PRIVATE KEY-----)'
