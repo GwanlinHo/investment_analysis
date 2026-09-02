@@ -10,6 +10,9 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 ## 更新紀錄 (Changelog)
 
+- **2026-09-02 (v3.1.1)**:
+  - **`sync.sh` 白名單補上 `macro_history.json`**：`macro_cache.json` 早在白名單內，同性質的 `macro_history.json` 卻漏列，導致每日工作流程必須在跑 `sync.sh` 之外，人工另外 commit 一次才不會漏掉當天的總經版本紀錄。已補入白名單，該手動步驟取消。`macro_history.json` 經核對只有官方總經數值與發布日期註記，無任何價量欄位或第三方原值，與既有的發布資料淨化政策一致。
+
 - **2026-09-01 (v3.1)**:
   - **日線破洞補值 (Daily Bar Gap Backfill)**:
     - **問題**：Yahoo 偶爾會**永久性**少掉某個交易日的日 K 棒且不再回補。2026-08-28 當天 `^GSPC`／`^IXIC`／`^DJI`／`^VIX`／`^SOX`／`^RUT`／`^NYFANG`／`^N225`／`HYG` 九檔全缺（只有 `GC=F` 有），連續三天重抓皆無。同一天 Yahoo 對 SPY／QQQ／SOXX／AAPL／GLD 卻有資料，對 DIA／IWM／TLT 沒有——破洞**隨機散落在個別標的**，不是指數專屬。
