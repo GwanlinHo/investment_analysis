@@ -11,6 +11,8 @@
     <script id="fundamental-data" type="application/json">{{ fundamental_json | tojson }}</script>
     <script id="yield-data" type="application/json">{{ yield_json | tojson }}</script>
     <script id="market-data" type="application/json">{{ market_json | tojson }}</script>
+    <!-- 速覽面板用的預算純量。Close 序列不發布(Yahoo ToS)，面板改讀這裡；見 publish_filter.build_panel_data -->
+    <script id="panel-data" type="application/json">{{ panel_json | tojson }}</script>
     <!-- 總經速覽資料：由 update_report.py 於注入階段填入（現值 + 前值 + 變動日） -->
     <script id="macro-data" type="application/json">{"US_MACRO": [], "TW_MACRO": []}</script>
     <style>
@@ -408,6 +410,7 @@
             }
 
             var MARKET = readJSON('market-data') || {};
+            var PANEL = readJSON('panel-data') || {};
             var MACRO = readJSON('macro-data') || {};
             var FUND = readJSON('fundamental-data') || [];
             var dateEl = document.querySelector('.date-tag');
@@ -426,11 +429,16 @@
                 var rows = MARKET[name];
                 return (rows && rows.length) ? rows : null;
             }
-            function pctChange(rows, back) {
-                if (!rows || rows.length <= back) return null;
-                var now = rows[rows.length - 1].Close, then = rows[rows.length - 1 - back].Close;
-                if (!isNum(now) || !isNum(then) || then === 0) return null;
-                return (now / then - 1) * 100;
+            // Close 序列不發布(Yahoo ToS)，1/5/20 日漲跌與 VIX 百分位改由 publish_filter
+            // 在產出時算好放進 panel-data。這裡以標的名查表，語意與原本逐列相減完全相同。
+            function panelOf(name) { return PANEL[name] || {}; }
+            function pctChange(name, back) {
+                var v = panelOf(name)['d' + back];
+                return isNum(v) ? v : null;
+            }
+            function lastClose(name) {
+                var v = panelOf(name).close;
+                return isNum(v) ? v : null;
             }
             function fmtPct(v) { return v === null ? '-' : (v > 0 ? '+' : '') + v.toFixed(2) + '%'; }
             function fmtNum(v, d) {
@@ -443,15 +451,9 @@
                 if (inverse) up = !up;
                 return up ? 'ov-up' : 'ov-down';
             }
-            function percentile(rows, key) {
-                if (!rows || !rows.length) return null;
-                var vals = [], last = rows[rows.length - 1][key];
-                if (!isNum(last)) return null;
-                for (var i = 0; i < rows.length; i++) { if (isNum(rows[i][key])) vals.push(rows[i][key]); }
-                if (vals.length < 5) return null;
-                var below = 0;
-                for (var j = 0; j < vals.length; j++) { if (vals[j] <= last) below++; }
-                return Math.round(below / vals.length * 100);
+            function percentile(name) {
+                var v = panelOf(name).pctile;
+                return isNum(v) ? v : null;
             }
             function daysBetween(a, b) {
                 if (!a || !b) return null;
@@ -469,7 +471,7 @@
             }
 
             // ---- 技術訊號判定 ----
-            function signals(rows) {
+            function signals(rows, name) {
                 var out = [];
                 if (!rows || rows.length < 2) return out;
                 var a = rows[rows.length - 1], b = rows[rows.length - 2];
@@ -483,10 +485,9 @@
                     if (b.MACD_Hist <= 0 && a.MACD_Hist > 0) out.push(['MACD 柱轉正', 'good']);
                     else if (b.MACD_Hist >= 0 && a.MACD_Hist < 0) out.push(['MACD 柱轉負', 'warn']);
                 }
-                if (isNum(a.Close) && isNum(a['20MA']) && isNum(b.Close) && isNum(b['20MA'])) {
-                    if (b.Close < b['20MA'] && a.Close >= a['20MA']) out.push(['站上 20MA', 'good']);
-                    else if (b.Close > b['20MA'] && a.Close < a['20MA']) out.push(['跌破 20MA', 'warn']);
-                }
+                var cross = panelOf(name).ma20;
+                if (cross === 'up') out.push(['站上 20MA', 'good']);
+                else if (cross === 'down') out.push(['跌破 20MA', 'warn']);
                 if (isNum(a.BIAS_20)) {
                     if (a.BIAS_20 >= BIAS_ALERT) out.push(['20日乖離 +' + a.BIAS_20.toFixed(1) + '%', 'warn']);
                     else if (a.BIAS_20 <= -BIAS_ALERT) out.push(['20日乖離 ' + a.BIAS_20.toFixed(1) + '%', 'good']);
@@ -509,9 +510,9 @@
                     if (!s) return;
                     rows.push({
                         name: name,
-                        close: s[s.length - 1].Close,
-                        d1: pctChange(s, 1), d5: pctChange(s, 5), d20: pctChange(s, 20),
-                        sig: signals(s)
+                        close: lastClose(name),
+                        d1: pctChange(name, 1), d5: pctChange(name, 5), d20: pctChange(name, 20),
+                        sig: signals(s, name)
                     });
                 });
                 return rows;
@@ -555,26 +556,24 @@
             }
             function sentiRows(all) {
                 var rows = [];
-                var vix = series('恐慌指數');
-                if (vix) {
-                    var p = percentile(vix, 'Close');
+                if (series('恐慌指數')) {
+                    var p = percentile('恐慌指數');
                     var kind = p === null ? '' : (p <= 20 ? 'warn' : p >= 80 ? 'good' : '');
                     rows.push({
                         name: '恐慌指數 VIX',
-                        value: fmtNum(vix[vix.length - 1].Close, 2),
-                        change: fmtPct(pctChange(vix, 1)),
-                        changeCls: moveClass(pctChange(vix, 1), true),
+                        value: fmtNum(lastClose('恐慌指數'), 2),
+                        change: fmtPct(pctChange('恐慌指數', 1)),
+                        changeCls: moveClass(pctChange('恐慌指數', 1), true),
                         state: p === null ? '' : tag('60日第 ' + p + ' 百分位', kind)
                     });
                 }
-                var hyg = series('HYG高收益債');
-                if (hyg && all) {
+                if (series('HYG高收益債') && all) {
                     rows.push({
                         name: '高收益債 HYG',
-                        value: fmtNum(hyg[hyg.length - 1].Close, 2),
-                        change: fmtPct(pctChange(hyg, 1)),
-                        changeCls: moveClass(pctChange(hyg, 1)),
-                        state: '<span class="ov-sub">風險偏好代理，5日 ' + fmtPct(pctChange(hyg, 5)) + '</span>'
+                        value: fmtNum(lastClose('HYG高收益債'), 2),
+                        change: fmtPct(pctChange('HYG高收益債', 1)),
+                        changeCls: moveClass(pctChange('HYG高收益債', 1)),
+                        state: '<span class="ov-sub">風險偏好代理，5日 ' + fmtPct(pctChange('HYG高收益債', 5)) + '</span>'
                     });
                 }
                 var instTargets = all
@@ -771,12 +770,10 @@
             }
             function renderHighlight() {
                 var bits = [];
-                var twii = series('加權指數');
-                if (twii) bits.push('加權指數 ' + fmtNum(twii[twii.length - 1].Close, 2) + '（' + fmtPct(pctChange(twii, 1)) + '）');
-                var vix = series('恐慌指數');
-                if (vix) {
-                    var p = percentile(vix, 'Close');
-                    bits.push('VIX ' + fmtNum(vix[vix.length - 1].Close, 2) + (p === null ? '' : '，60日第 ' + p + ' 百分位'));
+                if (series('加權指數')) bits.push('加權指數 ' + fmtNum(lastClose('加權指數'), 2) + '（' + fmtPct(pctChange('加權指數', 1)) + '）');
+                if (series('恐慌指數')) {
+                    var p = percentile('恐慌指數');
+                    bits.push('VIX ' + fmtNum(lastClose('恐慌指數'), 2) + (p === null ? '' : '，60日第 ' + p + ' 百分位'));
                 }
                 var fresh = macroRows(true).filter(function (r) { return r.age !== null && r.age <= 7; }).length;
                 if (fresh) bits.push('近 7 日總經更新 ' + fresh + ' 項');

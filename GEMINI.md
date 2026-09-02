@@ -26,6 +26,7 @@
 - **Purpose**: This generates the base HTML report with the latest technical indicators (KD, MACD, BIAS), price data, and K-line charts.
 - **Verification**: Ensure the script finishes successfully before proceeding to macro data collection.
 - **Gap Backfill (`gap_backfill.py`)**: Yahoo occasionally drops a trading day's daily bar permanently. Mid-series holes are now backfilled automatically (local cache first, then Yahoo 1-hour bars aggregated into a daily bar). Check the `[backfill]` lines: a reconstructed bar has a Close that is systematically 0.002%~0.09% low and an underestimated Volume, so never quote it as an official close — cite a Tier-1 source. If you see `[!] 仍有補不到的破洞`, disclose the remaining hole in the report exactly as before. Tail lag is not a hole and is never backfilled.
+- **Publish filter**: `Close` is NOT published (Yahoo ToS — 25 symbols x 60 days of closes is redistribution). The overview panel reads precomputed scalars from `<script id="panel-data">` built by `publish_filter.build_panel_data()`. Its Python helpers mirror the template JS exactly; change one side and you must change the other.
 
 ### 1. Macro Data Collection
 - **Principle**: Use **OFFICIAL Historical Actuals ONLY**. Strictly prohibit forecasts, estimates, or outlooks.
