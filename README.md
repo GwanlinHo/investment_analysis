@@ -10,6 +10,15 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 ## 更新紀錄 (Changelog)
 
+- **2026-09-02 (v3.2)**:
+  - **發布面不再帶出 Yahoo 收盤價 (Close)**:
+    - **問題**：v3.0 移除了 `Open`／`High`／`Low`／`Volume`，但**刻意保留 `Close`**，因為速覽面板要靠它算 1/5/20 日漲跌、VIX 60 日百分位與 20MA 穿越。實際盤點後，公開站台仍帶出 25 檔 x 60 天、共 1,500 點的機器可讀 Yahoo 價格序列（`index.html`、`report/index.html` 與 2 份殘留快照，合計 4 份），仍屬 Yahoo ToS 所禁止的再散布。（報告本文以文字引用幾個收盤點屬評論引用，性質不同，不受影響。）
+    - **設計**：新增 `publish_filter.build_panel_data()`，在產出時先算好面板實際顯示的那幾十個純量（每檔的最新收盤、`d1`／`d5`／`d20`、`ma20` 穿越方向，恐慌指數另加 `pctile`），以新的 `<script id="panel-data">` 發布；`Close` 加入 `RAW_PRICE_FIELDS` 一併移除。模板的 `pctChange()`／`percentile()`／`signals()` 改為查表，面板顯示完全不變。
+    - **保留最新收盤純量**：`panel-data` 仍帶每檔的最新收盤（25 個純量），因為面板要把它顯示在畫面上；這與報告本文引用當日收盤同性質，屬評論引用而非資料集轉發。被移除的是 60 天的序列。
+    - **回溯處理的分流（實測踩過）**：舊報告的內嵌 JS 直接讀 Close 序列、不認得 `panel-data`。實測對舊檔移除 Close 後，面板的收盤/漲跌/百分位全部變成 `-`，而且**補上 `panel-data` 也救不了**——那份 JS 根本不會去讀。故 `sanitize_html()` 改為依檔案自身的 JS 版本分流：偵測到 `readJSON('panel-data')` 才移除 Close，舊檔沿用 v3.0 規則（只移除 OHLV、保留 Close）並印出說明，要徹底清掉就得重新產生報告。
+    - **移除 2 份殘留快照**：`report/invest_analysis_20260820.html`／`20260826.html` 是 `.gitignore` 規則之前就進版控的，站台從未連結，各自帶著 1,500 點。以 `git rm --cached` 移出版控（本機檔案保留）。
+    - **驗證**：16 個離線單元測試釘住 Python 與模板 JS 的等價性（兩邊算法一旦不同步，面板數字會與報告表格對不起來且不會有任何錯誤訊息）；隔離環境完整端到端跑一輪，`panel-data` 的 25 檔 close／d1／d5／d20 與本機完整資料逐項比對**零不一致**，VIX 百分位一致；以 headless chromium 渲染確認面板照常顯示數值，並確認新規則下舊報告的面板仍正常。
+
 - **2026-09-02 (v3.1.1)**:
   - **`sync.sh` 白名單補上 `macro_history.json`**：`macro_cache.json` 早在白名單內，同性質的 `macro_history.json` 卻漏列，導致每日工作流程必須在跑 `sync.sh` 之外，人工另外 commit 一次才不會漏掉當天的總經版本紀錄。已補入白名單，該手動步驟取消。`macro_history.json` 經核對只有官方總經數值與發布日期註記，無任何價量欄位或第三方原值，與既有的發布資料淨化政策一致。
 

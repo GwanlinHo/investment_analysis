@@ -13,7 +13,7 @@ import json
 import sys
 import time
 from jinja2 import Environment, FileSystemLoader
-from publish_filter import sanitize_market, sanitize_fundamental
+from publish_filter import sanitize_market, sanitize_fundamental, build_panel_data
 import gap_backfill
 import requests
 
@@ -497,6 +497,8 @@ def main():
             # (本機 technical_data.json 仍為完整資料，供 AI 分析與休市守門使用)。
             fundamental_json=sanitize_fundamental(all_fun),
             yield_json=json_safe(y_data),
+            # panel_json 必須在 sanitize_market 之前以還帶 Close 的資料算出
+            panel_json=json_safe(build_panel_data(all_mkt)),
             market_json=sanitize_market(all_mkt)
         )
         os.makedirs("report", exist_ok=True); fname = f"report/invest_analysis_{utc_now.astimezone(TZ).strftime('%Y%m%d')}.html"; open(fname, 'w', encoding='utf-8').write(html); shutil.copy2(fname, "index.html"); print("[Success] 分析完成")
