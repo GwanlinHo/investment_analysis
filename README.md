@@ -10,6 +10,12 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 ## 更新紀錄 (Changelog)
 
+- **2026-09-07 (v3.2.1)**:
+  - **retry 守門認得休市日**：`invest_analysis_retry.sh` 原本只比對「已發布報告日期 vs 今天」，完全不知道有休市守門，於是**每個非交易日（週末、週一早上、國定假日）都必然對不上**，印出 `[!]` 並多重跑一次。實害小（重跑會被守門擋掉），但真正的失敗會被這些假警訊淹沒。改為：主跑判定 skip 時把日期寫入 `.last_gate_skip`（`.gitignore`），retry 守門讀到今日即直接放行。
+  - **為何不讓 retry 守門自己重跑 `market_open_gate.py`**：守門是拿 Yahoo 最新日比對 `technical_data.json`。若主跑寫完 `technical_data.json` 之後才掛掉，守門會回「未動」而讓**真正該補的報告被跳過**。改用主跑寫下的狀態，與 `technical_data.json` 解耦。
+  - **不再寫死 node 版本**：`invest_analysis_retry.sh` 的 PATH 由 `.config/nvm/versions/node/v22.17.0/bin` 改為 `~/.node-current/bin`（現行 v22.23.2），與其他排程腳本一致。舊目錄尚存故未壞，但清掉舊版本就會默默失效。
+  - **驗證**：以植入測試樁（把重跑換成 echo）的方式跑過三種情境——狀態為今日→免重試、狀態為舊日期→重跑、狀態檔不存在→重跑，皆符合預期；休市分支在 `git fetch` 之前就短路，零網路成本。
+
 - **2026-09-02 (v3.2)**:
   - **發布面不再帶出 Yahoo 收盤價 (Close)**:
     - **問題**：v3.0 移除了 `Open`／`High`／`Low`／`Volume`，但**刻意保留 `Close`**，因為速覽面板要靠它算 1/5/20 日漲跌、VIX 60 日百分位與 20MA 穿越。實際盤點後，公開站台仍帶出 25 檔 x 60 天、共 1,500 點的機器可讀 Yahoo 價格序列（`index.html`、`report/index.html` 與 2 份殘留快照，合計 4 份），仍屬 Yahoo ToS 所禁止的再散布。（報告本文以文字引用幾個收盤點屬評論引用，性質不同，不受影響。）

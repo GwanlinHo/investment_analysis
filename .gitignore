@@ -156,6 +156,8 @@ ai_context.json
 # gap_backfill 的本機原始 OHLCV 快取：與 technical_data.json 同性質(Yahoo 原值)，
 # 只用來補上游永久缺漏的 K 棒，不進版控、不發布。
 _ohlcv_cache.json
+# 休市守門的狀態檔(主跑寫、retry 守門讀)，屬本機執行狀態，不進版控。
+.last_gate_skip
 #macro_cache.json
 # --- End Specifics ---
 

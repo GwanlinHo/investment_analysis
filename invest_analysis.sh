@@ -12,6 +12,9 @@ export PATH=/home/pi/.local/bin:$PATH:/home/pi/.node-current/bin
 uv run market_open_gate.py
 gate_rc=$?
 if [ "$gate_rc" -eq 10 ]; then
+  # 記下「今天判定休市」供 invest_analysis_retry.sh 讀取。守門只比日期是否為今日,
+  # 沒有這個狀態就會在每個非交易日誤判成「主跑掛了」而多重跑一次(見該腳本說明)。
+  date +%F > /home/pi/WorkDir/investment_analysis/.last_gate_skip
   echo "$(date -Is) [invest] 休市守門判定 skip,本次不出報告。"
   exit 0
 fi
