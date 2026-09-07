@@ -6,7 +6,7 @@
 # 用 origin/main(而非本機)判斷,才能同時抓到「跑掛」與「push 失敗」兩種失敗。
 # 輸出走 stdout,由 cron 重導至 invest_analysis_cron.log(與 07:00 主跑同 log)。
 set -o pipefail
-export PATH=/home/pi/.local/bin:$PATH:/home/pi/.config/nvm/versions/node/v22.17.0/bin
+export PATH=/home/pi/.local/bin:$PATH:/home/pi/.node-current/bin
 REPO=/home/pi/WorkDir/investment_analysis
 cd "$REPO" || exit 1
 
