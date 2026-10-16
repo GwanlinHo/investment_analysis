@@ -10,6 +10,11 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 ## 更新紀錄 (Changelog)
 
+- **2026-10-16 (v3.3.0)**:
+  - **指標速覽灰字限 20 字**：總經列的灰字原本整段顯示 `note`（查證紀錄，最長 350 字），改為只顯示備註開頭的資料期間（`briefNote()`，上限 20 字）；完整備註只留在本文總經表。
+  - **AI 分析只准五位分析師、每位 500 字**：`update_report.py` 新增 `validate_ai_structure()`，出現其他標題（如 AI 自行加的「資料基準與時序差說明」「本期資料品質揭露」）、順序不符或任一段超過 500 漢字即拒絕注入並以非零結束，由流程中的 AI 修改後重跑。測試見 `tests/test_ai_structure.py`。
+  - 補不到的破洞改為在 Kenji 段內一句話（20 字內）揭露；工作中發現的系統問題改記本機 `local_logs/`（不發布）。未經使用者同意不得新增區塊、欄位或表格。
+
 - **2026-09-07 (v3.2.1)**:
   - **retry 守門認得休市日**：`invest_analysis_retry.sh` 原本只比對「已發布報告日期 vs 今天」，完全不知道有休市守門，於是**每個非交易日（週末、週一早上、國定假日）都必然對不上**，印出 `[!]` 並多重跑一次。實害小（重跑會被守門擋掉），但真正的失敗會被這些假警訊淹沒。改為：主跑判定 skip 時把日期寫入 `.last_gate_skip`（`.gitignore`），retry 守門讀到今日即直接放行。
   - **為何不讓 retry 守門自己重跑 `market_open_gate.py`**：守門是拿 Yahoo 最新日比對 `technical_data.json`。若主跑寫完 `technical_data.json` 之後才掛掉，守門會回「未動」而讓**真正該補的報告被跳過**。改用主跑寫下的狀態，與 `technical_data.json` 解耦。
