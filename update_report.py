@@ -237,6 +237,38 @@ def inject_macro_payload(content, macro_cache):
                   content, count=1, flags=re.DOTALL)
 
 
+# AI 分析只准有這五位分析師的段落，依序排列；每段漢字上限 AI_SECTION_MAX_ZH。
+# 2026-10-16 使用者要求：不得擅自新增區塊（曾自行加上「資料基準與時序差說明」「本期資料品質揭露」），
+# 每位分析師要在電腦上一個畫面內看完。
+AI_PERSONAS = ["Atlas", "Sophia", "Kenji", "Crow", "Rain"]
+AI_SECTION_MAX_ZH = 500
+
+def validate_ai_structure(content):
+    """回傳錯誤訊息清單；空清單代表通過。"""
+    errors = []
+    heads = list(re.finditer(r'<h([1-6])[^>]*>(.*?)</h\1>', content, flags=re.DOTALL))
+    titles = [re.sub(r'<[^>]+>', '', m.group(2)).strip() for m in heads]
+    names = []
+    for t in titles:
+        hit = [p for p in AI_PERSONAS if t.startswith(p)]
+        if not hit:
+            errors.append(f"不允許的標題「{t}」：AI 分析只能有 {'、'.join(AI_PERSONAS)} 五位分析師的段落")
+        else:
+            names.append(hit[0])
+    if names != AI_PERSONAS and not [e for e in errors if e.startswith("不允許")]:
+        errors.append(f"分析師段落須依序各一段：{'、'.join(AI_PERSONAS)}；實際為 {'、'.join(names) or '（無）'}")
+    if heads:
+        before = re.sub(r'<[^>]+>', '', content[:heads[0].start()]).strip()
+        if before:
+            errors.append(f"第一位分析師之前不得有內容：「{before[:30]}」")
+    for i, m in enumerate(heads):
+        end = heads[i + 1].start() if i + 1 < len(heads) else len(content)
+        body = re.sub(r'<[^>]+>', '', content[m.end():end])
+        n = len(re.findall(r'[\u4e00-\u9fff]', body))
+        if n > AI_SECTION_MAX_ZH:
+            errors.append(f"「{titles[i]}」{n} 字，超過上限 {AI_SECTION_MAX_ZH} 字")
+    return errors
+
 def is_mostly_chinese(text):
     clean_text = re.sub(r'<[^>]+>', '', text)
     clean_text = re.sub(r'[\s\d]', '', clean_text)
@@ -266,6 +298,13 @@ def main():
     with open("ai.html", "r", encoding="utf-8") as f: ai_content = f.read().strip()
     
     if not is_mostly_chinese(ai_content): return
+
+    structure_errors = validate_ai_structure(ai_content)
+    if structure_errors:
+        for e in structure_errors:
+            print(f"[Critical Error] {e}")
+        print("[Abort] ai.html 結構或篇幅不符規範，停止報告更新。請修改 ai.html 後重跑本腳本。")
+        raise SystemExit(1)
     
     # 執行強化版校驗
     if not validate_numerical_integrity(ai_content, context):

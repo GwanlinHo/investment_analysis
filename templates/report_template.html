@@ -682,6 +682,11 @@
                 if (minSpread < 0.25) return ['殖利率曲線平坦（最小利差 ' + Math.round(minSpread * 100) + ' bps）', 'warn'];
                 return ['殖利率曲線正常（10Y-3M ' + Math.round((v['10Y'] - v['3M']) * 100) + ' bps）', 'good'];
             }
+            var BRIEF_MAX = 20;
+            function briefNote(note) {
+                var s = String(note || '').split(/\s*[（(]/)[0].trim();
+                return s.length > BRIEF_MAX ? s.slice(0, BRIEF_MAX) : s;
+            }
             function macroRows(all) {
                 var out = [];
                 [['US_MACRO', '美'], ['TW_MACRO', '台']].forEach(function (pair) {
@@ -740,7 +745,8 @@
                     var when = (r.changed_on && r.age > 1) ? r.age + ' 日前更新' : '';
                     var label = r.termLabel ? '[' + esc(r.region) + '] ' + r.termLabel + '　' + esc(r.name)
                                             : '[' + esc(r.region) + '] ' + esc(r.name);
-                    var sub = esc(r.note) + (when ? '　' + esc(when) : '');
+                    // 速覽只放一句短補充（上限 20 字）：取備註開頭的資料期間，查證細節留在本文總經表。
+                    var sub = esc(briefNote(r.note)) + (when ? '　' + esc(when) : '');
                     if (r.curveTag) sub = tag(r.curveTag[0], r.curveTag[1]) + '<br>' + sub;
                     html += '<tr><td><span class="ov-name">' + label + '</span>' +
                         '<span class="ov-sub">' + sub + '</span></td>' +
