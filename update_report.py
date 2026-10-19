@@ -1,0 +1,397 @@
+import os
+import datetime
+import json
+import re
+import shutil
+from html.parser import HTMLParser
+
+# --- Constants ---
+CACHE_FILE = "macro_cache.json"
+TECHNICAL_DATA_FILE = "technical_data.json"
+AI_CONTEXT_FILE = "ai_context.json"
+
+class MacroParser(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.results = {"US_MACRO": [], "TW_MACRO": []}
+        self.current_region = None
+        self.current_row = None
+        self.td_index = 0
+        self.capture = False
+        self.text_buffer = ""
+
+    def handle_starttag(self, tag, attrs):
+        attr_dict = dict(attrs)
+        if tag == "table":
+            if attr_dict.get("id") == "us-macro-table": self.current_region = "US_MACRO"
+            elif attr_dict.get("id") == "tw-macro-table": self.current_region = "TW_MACRO"
+        elif tag == "tr" and self.current_region:
+            self.current_row = {}
+            self.td_index = 0
+        elif tag == "td" and self.current_region:
+            self.capture = True
+            self.text_buffer = ""
+
+    def handle_data(self, data):
+        if self.capture: self.text_buffer += data
+
+    def handle_endtag(self, tag):
+        if tag == "td" and self.current_region:
+            self.capture = False
+            self.td_index += 1
+            val = self.text_buffer.strip()
+            if self.td_index == 1: self.current_row["name"] = val
+            elif self.td_index == 2:
+                self.current_row["value"] = val.replace("▲", "").replace("▼", "").replace("-", "").strip()
+                self.current_row["trend"] = "up" if "▲" in self.text_buffer else "down" if "▼" in self.text_buffer else "neutral"
+            elif self.td_index == 3: self.current_row["note"] = val
+        elif tag == "tr" and self.current_region:
+            if self.current_row and "name" in self.current_row and self.current_row["name"] != "指標名稱":
+                self.results[self.current_region].append(self.current_row)
+            self.current_row = None
+        elif tag == "table":
+            self.current_region = None
+
+def load_cache():
+    cache = {"US_MACRO": [], "TW_MACRO": []}
+    if os.path.exists(CACHE_FILE):
+        try:
+            with open(CACHE_FILE, "r", encoding="utf-8") as f:
+                cache = json.load(f)
+        except: pass
+    return cache
+
+def get_latest_report_file():
+    reports = [f for f in os.listdir("report") if f.startswith("invest_analysis_") and f.endswith(".html")]
+    if not reports: return None
+    return os.path.join("report", sorted(reports)[-1])
+
+def load_from_json(filename):
+    if os.path.exists(filename):
+        try:
+            with open(filename, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"[Warning] 讀取 {filename} 失敗: {e}")
+    return None
+
+def _close_of(rows):
+    """取最後一根 K 棒的收盤價。
+
+    investment_analysis.py 的 json_safe() 會把 NaN 轉為 null(None)，因此鍵存在但值為 None
+    時 dict.get(key, 0) 仍會回傳 None；直接 float(None) 會拋 TypeError。此處統一擋掉。
+    """
+    if not rows:
+        return None
+    value = rows[-1].get("Close")
+    if value is None:
+        return None
+    try:
+        return round(float(value), 2)
+    except (TypeError, ValueError):
+        return None
+
+
+def get_data_context(tech_data, macro_data):
+    ctx = {}
+    if tech_data and "market" in tech_data:
+        m = tech_data["market"]
+        if "恐慌指數" in m:
+            vix = _close_of(m["恐慌指數"])
+            if vix is not None: ctx["VIX"] = vix
+        taiex_keys = ["台股加權指數", "^TWII", "加權指數"]
+        for k in taiex_keys:
+            if k in m and m[k]:
+                taiex = _close_of(m[k])
+                if taiex is not None: ctx["TAIEX"] = taiex
+                break
+        if "標普 500" in m:
+            sp = _close_of(m["標普 500"])
+            if sp is not None: ctx["SP500"] = sp
+
+    def find_val(region, name_part):
+        for item in macro_data.get(region, []):
+            if name_part in item["name"]:
+                num_str = re.sub(r'[^\d.]', '', item["value"])
+                try: return float(num_str)
+                except: return item["value"]
+        return None
+
+    # 自動將快取中所有數值指標納入事實庫
+    for region in ["US_MACRO", "TW_MACRO"]:
+        for item in macro_data.get(region, []):
+            num_str = re.sub(r'[^\d.]', '', item["value"])
+            try:
+                val = float(num_str)
+                ctx[item["name"]] = val
+                # 增加英文別名支援
+                if "ISM 製造業指數" in item["name"]: ctx["ISM_PMI"] = val
+                if "布蘭特原油價格" in item["name"]: ctx["OIL_PRICE"] = val
+            except: pass
+
+    ctx["DXY"] = find_val("US_MACRO", "美元指數")
+    ctx["US10Y"] = find_val("US_MACRO", "10 年期公債")
+    ctx["US3M"] = find_val("US_MACRO", "3 個月期公債")
+    
+    # 增加 TSMC 支持
+    if tech_data and "market" in tech_data:
+        m = tech_data["market"]
+        tsmc_keys = ["台積電", "2330.TW"]
+        for k in tsmc_keys:
+            if k in m and m[k]:
+                tsmc = _close_of(m[k])
+                if tsmc is not None: ctx["TSMC"] = tsmc
+                break
+    ctx["CPI"] = find_val("US_MACRO", "消費者物價指數")
+    ctx["PPI"] = find_val("US_MACRO", "生產者物價指數")
+    ctx["RETAIL_SALES"] = find_val("US_MACRO", "零售銷售")
+    ctx["GDP"] = find_val("US_MACRO", "國內生產毛額")
+    ctx["UNEMPLOYMENT_RATE"] = find_val("US_MACRO", "失業率")
+    ctx["NONFARM_PAYROLLS"] = find_val("US_MACRO", "非農就業人數")
+    
+    margin_str = find_val("TW_MACRO", "融資餘額")
+    if margin_str: ctx["MARGIN_BALANCE"] = margin_str
+
+    margin_change_str = find_val("TW_MACRO", "融資單日變動")
+    if margin_change_str: ctx["MARGIN_CHANGE"] = margin_change_str
+
+    with open(AI_CONTEXT_FILE, "w", encoding="utf-8") as f:
+        json.dump(ctx, f, ensure_ascii=False, indent=4)
+    return ctx
+
+def apply_tags(content, context):
+    def replacer(match):
+        tag = match.group(1)
+        return str(context.get(tag, match.group(0)))
+    return re.sub(r'\{\{(.*?)\}\}', replacer, content)
+
+def validate_numerical_integrity(content, context):
+    """
+    強化版校驗邏輯：將數字分類並嚴格對比事實庫
+    """
+    # 提取內容中所有的浮點數 (忽略 {{ }} 中的內容，因為那會被替換)
+    # 先暫時移除標籤以檢查原始文字中的硬編碼數字
+    clean_content = re.sub(r'\{\{.*?\}\}', '', content)
+    found_numbers = [float(n) for n in re.findall(r'\d+\.\d+', clean_content)]
+    
+    # 事實庫數值
+    facts = [v for v in context.values() if isinstance(v, (int, float))]
+    
+    # 針對宏觀指標 (通常 < 1000)
+    macro_facts = [v for v in facts if v < 1000]
+    max_macro = max(macro_facts) if macro_facts else 150 # 預設 DXY 左右
+    
+    for n in found_numbers:
+        # 如果數字在宏觀範圍 (例如 10-1000 之間)
+        if 10 < n < 1000:
+            # 檢查它是否與事實庫中的任何宏觀數字接近 (10% 容差)
+            matched = False
+            for f in macro_facts:
+                if abs(n - f) / f < 0.1:
+                    matched = True
+                    break
+            
+            if not matched:
+                print(f"[Critical Error] 分析內容中發現可疑數字: {n}。")
+                print(f"該數字不在事實庫宏觀範圍內 {macro_facts}。")
+                print("[Action] 懷疑發生數字幻覺 (Hallucination)，更新已被攔截。")
+                return False
+    return True
+
+def generate_macro_table(data, region_id):
+    html = f'<table class="macro-table" id="{region_id}"><thead><tr><th style="text-align:left;">指標名稱</th><th style="text-align:right;">數值</th><th style="text-align:right;">日期/備註</th></tr></thead><tbody>'
+    for item in data:
+        trend_icon = "▲" if item.get('trend') == "up" else "▼" if item.get('trend') == "down" else "-"
+        trend_class = "text-up" if item.get('trend') == "up" else "text-down" if item.get('trend') == "down" else "text-secondary"
+        val_cell = f'<span class="{trend_class}"><strong>{item["value"]}</strong> <span style="font-size:10px;">{trend_icon}</span></span>'
+        html += f'<tr><td style="text-align:left;">{item["name"]}</td><td style="text-align:right;">{val_cell}</td><td style="text-align:right; font-size: 12px; color: #666;">{item["note"]}</td></tr>'
+    html += '</tbody></table>'
+    return html
+
+def inject_macro_payload(content, macro_cache):
+    """把總經現值 + 前值寫進 <script id="macro-data"> 供速覽面板前端使用。
+
+    只替換這個 script 標籤的「內容」，前後標籤保留；不使用 <script.*?id= 這種會跨標籤
+    吞噬的寫法（2026-07-29 曾因類似正則毀掉整份報告）。
+    """
+    try:
+        import macro_history
+        today = datetime.datetime.now().strftime("%Y-%m-%d")
+        history, added = macro_history.upsert_from_cache(macro_cache, today)
+        payload = macro_history.build_payload(macro_cache, history)
+        payload["generated"] = today
+        if added:
+            print(f"[*] macro_history.json 新增 {added} 筆指標版本。")
+    except Exception as e:
+        print(f"[Warning] 總經歷史處理失敗，速覽面板將只顯示現值: {e}")
+        payload = {"US_MACRO": macro_cache.get("US_MACRO", []),
+                   "TW_MACRO": macro_cache.get("TW_MACRO", [])}
+
+    # </script> 不會出現在 JSON 數值中，但仍依慣例轉義，避免提早關閉標籤
+    payload_json = json.dumps(payload, ensure_ascii=False).replace("</", "<\\/")
+    pattern = r'(<script id="macro-data" type="application/json">).*?(</script>)'
+    if not re.search(pattern, content, flags=re.DOTALL):
+        print("[Warning] 報告中找不到 macro-data 標籤，略過總經資料注入（可能是舊版報告）。")
+        return content
+    return re.sub(pattern, lambda m: m.group(1) + payload_json + m.group(2),
+                  content, count=1, flags=re.DOTALL)
+
+
+# AI 分析只准有這五位分析師的段落，依序排列；每段漢字上限 AI_SECTION_MAX_ZH。
+# 2026-10-16 使用者要求：不得擅自新增區塊（曾自行加上「資料基準與時序差說明」「本期資料品質揭露」），
+# 每位分析師要在電腦上一個畫面內看完。
+AI_PERSONAS = ["Atlas", "Sophia", "Kenji", "Crow", "Rain"]
+AI_SECTION_MAX_ZH = 500
+
+def validate_ai_structure(content):
+    """回傳錯誤訊息清單；空清單代表通過。"""
+    errors = []
+    heads = list(re.finditer(r'<h([1-6])[^>]*>(.*?)</h\1>', content, flags=re.DOTALL))
+    titles = [re.sub(r'<[^>]+>', '', m.group(2)).strip() for m in heads]
+    names = []
+    for t in titles:
+        hit = [p for p in AI_PERSONAS if t.startswith(p)]
+        if not hit:
+            errors.append(f"不允許的標題「{t}」：AI 分析只能有 {'、'.join(AI_PERSONAS)} 五位分析師的段落")
+        else:
+            names.append(hit[0])
+    if names != AI_PERSONAS and not [e for e in errors if e.startswith("不允許")]:
+        errors.append(f"分析師段落須依序各一段：{'、'.join(AI_PERSONAS)}；實際為 {'、'.join(names) or '（無）'}")
+    if heads:
+        before = re.sub(r'<[^>]+>', '', content[:heads[0].start()]).strip()
+        if before:
+            errors.append(f"第一位分析師之前不得有內容：「{before[:30]}」")
+    for i, m in enumerate(heads):
+        end = heads[i + 1].start() if i + 1 < len(heads) else len(content)
+        body = re.sub(r'<[^>]+>', '', content[m.end():end])
+        n = len(re.findall(r'[\u4e00-\u9fff]', body))
+        if n > AI_SECTION_MAX_ZH:
+            errors.append(f"「{titles[i]}」{n} 字，超過上限 {AI_SECTION_MAX_ZH} 字")
+    return errors
+
+# 財經焦點每則只准「[來源] 標題(附原文連結) (日期)」加一段短摘要。
+# 2026-10-18 使用者要求處理版權：過去逐篇細部改寫新聞且不附出處連結，有改作之虞；
+# 改為短摘要 + 原文連結，讀者要細節自行點原文。
+NEWS_MAX_ITEMS = 20
+NEWS_SUMMARY_MAX_ZH = 80
+
+def validate_news_structure(content):
+    """回傳錯誤訊息清單；空清單代表通過。"""
+    errors = []
+    items = re.findall(r'<li[^>]*>(.*?)</li>', content, flags=re.DOTALL)
+    if not items:
+        errors.append("news.html 沒有任何 <li> 新聞項目")
+    if len(items) > NEWS_MAX_ITEMS:
+        errors.append(f"新聞共 {len(items)} 則，超過上限 {NEWS_MAX_ITEMS} 則")
+    for i, item in enumerate(items, 1):
+        hrefs = re.findall(r'<a\b[^>]*\bhref\s*=\s*"([^"]*)"', item)
+        tags = re.findall(r'<a\b', item)
+        if len(tags) != 1 or len(hrefs) != 1:
+            errors.append(f"第 {i} 則須恰有一個原文連結 <a href>，實際 {len(tags)} 個")
+        elif not re.match(r'https?://[^\s/]+\.[^\s]+', hrefs[0]):
+            errors.append(f"第 {i} 則連結不是有效網址：「{hrefs[0][:60]}」")
+        parts = re.split(r'<br\s*/?>', item, maxsplit=1)
+        if len(parts) < 2:
+            errors.append(f"第 {i} 則缺少 <br> 分隔的摘要")
+            continue
+        n = len(re.findall(r'[\u4e00-\u9fff]', re.sub(r'<[^>]+>', '', parts[1])))
+        if n > NEWS_SUMMARY_MAX_ZH:
+            errors.append(f"第 {i} 則摘要 {n} 字，超過上限 {NEWS_SUMMARY_MAX_ZH} 字")
+    return errors
+
+def is_mostly_chinese(text):
+    clean_text = re.sub(r'<[^>]+>', '', text)
+    clean_text = re.sub(r'[\s\d]', '', clean_text)
+    if not clean_text: return True
+    chinese_chars = len(re.findall(r'[\u4e00-\u9fff]', clean_text))
+    return (chinese_chars / len(clean_text)) > 0.3
+
+def main():
+    report_file = get_latest_report_file()
+    if not report_file: return
+    
+    tech_data = load_from_json(TECHNICAL_DATA_FILE)
+    # 防線：technical_data.json 必須為今日更新。若非今日，代表上游 investment_analysis.py
+    # 因資料完整性不足(缺失標的達門檻)而中止、未產出新資料，此時拒絕注入，避免把今天的
+    # AI 分析灌進昨天的舊報告而造成新舊混雜。
+    if tech_data:
+        last_updated = str(tech_data.get("last_updated", ""))
+        today = datetime.datetime.now().strftime("%Y-%m-%d")
+        if not last_updated.startswith(today):
+            print(f"[Abort] technical_data.json 最後更新為 {last_updated!r}，非今日({today})，"
+                  "疑似上游資料抓取已中止，拒絕注入報告。")
+            return
+    macro_cache = load_cache()
+    context = get_data_context(tech_data, macro_cache)
+    
+    if not os.path.exists("ai.html"): return
+    with open("ai.html", "r", encoding="utf-8") as f: ai_content = f.read().strip()
+    
+    if not is_mostly_chinese(ai_content): return
+
+    structure_errors = validate_ai_structure(ai_content)
+    if structure_errors:
+        for e in structure_errors:
+            print(f"[Critical Error] {e}")
+        print("[Abort] ai.html 結構或篇幅不符規範，停止報告更新。請修改 ai.html 後重跑本腳本。")
+        raise SystemExit(1)
+    
+    news_html = None
+    if os.path.exists("news.html"):
+        with open("news.html", "r", encoding="utf-8") as f: news_html = f.read().strip()
+        news_errors = validate_news_structure(news_html)
+        if news_errors:
+            for e in news_errors:
+                print(f"[Critical Error] {e}")
+            print("[Abort] news.html 格式或篇幅不符規範，停止報告更新。請修改 news.html 後重跑本腳本。")
+            raise SystemExit(1)
+
+    # 執行強化版校驗
+    if not validate_numerical_integrity(ai_content, context):
+        print("[Abort] 由於內容校驗失敗，停止報告更新。")
+        return
+
+    ai_content = apply_tags(ai_content, context)
+
+    with open(report_file, "r", encoding="utf-8") as f: content = f.read()
+    us_table = generate_macro_table(macro_cache.get("US_MACRO", []), "us-macro-table")
+    tw_table = generate_macro_table(macro_cache.get("TW_MACRO", []), "tw-macro-table")
+    
+    # 支援占位符與現有表格的替換。
+    # 注意：開頭標籤內的 id 必須用 [^>]* 匹配，不可用 .*?——DOTALL 下 <table.*?id= 會從
+    # 全文件第一個 <table 一路吞到總經表格，把中間的 K 線圖等內容全部毀掉
+    # (2026-07-29 對已注入報告重跑本腳本時實際發生過)。
+    content = re.sub(r'<div id="us-macro-placeholder"></div>|<table[^>]*id="us-macro-table">.*?</table>', us_table, content, flags=re.DOTALL)
+    content = re.sub(r'<div id="tw-macro-placeholder"></div>|<table[^>]*id="tw-macro-table">.*?</table>', tw_table, content, flags=re.DOTALL)
+
+    # 指標速覽面板所需的總經資料（現值 + 前值）
+    content = inject_macro_payload(content, macro_cache)
+
+    if news_html is not None:
+        pattern_news = r'(<div id="weekly-news-focus">).*?(?=<!-- news-anchor -->)'
+        content = re.sub(pattern_news, f'\\1\n{news_html}\n</div>', content, flags=re.DOTALL)
+
+    # 修正 AI 分析區塊的匹配邏輯 (使用非貪婪模式 .*? 並確保 anchor 正確)
+    pattern_ai = r'(<div id="ai-analysis-report">).*?(<!-- ai-anchor -->)'
+    
+    # 清理 ai_content 中的包裝標籤，避免重複嵌套
+    ai_content_clean = re.sub(r'^<div id="ai-analysis-report">', '', ai_content)
+    ai_content_clean = re.sub(r'</div>$', '', ai_content_clean).strip()
+    
+    # 執行替換
+    content = re.sub(pattern_ai, f'\\1\n{ai_content_clean}\n\\2', content, flags=re.DOTALL)
+
+    with open(report_file, "w", encoding="utf-8") as f: f.write(content)
+    shutil.copy2(report_file, "index.html")
+    print(f"[Success] Done.")
+    
+    # 執行資料清理
+    try:
+        import prune_manager
+        prune_manager.prune_reports()
+        prune_manager.prune_technical_data()
+    except Exception as e:
+        print(f"[Warning] 清理過程中發生錯誤: {e}")
+
+if __name__ == "__main__":
+    main()

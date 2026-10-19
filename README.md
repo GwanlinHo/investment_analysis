@@ -1,0 +1,337 @@
+# Investment Analysis Automation
+
+This is an investment assistance tool that combines **Python automation scripts** with **AI-powered analysis**. It is designed to automatically fetch data from the US and Taiwan stock markets (ETFs) and bond markets, calculate key technical indicators, generate K-line charts, and produce in-depth market insights and real-time news summaries with the help of an AI agent, ultimately delivering an easy-to-read comprehensive HTML analysis report. Of course, the frequency of execution and the data to be collected each time can be fully customized by the user.
+
+# 投資分析自動化專案
+
+這是一個結合 **Python 自動化腳本** 與 **AI 智慧分析** 的投資輔助工具。旨在自動抓取美股、台股 ETF 及債券市場數據，計算關鍵技術指標，繪製 K 線圖，並結合 AI 代理人生成深度市場觀點與即時新聞彙整，最終產出一份易於閱讀的 HTML 綜合分析報告。當然，一週要觸發多少次，以及每次要收集哪些資料，完全可以由使用者自行調整。
+
+---
+
+## 更新紀錄 (Changelog)
+
+- **2026-10-18 (v3.4.0)**:
+  - **財經焦點改為短摘要 + 原文連結（版權）**：原本每則 170~410 字逐篇改寫且不附出處連結，有改作之虞。改為每則「[來源] 標題（連到原文）(日期)」+ 80 字內自寫摘要；`update_report.py` 新增 `validate_news_structure()`，缺連結、多連結、非 http 網址、摘要超過 80 漢字或超過 20 則即拒絕注入。測試見 `tests/test_news_structure.py`。
+  - **`market-data` 改白名單發布**：v3.2 拿掉 Close 後，`5MA × (1 + BIAS_5/100)` 仍可精確還原每日收盤。新增 `publish_filter.minimize_market()`，只發布速覽面板實際讀取的欄位（K、D、MACD_Hist 取最後 2 筆；BIAS_20、ADX、±DI、Date 取最後 1 筆），三大法人只留外資、投信兩欄（連買連賣天數需整段序列）。頁面約少 0.9 MB，K 線圖為伺服器端 PNG 不受影響。
+  - **不再保留與發布歷史報告**：`prune_manager` 保留上限 30 → 1（僅留注入目標），`report/` 整個移出版控與發布白名單。
+  - **`macro_history.json` 不再發布**：內含 Yahoo 來源的殖利率/美元指數/油價逐日序列；異地備份改由 `_lib/backup_workdir.sh` 收進私有備份 repo。
+  - **移除 MIT LICENSE**，頁尾改為「本站內容保留所有權利」；免責聲明加註「個人無償研究，非證券投資顧問事業」；導覽列移除「動能選股」連結。
+
+- **2026-10-16 (v3.3.0)**:
+  - **指標速覽灰字限 20 字**：總經列的灰字原本整段顯示 `note`（查證紀錄，最長 350 字），改為只顯示備註開頭的資料期間（`briefNote()`，上限 20 字）；完整備註只留在本文總經表。
+  - **AI 分析只准五位分析師、每位 500 字**：`update_report.py` 新增 `validate_ai_structure()`，出現其他標題（如 AI 自行加的「資料基準與時序差說明」「本期資料品質揭露」）、順序不符或任一段超過 500 漢字即拒絕注入並以非零結束，由流程中的 AI 修改後重跑。測試見 `tests/test_ai_structure.py`。
+  - 補不到的破洞改為在 Kenji 段內一句話（20 字內）揭露；工作中發現的系統問題改記本機 `local_logs/`（不發布）。未經使用者同意不得新增區塊、欄位或表格。
+
+- **2026-09-07 (v3.2.1)**:
+  - **retry 守門認得休市日**：`invest_analysis_retry.sh` 原本只比對「已發布報告日期 vs 今天」，完全不知道有休市守門，於是**每個非交易日（週末、週一早上、國定假日）都必然對不上**，印出 `[!]` 並多重跑一次。實害小（重跑會被守門擋掉），但真正的失敗會被這些假警訊淹沒。改為：主跑判定 skip 時把日期寫入 `.last_gate_skip`（`.gitignore`），retry 守門讀到今日即直接放行。
+  - **為何不讓 retry 守門自己重跑 `market_open_gate.py`**：守門是拿 Yahoo 最新日比對 `technical_data.json`。若主跑寫完 `technical_data.json` 之後才掛掉，守門會回「未動」而讓**真正該補的報告被跳過**。改用主跑寫下的狀態，與 `technical_data.json` 解耦。
+  - **不再寫死 node 版本**：`invest_analysis_retry.sh` 的 PATH 由 `.config/nvm/versions/node/v22.17.0/bin` 改為 `~/.node-current/bin`（現行 v22.23.2），與其他排程腳本一致。舊目錄尚存故未壞，但清掉舊版本就會默默失效。
+  - **驗證**：以植入測試樁（把重跑換成 echo）的方式跑過三種情境——狀態為今日→免重試、狀態為舊日期→重跑、狀態檔不存在→重跑，皆符合預期；休市分支在 `git fetch` 之前就短路，零網路成本。
+
+- **2026-09-02 (v3.2)**:
+  - **發布面不再帶出 Yahoo 收盤價 (Close)**:
+    - **問題**：v3.0 移除了 `Open`／`High`／`Low`／`Volume`，但**刻意保留 `Close`**，因為速覽面板要靠它算 1/5/20 日漲跌、VIX 60 日百分位與 20MA 穿越。實際盤點後，公開站台仍帶出 25 檔 x 60 天、共 1,500 點的機器可讀 Yahoo 價格序列（`index.html`、`report/index.html` 與 2 份殘留快照，合計 4 份），仍屬 Yahoo ToS 所禁止的再散布。（報告本文以文字引用幾個收盤點屬評論引用，性質不同，不受影響。）
+    - **設計**：新增 `publish_filter.build_panel_data()`，在產出時先算好面板實際顯示的那幾十個純量（每檔的最新收盤、`d1`／`d5`／`d20`、`ma20` 穿越方向，恐慌指數另加 `pctile`），以新的 `<script id="panel-data">` 發布；`Close` 加入 `RAW_PRICE_FIELDS` 一併移除。模板的 `pctChange()`／`percentile()`／`signals()` 改為查表，面板顯示完全不變。
+    - **保留最新收盤純量**：`panel-data` 仍帶每檔的最新收盤（25 個純量），因為面板要把它顯示在畫面上；這與報告本文引用當日收盤同性質，屬評論引用而非資料集轉發。被移除的是 60 天的序列。
+    - **回溯處理的分流（實測踩過）**：舊報告的內嵌 JS 直接讀 Close 序列、不認得 `panel-data`。實測對舊檔移除 Close 後，面板的收盤/漲跌/百分位全部變成 `-`，而且**補上 `panel-data` 也救不了**——那份 JS 根本不會去讀。故 `sanitize_html()` 改為依檔案自身的 JS 版本分流：偵測到 `readJSON('panel-data')` 才移除 Close，舊檔沿用 v3.0 規則（只移除 OHLV、保留 Close）並印出說明，要徹底清掉就得重新產生報告。
+    - **移除 2 份殘留快照**：`report/invest_analysis_20260820.html`／`20260826.html` 是 `.gitignore` 規則之前就進版控的，站台從未連結，各自帶著 1,500 點。以 `git rm --cached` 移出版控（本機檔案保留）。
+    - **驗證**：16 個離線單元測試釘住 Python 與模板 JS 的等價性（兩邊算法一旦不同步，面板數字會與報告表格對不起來且不會有任何錯誤訊息）；隔離環境完整端到端跑一輪，`panel-data` 的 25 檔 close／d1／d5／d20 與本機完整資料逐項比對**零不一致**，VIX 百分位一致；以 headless chromium 渲染確認面板照常顯示數值，並確認新規則下舊報告的面板仍正常。
+
+- **2026-09-02 (v3.1.1)**:
+  - **`sync.sh` 白名單補上 `macro_history.json`**：`macro_cache.json` 早在白名單內，同性質的 `macro_history.json` 卻漏列，導致每日工作流程必須在跑 `sync.sh` 之外，人工另外 commit 一次才不會漏掉當天的總經版本紀錄。已補入白名單，該手動步驟取消。`macro_history.json` 經核對只有官方總經數值與發布日期註記，無任何價量欄位或第三方原值，與既有的發布資料淨化政策一致。
+
+- **2026-09-01 (v3.1)**:
+  - **日線破洞補值 (Daily Bar Gap Backfill)**:
+    - **問題**：Yahoo 偶爾會**永久性**少掉某個交易日的日 K 棒且不再回補。2026-08-28 當天 `^GSPC`／`^IXIC`／`^DJI`／`^VIX`／`^SOX`／`^RUT`／`^NYFANG`／`^N225`／`HYG` 九檔全缺（只有 `GC=F` 有），連續三天重抓皆無。同一天 Yahoo 對 SPY／QQQ／SOXX／AAPL／GLD 卻有資料，對 DIA／IWM／TLT 沒有——破洞**隨機散落在個別標的**，不是指數專屬。
+    - **後果**：不只是「少一天」。表列「單日漲跌」會變成跨兩個交易日的變動（標普 2026-08-31 算出 -0.58%，真實單日為 -0.33%），而且 5/20/60MA、KD、RSI、MACD、ADX 全部建立在少一根 K 棒的序列上，會一路錯到該筆滾出視窗為止。原本僅靠 AI 在報告內文逐段聲明補救。
+    - **其他來源評估**：Stooq 已上 JS proof-of-work 反爬蟲牆，純 HTTP 拿不到 CSV；FRED 有 08/28 官方收盤且與既有日期完全吻合，但**只有 Close 沒有 OHLC**，且不含 `^SOX`／`^NYFANG`／`^RUT`／`^N225`／`HYG`；Alpha Vantage、Twelve Data 等免費層不支援指數。`^SOX`、`^NYFANG` 這類專有指數實際上只有 Yahoo 有免費來源。
+    - **設計**：新增 `gap_backfill.py`，兩層防護，皆遵循既有 `fill_latest_from_finmind` 的「只補缺漏、不覆蓋既有有效值」語意：
+      - **第 1 層 — 本機快取 union 合併**：每次抓取後把原始 OHLCV 存進 `_ohlcv_cache.json`（`.gitignore`，與 `technical_data.json` 同性質不發布）；下次只補新抓結果沒有的日期。**絕不覆蓋新抓有的日期**——上游會合理修正數值（Yahoo 曾把 08/28 黃金由 4,529.90 改為 4,478.10），偏好舊值等於凍結錯誤資料。
+      - **第 2 層 — 盤中線重建**：Yahoo 的 1 小時線沒有這些破洞且可回溯約 730 天，涵蓋 `history_days=250` 全窗。偵測到序列**中間**缺漏時，抓該標的 1h 線、依交易所時區聚合成日 K 補上。
+    - **只補中間、不補尾端**：尾端落後（標的當日尚未更新）是正常現象，仍由既有的表頭基準日與逐列 `[!] 資料 MM/DD` 標註處理，不用舊值假裝已更新。
+    - **交易日曆**：破洞會同時打中清單裡的所有指數，故日曆不能只由自家標的日期聯集推出。美股另抓 SPY／AAPL 兩檔哨兵取聯集；`^N225` 以自身 1h 線推出實際開盤日；台股標的數多且有 FinMind 補值，用自家聯集即可。期貨（`=F`）日曆與股市根本不同（有週日盤），一律排除以免製造假破洞。單次執行內 memoize，三個群組不重複發請求。
+    - **兩個實測踩過的坑**（改動時務必保留，見模組 docstring）：
+      - **時區**：必須用標的自己的交易所時區切日。用 America/New_York 去切 `^N225`，東京盤會被切成兩半（只剩 3 根、OHLC 全錯）；改 Asia/Tokyo 後才正確。
+      - **配息**：盤中線**沒有**除息調整，日線 `auto_adjust=True` **有**。實測 HYG 在 2026-08-03 除息（0.384）之前，盤中收盤系統性高於日線調整收盤 **+0.48%**（= 0.384/79.3），除息日後歸零。故重建後一律以相鄰交易日的「日線調整收盤 / 盤中收盤」比值做等比校正；偏離 1 未超過 0.1% 視為收盤價微小雜訊，不套用。
+    - **精度**（以重建已知日再與真實日線逐欄比對，9 檔標的）：Open/High/Low 多數 0.000%，最差 -0.066%；Close 系統性略低 0.002%~0.087%（收盤結算價在最後一根盤中 K 棒之後才產生），對技術指標無實質影響。**Volume 為估計值**，低估 4%~100%（缺盤前盤後與收盤集合競價）——指數群組本就不顯示量比，ETF 單筆對 20 日均量的影響 <1%。
+    - **失敗處理**：任何一層出錯都只是少補，不中斷主流程；補不到的破洞會列印 `[!] 仍有補不到的破洞`，交由既有標註與報告內文揭露。靜默補錯比留著標記的洞更糟。
+    - **回溯**：偵測範圍是整個 250 天視窗，故首次執行即自動補齊既有的所有破洞，不需另寫一次性腳本。
+
+- **2026-08-31 (v3.0.1)**:
+  - **中間產物不再進公開 repo**：`news.html`、`ai.html`、`ai_context.json` 三者只是工作流程的中間檔——`update_report.py` 讀取後把內容注入 `index.html`，公開站台從未引用（`index.html` 內只有錨點連結，無任何指向這些檔案的 href／fetch）。三者以 `git rm --cached` 移出版控、加入 `.gitignore`，並自 `sync.sh` 白名單移除；本機檔案保留，工作流程不受影響。發布白名單縮減為 `index.html`、`report/`、`macro_cache.json`。
+  - **保留 `macro_cache.json`／`macro_history.json`**：兩者是逐月累積的官方總經數值（含發布日期註記），非暫存檔，且是這批資料唯一的異地副本，故續留版控。已核對兩者皆無價格序列或第三方原值。
+
+- **2026-08-31 (v3.0)**:
+  - **發布資料淨化 (Publish Data Minimization)**:
+    - **需求**：本專案的報告推送到公開 repo，而 Yahoo Finance 服務條款限「個人、非商業使用」、禁止再散布其資料。稽核發現發布面實際帶出了 Yahoo 原值：`technical_data.json`（1.5MB，33 檔標的 x 60 天完整 OHLCV）直接進版控，報告 HTML 的 `<script id="market-data">` 內嵌同一份約 1.1MB 的 OHLCV，`<script id="fundamental-data">` 則內嵌 Yahoo `.info` 的 PE／PB／殖利率／ROE 等原值。抓取端（每日一次、約 50 次請求、有休市守門）本身無虞，問題在發布端。
+    - **設計**：新增 `publish_filter.py`，把「Yahoo 原值」這一層只從**發布面**移除，本機面完全不動：
+      - `sanitize_market()`：移除每筆序列的 `Open`／`High`／`Low`／`Volume`，保留 `Date`、`Close` 與本專案自行計算的衍生指標（KD、RSI、MACD、乖離、MA、ADX/DI）。`*_institutional`（FinMind 三大法人，非 Yahoo 來源）不受影響。
+      - `sanitize_fundamental()`：預設不發布基本面欄位（旗標 `PUBLISH_FUNDAMENTAL`）。官方開放資料 `TWSE BWIBBU_ALL` 僅含上市個股（1081 筆，涵蓋 2330 但不含本專案主要的 ETF 標的），且殖利率定義與 Yahoo 不同，無法等值回補，故不做混源回填；報告本文的 AI 分析文字仍以敘述方式引用這些數值。速覽面板的基本面區改顯示對應說明。
+      - `sanitize_html()`：同一套規則可直接套用在已產生的報告 HTML，供既有檔案回溯處理，與 render 時等效。
+    - **套用時機**：於 `investment_analysis.py` render 模板時淨化。此時尚未進行 AI 分析，本機 `technical_data.json` 仍為完整 OHLCV，CLAUDE.md 的 Fact-Only Rule（只能引用檔案中確實存在的高低點）與 `market_open_gate.py` 皆不受影響；`update_report.py` 只改寫 `<script id="macro-data">`，不會把原值寫回。
+    - **版控與白名單**：`technical_data.json` 以 `git rm --cached` 移出版控並加入 `.gitignore`，同時從 `sync.sh` 的 `WHITELIST` 移除（僅停用白名單不足以撤下已提交的檔案）。既有的 `index.html`、`report/index.html` 與兩份殘留快照已回溯淨化。
+    - **注意**：本次只清 HEAD，不改寫公開 repo 的 git 歷史（改寫公開歷史的破壞性與本案風險不成比例），舊 commit 內仍留有原始資料。
+    - **驗證**：32 份 HTML 全數通過「market-data 內無 Open／High／Low／Volume、fundamental-data 為空、JSON 可解析、面板必要欄位齊全」檢查；以 headless chromium 逐區比對淨化前後的速覽面板，總經／技術／情緒／頂部摘要輸出完全相同，僅基本面區依設計改為說明文字。
+
+- **2026-08-16 (v2.9)**:
+  - **指標速覽浮動面板 (Floating Overview Panel)**:
+    - **需求**：使用者希望在報告開啟時能一眼掃過總經、技術面、情緒面的近期變化，不必逐區捲動；面板需可關閉、可再次叫出，且資料全部取自報告既有的收集結果。
+    - **設計**：`templates/report_template.html` 新增浮動面板，分三區——**總經**（近 30 日有更新的指標，現值／前值／發布日，預設 6 項）、**技術**（核心 6 檔標的的 1／5／20 日漲跌與 KD、MACD、20MA、乖離、ADX 訊號）、**情緒**（VIX 及其 60 日區間百分位、HYG 風險偏好、外資／投信買賣超與連買連賣天數、融資餘額）。三區皆可展開為完整清單，頂部另有一行規則產生的重點摘要。桌機為右下浮動卡、手機為底部抽屜。
+    - **休市標示**：面板頂端標示「資料截至　台股 YYYY-MM-DD｜美股 YYYY-MM-DD」，若與報告日期不同（週末、國定假日、08:00 retry）會以紅字註明該市場休市——避免把上一交易日的收盤誤讀為當日行情（報告本體各區塊原本就有休市標示，面板是第一個跳出來的畫面，不能漏）。
+    - **顯示行為**：`DOMContentLoaded` 即渲染（JSON 資料標籤位於 `<head>`，不必等 4MB 的 K 線圖），每份新報告自動跳出一次（以報告日期為 localStorage 記憶鍵），關閉後可用右下「速覽」按鈕或再次點擊叫出，支援 Esc 關閉。localStorage 不可用時（file:// 或隱私模式）自動降級為每次跳出。
+    - **無伺服器端注入**：面板置於 `.container` 之外、`</body>` 之前，完全避開 `update_report.py` 的四組 DOTALL 正則注入區；每一格數值皆由前端從 `<script type="application/json">` 標籤即時計算，因此對已注入報告重跑 `update_report.py` 不會影響面板（等冪）。
+  - **RWD 補強 (矮視窗)**:
+    - 以 8 種視窗實測 (320 / 390 / 430 / 844x390 橫向 / 768 / 1024 / 1366 / 1920)：面板皆不超出視窗、無頁面或表格橫向溢出、按鈕不重疊。
+    - 橫向手機 (844x390) 原本內容區僅 222px、約兩列可見，新增 `max-height: 500px` 媒體查詢壓縮標題列/摘要/頁尾留白並放寬高度上限，內容區提升至 289px。
+  - **面板調整 (依使用者回饋)**:
+    - **手機版改為浮動視窗**：原本滿版貼齊螢幕，改為左右與下方各留 12px、四角圓角，視覺上明確是「浮在報告之上的視窗」而非頁面區塊。
+    - **公債殖利率固定依 3M -> 10Y -> 30Y 排列**：原本與其他指標一起按「最近更新」排序會被打散，看不出曲線形狀。三檔固定連續排在總經區最前面，並在最短天期那列標示曲線狀態（正常／平坦／倒掛，含利差 bps），判讀標準對齊 CLAUDE.md 中 Atlas 的殖利率監控規則 (利差 < 25bps 為平坦、< 0 為倒掛)。預設顯示改為「殖利率三檔 + 最近更新 5 項」。
+  - **面板精簡 (依使用者回饋：預設資訊量減半)**:
+    - 預設列數由 27 降為 **15**（總經 6 / 技術 4 / 情緒 3 / 基本面 2），其餘 80 列全部收進「展開全部」（展開後共 95 列）。
+    - 技術面預設標的由 6 檔縮為 4 檔（加權指數、台積電、標普 500、費城半導體）；情緒面預設只留 VIX、外資買賣超（台積電）、融資餘額，HYG 與投信買賣超移入展開區；基本面預設 2 檔。
+    - 移除冗字：備註本身已含資料月份與發布日，當日更新時不再重複標「今日更新」，僅在隔一天以上才顯示「N 日前更新」。
+    - 預設列數集中於 `CORE`、`MACRO_DEFAULT`、`FUND_DEFAULT` 三個常數，日後調整不必改邏輯。
+  - **總經歷史紀錄 (`macro_history.json` / `macro_history.py`)**:
+    - **問題**：`macro_cache.json` 只保存每個指標的最新值，面板無法顯示「前值 → 現值」。
+    - **作法**：新增 `macro_history.py`，重用 `update_report.py` 既有的 `MacroParser` 掃描 `report/invest_analysis_*.html`（保留 30 份，約 6 週）一次性回填歷史，之後由 `update_report.py` 每日 upsert；僅在數值或備註實際變動時才追加版本。比對採正規化字串（解析器會移除 `-`、`▲`、`▼`，若不正規化，`3.50%-3.75%` 這類區間值會每天被誤判為新版本），但保留開頭負號以區分 `-2.3 萬` 與 `2.3 萬`。
+  - **修正：內嵌 JSON 含 NaN 導致前端無法解析 (既有問題)**:
+    - **問題**：`market-data` 等內嵌 JSON 由 Python `json.dumps` 產生，pandas 的缺值會輸出 `NaN`。Python 可讀，但那不是合法 JSON，瀏覽器 `JSON.parse` 會整包拋錯（線上報告實際含 45 個 `NaN`）。因先前無任何前端程式讀取這些標籤，問題一直未被發現。
+    - **修正**：`investment_analysis.py` 新增 `json_safe()`，在寫入 `technical_data.json` 與渲染模板前將 `NaN`／`Inf` 轉為 `null`；面板的 `readJSON()` 另保留一層向下相容的容錯解析。
+  - **基本面資料補齊 (零額外抓取成本)**:
+    - **問題**：`CLAUDE.md` 要求 Sophia 依據「`fundamental-data` 標籤中的真實 ROE、毛利率、PEG」評估，但 `get_fundamental_data()` 只取了 `shortPercentOfFloat`、`shortRatio` 兩個欄位，那些基本面數字**從未存在**於資料中。
+    - **作法**：該函式本來就已呼叫 `yf.Ticker().info`（為了空單資料），因此改為多取 ROE、毛利率、淨利率、本益比、預估本益比、PEG、股價淨值比、殖利率、營收年增、盈餘年增、負債權益比——**不增加任何一次網路請求**。取不到的欄位一律為 `None`，不做推估。實測 16 檔標的中 15 檔有資料：個股 (台積電) 欄位完整，ETF 多半僅有本益比與殖利率，指數與期貨則無。
+    - **呈現**：速覽面板新增「基本面」區（名稱／本益比／殖利率，並以標籤顯示 ROE、毛利率、PEG、營收年增、股價淨值比），有 ROE 者優先排序。
+  - **修正：三大法人買賣超單位標錯 1000 倍 (既有問題)**:
+    - **問題**：`investment_analysis.py` 台股表格欄位標題為「外資(張)」「投信(張)」，但 FinMind 的 `TaiwanStockInstitutionalInvestorsBuySell` 回傳單位是**股**，程式直接原值輸出——台積電單日曾顯示 `3,972,231 張`，遠超過全市場成交量。
+    - **修正**：新增 `to_lots()` 換算 (1 張 = 1000 股)，表格與速覽面板一致顯示張數 (台積電當日 -3,024 張)。K 線圖的法人流向子圖為累積趨勢線，不受單位影響。
+  - **修正：`[hidden]` 被作者樣式覆蓋**:
+    - `.ov-panel` 的 `display: flex` 會蓋過瀏覽器對 `[hidden]` 的預設隱藏，導致面板「關閉」後仍實際可見（僅屬性改變）。補上 `.ov-panel[hidden], .ov-backdrop[hidden] { display: none; }`。此問題由端到端瀏覽器測試（檢查實際可見性而非 `hidden` 屬性）攔截。
+
+- **2026-08-05 (v2.8)**:
+  - **每日報告提前 + 休市不出報告**:
+    - **需求**：使用者要求每日投資分析報告提前產生，且「前一日美股與台股都休市」時不要產生報告。
+    - **提前時間 (夏/冬令自動切換)**：cron 由固定 07:00 改為依美東時區判斷——夏令 (America/New_York = EDT) 06:00 起跑、冬令 (EST) 維持 07:00（保留已驗證的美股日 K 抓取緩衝），以美股收盤到台北的時差決定，每天僅一行實際執行。同時將 yt_analysis 第三班由 06:00 挪到 06:30，避開與投資分析共用重型鎖的同刻競用。08:00 retry 守門不變，作為夏令偶爾美股日 K 晚到或誤判 skip 的自動補救。
+    - **休市守門 (`market_open_gate.py`)**：`invest_analysis.sh` 在取重型鎖、啟動 claude 之前先跑輕量 gate——比對 `^GSPC`／`^TWII` 最新交易日與既有 `technical_data.json` 中「標普 500」「加權指數」最後一根 K 棒日期；**兩市皆無新交易日 (等同前一日兩市皆休市) 才 skip**（回傳碼 10，直接結束、不動任何資料、不 commit），只要任一市有新交易日（例如僅美股開盤）即照常出報告。採保守原則：檔案缺失、抓取失敗或資料異常一律照常執行，把關交給既有資料完整性 gate。不維護節假日行事曆，天然涵蓋週末、連假與多日中斷。
+
+- **2026-07-29 (v2.7)**:
+  - **全報告事實鐵律 (Facts-Only & Event-Timing Integrity)**:
+    - **問題**：2026-07-29 早上生成的報告把「市場預期 FOMC 按兵不動」寫成「FOMC 於今日宣布維持利率不變」的既成事實，並掛上捏造的 CNBC 來源——實際決策要到美東 7/29 下午（台灣時間 7/30 凌晨）才公布。現有驗證只比對數值、不檢查事件是否真的已發生，未能攔截。
+    - **修正**：依使用者要求，`CLAUDE.md` 新聞規範與 AI 分析反幻覺協定全面禁止預期性內容：(1) 新聞只准報導「官方發布時間（含美東→台灣時區換算）早於報告生成時間」的已發生事件；(2) 排程性事件（央行決策、財報、經濟數據）只能以「何時公布」的行事曆事實呈現，不得附帶預期結果；(3) 市場預期、共識預估、機率定價、分析師預測等預測型內容全報告禁用，搜尋到的前瞻/展望型報導一律棄用不改寫；(4) Rain 的三情境（Bull/Base/Bear）策略框架廢除，改為僅基於已實現數據的市場現況總結，禁止情境機率、目標價與方向性預測。
+  - **update_report.py 表格替換正則修正**:
+    - **問題**：總經表格替換的正則 `<table.*?id="us-macro-table">` 在 DOTALL 下會從全文件第一個 `<table` 貪吃到總經表格；對「已注入過的報告」重跑本腳本時（2026-07-29 實際發生），中間的 26 張 K 線圖（約 3.2MB）被整段吞掉。每日正常流程因走 placeholder 分支而未曾觸發。
+    - **修正**：開頭標籤內的 id 改用 `<table[^>]*id=...>` 匹配，替換範圍限定在表格自身，重跑注入成為安全的等冪操作。
+  - **朗讀時保持螢幕亮 (Wake Lock) 與 iOS 切音修正**:
+    - **問題**：報告的「朗讀新聞／朗讀分析」播放途中，手機待機時間一到螢幕自動熄滅，頁面轉為隱藏即觸發停止朗讀，長文無法聽完；另 iOS 每段語音開頭有被切掉一個音節的既有問題。
+    - **修正**：`templates/report_template.html`（並同步補上線上 `index.html`）的 TTS 控制器加入兩項與多益單字卡 PWA 相同的已驗證機制：(1) 朗讀開始時以 Screen Wake Lock API 保持螢幕亮，停止或唸完時釋放；(2) 朗讀期間以 Web Audio 輸出 20Hz、約 -80dB 的無聲訊號保持音訊通道常開，避免 iOS 每段開頭被切音。不支援 Wake Lock 的環境自動降級為原行為。主動切換至其他 App 時仍會停止朗讀（原設計保留）。
+  - **導覽列新增「動能選股」按鈕**:
+    - `templates/report_template.html` 導覽列 (nav-bar) 於「財經節目」之後新增外連按鈕「動能選股」，連往 `https://gwanlinho.github.io/Stock_Selection/` (target="_blank")，方便讀者從總經擇時報告一鍵前往攻擊型個股選股週報。同步補進現有 `index.html` 使其即時上線。
+
+- **2026-07-06 (v2.4)**:
+  - **GitHub Pages 部署護欄 (sync.sh)**:
+    - **問題**：GitHub Pages 偶發「Deployment failed, try again later」暫時性故障 (2026-07-05 本 repo 即發生一次，2026-07-03 stock_selection 連續三次)，部署失敗時網頁停留在舊版且無人察覺，直到下次 push 才有機會重試。
+    - **修正**：`sync.sh` 推送成功後改為呼叫共用函式庫 `WorkDir/_lib/pages_guard.sh` 的 `verify_pages_or_retrigger`：以公開 Actions API (免 token) 輪詢該 commit 的部署結論 (最多 3 分鐘)；若為 failure 則推一個空 commit 自動重觸發一次；API 查不到狀態時僅警告、不中斷報告流程。三個公開 repo (investment_analysis / Stock_Selection / yt_podcast_analysis) 共用同一份護欄。
+
+- **2026-06-15 (v2.3)**:
+  - **休市顯示上一交易日 (移除停更天數門檻)**:
+    - **問題**：v2.2 以「最新資料距執行日超過 5 天」作為缺失判定之一，但休市 (尤其過年等長假可達九天) 屬正常現象，以天數判定缺失並無道理 — 長假會讓原本有上一交易日資料的標的被誤顯示為 n/a。
+    - **修正**：缺失 / n/a 收斂為唯一標準「完全沒有任何有效資料可顯示」(yfinance 與 FinMind 皆抓不到、或序列全為 NaN)。只要有任何歷史有效資料，休市時一律顯示「最後有效交易日 (上一交易日)」並逐列標註資料日，不再顯示 n/a。abort 門檻 (≥3) 僅在資料源真正掛掉 (連歷史資料都抓不到) 時觸發。
+
+- **2026-06-15 (v2.2)**:
+  - **修正缺失判定誤觸發中止 (False Abort Fix)**:
+    - **問題**：v2.1 缺失判定以「群組內有效日的最大值」為基準，週末與週一早晨，群組內持續交易的黃金期貨 (`GC=F`) 與時區領先的日經 (`^N225`) 已有比美股股指更新的日期，把群組基準拉高，導致正常休市的美股股票指數 (`^GSPC`/`^SOX`/`^DJI`/`^IXIC` 等，最新仍為上週五) 被誤判為「最新交易日缺失」，累積超過 3 個而**誤觸發中止 — 每週一的報告都會被誤擋**。
+    - **修正**：缺失判定改採絕對標準 — 僅當「完全無有效收盤」或「最新資料距執行日超過 5 個日曆日 (長期停更，涵蓋一般週末與短連假)」才計為缺失；移除「落後群組基準即缺失」。僅落後群組基準但仍在期限內者不計缺失，續由逐列日期標註誠實呈現其實際資料日。
+
+- **2026-06-14 (v2.1)**:
+  - **資料完整性把關 (Data Integrity Gate)**:
+    - **策略**：yfinance 取不到資料時改由 FinMind 補救；兩者皆失敗時依缺失標的數分流處理，避免殘缺或誤導性報告被上傳。
+    - **缺失計數 (以標的為單位)**：某標的取不到「最近交易日」收盤 (台股 yfinance 失敗且 FinMind 亦失敗 / 美股 yfinance 失敗且無備援) 即計 1 個缺失。
+    - **缺 0~2 個**：缺失標的整列數值以 `n/a` 呈現 (新增 `format_na_row`)，並標示「[!] API 無資料」，照常產生報告；使用者可一眼辨識數據異常源於 API 取不到。
+    - **缺 3 個(含)以上**：`investment_analysis.py` 印出 `[ABORT]` 並以非零碼結束、**不產生報告、不更新 technical_data.json**，從源頭杜絕殘缺上傳，保留前一份報告。
+    - **三道防線**：(1) py 中止不產出；(2) CLAUDE.md 規範工作流在 py 非零退出時終止、不 push；(3) `update_report.py` 於 technical_data.json 非當日更新時拒絕注入。
+    - **備援強化**：`get_stock_data` 在 yfinance 完全失敗時，對台股標的改用 FinMind 全量抓取 (先前僅補當日缺漏，yfinance 全失敗會直接跳過)。
+
+- **2026-06-13 (v2.0)**:
+  - **台股資料源 FinMind 補洞 (TW Data Source Fallback)**:
+    - **問題**：Yahoo Finance 對台股 ETF/指數的當日收盤回補常延遲跨日 (Close 為 NaN)，而 cron 每日 07:00 執行，結構性拿不到最新台股資料，導致報表台股區塊長期可能呈現前一交易日的過期數據、漏失當日行情 (例：國泰費半 ETF 6/12 實漲 6.6% 卻被漏掉)。
+    - **修正**：`investment_analysis.py` 新增 `fill_latest_from_finmind`，於 `get_stock_data` 抓取 Yahoo 後，對台股標的 (`^TWII`／`.TW`／`.TWO`) 以 FinMind (本土源) 補上 Yahoo 缺漏的最新交易日 OHLC。僅補 Yahoo 缺漏列、不覆蓋既有有效值；近期還原價≈原始價，補在尾端口徑一致。FinMind 失敗時由 v1.9 的表頭基準日與逐列標註機制防呆。
+    - **驗證**：FinMind 對一般 ETF、上櫃債券 ETF (`.TWO`)、槓桿 ETF (`00631L`)、指數 (`TAIEX`) 涵蓋完整，且指數值與 Yahoo 一致。
+
+- **2026-06-13 (v1.9)**:
+  - **交易日錯位修正 (Last Trading Date Bug Fix)**:
+    - **問題**：表頭「最後交易日」原以群組內所有標的（含尾端 NaN 行）的 `df.index[-1]` 取最大值，當僅少數標的（如台積電）已回補最新交易日、而多數標的（加權指數、ETF）尚未回補時，表頭日期會被拉高，與各列實際呈現的前一交易日數據錯位（例：表頭標 6/12，但加權指數實為 6/11 的數據）。
+    - **修正**：`investment_analysis.py` 改以各標的「最後有效數據日」（排除尾端 NaN）的**最大值**（即報告涵蓋到的最新交易日）作為群組基準交易日，取代原本含 NaN 的 `df.index[-1]`；並於 `format_data_row` 比對每列實際資料日，對尚未回補最新日的標的於該列標註「[!] 資料 MM/DD」，杜絕靜默呈現過期數據。
+
+- **2026-06-03 (v1.8)**:
+  - **系統優化 (System Optimization)**:
+    - **強化數據注入標籤**：修改 `update_report.py` 以支援 `TSMC`、`ISM_PMI` 與 `OIL_PRICE` 等新標籤，提升 AI 分析的數值精確度與可讀性。
+  - **每日分析報告 (Daily Analysis Update)**:
+    - **數據更新**：更新 `macro_cache.json` 至 2026 年 5 月份實績，包括 ISM 製造業指數升至 54.0。
+    - **Computex 專題分析**：AI 分析深度整合 Computex 2026 與黃仁勳加碼投資台灣之利多，並評估地緣政治引發的能源供應危機。
+
+- **2026-05-15 (v1.7)**:
+  - **總經數據自動化校正 (Macro Data Bug Fix)**:
+    - **修復查找區域錯誤**：修正 `update_report.py` 中 `US10Y` 與 `US3M` 指標的查找邏輯，將區域來源由不存在的 `US10Y`/`US3M` 改回 `US_MACRO`，確保事實庫中的殖利率標籤能被正確載入。
+  - **投資報告更新 (Daily Analysis Update)**:
+    - **同步最新數據**：更新 `macro_cache.json` 包含 5 月份最新失業救濟、美元指數、美債殖利率與台股融資餘額。
+    - **AI 分析深度強化**：針對 Kevin Warsh 接任聯準會主席與台積電 2026 技術論壇釋出的埃米世代製程規劃進行深度多維度評析。
+
+- **2026-04-25 (v1.6)**:
+  - **宏觀指標標籤映射擴充 (Macro Indicator Tag Update)**:
+    - **新增多項標籤映射**：在 `update_report.py` 中新增 `{{RETAIL_SALES}}`、`{{GDP}}`、`{{PPI}}`、`{{UNEMPLOYMENT_RATE}}` 及 `{{NONFARM_PAYROLLS}}` 等宏觀指標的自動映射，解決 AI 分析中變數名稱未被正確替換的問題。
+    - **自動化測試驗證**：已驗證 `index.html` 中的「零售銷售」等變數能正確替換為事實庫數值。
+
+- **2026-04-18 (v1.5)**:
+  - **AI 分析標籤擴充 (AI Tag Update)**:
+    - **新增融資單日變動標籤**：修改 `update_report.py` 中的 `get_data_context` 函式，使其能從事實庫中提取「融資單日變動」數據並對應至 `{{MARGIN_CHANGE}}` 標籤。
+    - **更新強制標籤列表**：於 `GEMINI.md` 中將 `{{MARGIN_CHANGE}}` 加入 Tag-Based Substitution 強制使用列表中，以解決 AI 分析報告中數字顯示不正確或出現幻覺的問題。
+
+- **2026-04-17 (v1.4)**:
+  - **資料顯示強健性優化 (Data Robustness Update)**:
+    - **修正區塊日期邏輯**：重構 `investment_analysis.py` 中的 `process_stock_group` 函式，將區塊日期選取邏輯由「首個標的日期」改為「群組內所有標的之最大日期」，解決因單一指標（如加權指數）更新延遲導致整個市場區塊顯示日期落後的問題。
+  - **AI 分析敘事規範升級**:
+    - **禁止固定模板**：於 `GEMINI.md` 加入 `Dynamic Narrative Rule`，嚴禁 AI 使用固定句式，確保分析內容具備自然流動的專業敘事感。
+    - **強制變數描述**：實施 `Variable Description Mandate`，要求所有標籤變數（如 {{VIX}}）必須附帶明確指標名稱描述，消除僅有數字而無主詞的表達缺陷。
+    - **即時內容修正**：手動重構 `ai.html`，以身作則展示新版敘事風格，提升報告閱讀體驗。
+
+- **2026-04-13 (v1.3)**:
+  - **開發流程規範強化 (Workflow Standard Update)**:
+    - **合併與同步要求**：於 `GEMINI.md` 中新增明確規範，要求在 feature branch 完成修改、驗證並獲得使用者同意後，必須執行合併至 `main`、推送至遠端倉庫，並將本地環境切換回 `main` 分支，確保開發環境的一致性與穩定性。
+
+- **2026-04-13 (v1.2)**:
+  - **事實校驗系統升級**:
+    - **動態事實庫擴展**：修改了 `update_report.py`，使校驗系統能夠自動載入 `macro_cache.json` 中所有的數值指標作為分析事實庫，大幅提升校驗靈活性。
+    - **數值完整性優化**：解決了 AI 在引用台積電營收、毛利率與油價目標等具體數據時被攔截的問題，確保專業分析與數據一致性能並存。
+    - **地緣政治深度追蹤**：針對「霍爾木茲海峽封鎖」引發的能源、金價與全球供應鏈風險，由 Atlas 與 Crow 角色發布了針對性的預警報告。
+
+- **2026-04-12 (v1.1)**:
+  - **AI 分析敘事引擎優化**:
+    - **消除模板感**：重新設計了 `ai.html` 的生成邏輯，徹底解決數據標籤（如 {{TAIEX}}）在分析內容中出現語句不通順的問題，改以更自然、更具洞察力的專業分析師口吻。
+    - **全循環分析驗證**：在 `feature/full-analysis-cycle-fix` 分支中完成了技術數據、總經數據、新聞抓取與 AI 分析的完整生成測試，確保報告的高品質與邏輯一致性。
+    - **地緣政治風險更新**：特別針對荷姆茲海峽的通行費狀況、船隻滯留排隊與通膨影響進行了跨領域深度分析。
+
+- **2026-04-12 (v1.0)**:
+  - **開發流程規範化與 GEMINI.md 翻譯**:
+    - **新增開發流程規定**：在 `GEMINI.md` 中加入強制性開發流程，要求所有功能、格式或規則的修改必須在獨立分支進行，並在通過完整測試且取得使用者同意後方可合併至 `main`。
+    - **內容完整翻譯**：將 `GEMINI.md` 中的「數字引用與幻覺防禦機制」等中文區塊翻譯為英文，以確保專案規則的一致性。
+  - **資料清理系統與 Regex 穩定性修正**:
+    - **新增 prune_manager.py**：實作自動清理功能，報表目錄 `report/` 僅保留最近 30 份 HTML 報表；`technical_data.json` 中的市場歷史序列限制為最近 120 個交易日，有效釋放硬碟空間並防止資料檔案無序膨脹。
+    - **修正 update_report.py**：修復正則表達式匹配邏輯，改用非貪婪模式（Non-greedy）匹配 AI 分析區塊，避免在注入 AI 觀點時意外刪除或毀壞前端技術指標與 K 線圖區塊。
+    - **自動化流程整合**：將清理流程整合至報表更新階段，實現「分析完畢即刻修剪」的維護機制。
+
+- **2026-04-11**:
+  - **報告標籤系統擴充與分析優化**:
+    - **CPI 標籤支援**：優化 `update_report.py` 數據提取邏輯，新增 `{{CPI}}` 標籤支援，確保分析內容能精確引用最新消費者物價指數數據。
+    - **地緣政治風險分析**：在 AI 分析中引入地緣政治預警機制，針對 3 月 CPI 跳升與中東局勢提供多維度情境分析。
+    - **數據精準度提升**：修復 AI 報告中數值單位的顯示問題，確保百分比與金額單位的正確映射。
+
+- **2026-04-10**:
+  - **報告數據注入與台股同步修復**:
+    - **JSON 注入修復**：修正 `investment_analysis.py` 在渲染模板時未傳遞市場數據 JSON 的問題，並同步更新 `report_template.html` 以支援 Jinja2 變數，解決報告中技術圖表數據為空的 Bug。
+    - **總經表格注入邏輯優化**：修正 `update_report.py` 僅能替換現有表格而無法處理初始占位符的邏輯，確保宏觀經濟指標能正確填入報告。
+    - **台股數據同步確認**：解決台股加權指數數據抓取延遲問題，目前報告已完整包含昨（4/9）與今（4/10）的最新盤後數據。
+
+
+- **2026-04-09**:
+  - **數值精確度修復與自動化防護系統 (Anti-Hallucination System)**:
+    - **重大幻覺修復**：修正 AI 將 VIX 技術指標欄位 `TR` (真實波幅) 誤認為 `Close` (收盤價) 導致的數據錯誤。
+    - **標籤化引用機制**：更新 `GEMINI.md` 並修改 `update_report.py`，支援於 `ai.html` 中使用 `{{VIX}}`、`{{TAIEX}}` 等變數標籤。系統現在會在報告生成時自動從事實庫提取真實數值進行物理替換，徹底杜絕人為手寫數字錯誤。
+    - **自動校驗攔截器**：於 `update_report.py` 導入「數值一致性檢查器」。系統現在會自動比對 AI 生成內容中的數字與數據庫事實，若偵測到異常偏差（如 VIX 數據為 21 但內容寫 60），將強制攔截更新流程並報錯。
+    - **AI 數據上下文簡化**：新增 `ai_context.json` 生成邏輯，僅向 AI 提供過濾後的核心關鍵指標清單，降低 AI 讀取複雜 JSON 結構時的解析壓力。
+    - **規範升級**：於 `GEMINI.md` 正式寫入「標籤化引用」與「禁止編造歷史高低點」準則。
+
+- **2026-04-03**:
+  - **新聞內容語言與安全防護機制**:
+    - **強制翻譯準則**：更新 `GEMINI.md`，明確定義所有非中文來源的新聞必須翻譯為繁體中文，禁止直接複製英文摘要，確保報告內容的一致性。
+    - **注入攔截機制**：於 `update_report.py` 中新增 `is_mostly_chinese` 語言檢查邏輯。若偵測到 `news.html` 或 `ai.html` 內容之英文字元佔比過高，系統將自動中止注入流程並報錯，有效攔截不合規內容。
+    - **流程強化**：完善 AI 執行新聞搜尋後的彙整規範，要求生成後必須進行語系與時效性（7天內）的雙重核對。
+
+- **2026-04-02**:
+  - **系統 Bug 修復與時區校準**:
+    - **時區轉換邏輯修正**：將 `investment_analysis.py` 中 naive 的 `utcnow()` 替換為 `now(datetime.timezone.utc)`，解決在特定時段執行時因 naive 對象轉換時區導致報告檔名日期錯誤（誤判為前一日）的問題。
+    - **自動化數據同步增強**：優化了 `update_report.py` 的注入流程，確保在生成跨日報告時，`index.html` 與 `report/` 目錄下的歷史存檔能精確同步。
+
+- **2026-03-29**:
+  - **重大功能更新：籌碼分析系統**:
+    - **台股三大法人追蹤**：整合 FinMind API，於 K 線圖新增第三層籌碼流向 (Flow) 面板，即時繪製投信、外資、自營商累計買賣超曲線，精確識別法人鎖碼與出貨訊號。
+    - **美股籌碼指標整合**：新增空單比率 (Short Float %) 與補空天數 (Short Ratio) 欄位，並於圖表導入 OBV 能量潮曲線，捕捉大戶資金動能與量價背離。
+    - **專業繪圖佈局優化**：實施「座標軸分離」設計（成交量座標位於左側，價格與籌碼位於右側），徹底解決數值重疊問題；採用 5:1:1 黃金比例配置。
+    - **動態報表邏輯**：系統自動根據標的屬性切換顯示欄位，針對指數標的自動簡化圖表與表格內容，減少冗餘雜訊。
+    - **籌碼判讀教學**：於報告末尾新增「籌碼分析判讀教學」區塊，提供系統性的技術判讀指南。
+
+- **2026-03-28**:
+  - **系統架構優化**:
+    - **標的群組更名**：將原本的「主要指數」更名為「美股指數」，使分類更具語義化。
+    - **權重平衡調整**：將「加權指數 (^TWII)」從美股指數群組移至「台股 ETF」群組首位，優化台股分析的視覺流向。
+    - **導覽功能擴充**：於報告導覽列新增「財經節目」按鈕，串接外部 YouTube 分析平台 `yt_podcast_analysis`。
+
+- **2026-03-17**:
+  - **GEMINI.md 規範強化**: 
+    - 新增 TAIEX 指數強制引用規則：強制要求 AI 在進行台灣分析前，必須先從 `technical_data.json` 提取當前加權指數，確保分析數據的連貫性。
+    - 建立動態新聞日期校驗機制：要求 AI 必須根據執行當下的系統日期自動過濾超過 7 天的舊聞，並強制要求新聞標題須包含 (YYYY-MM-DD)。
+  - **AI 報告結構優化**: 重構 `ai.html` 模板，改用簡潔的 `.persona` 區段結構，提升動態注入內容時的穩定性與營運效果。
+  - **新聞數據精確化**: 全面更新並過濾 `news.html` 中的內容，確保 20 則新聞焦點完全符合當前執行週之真實市場動態。
+
+---
+
+## Live Demo (操作示範)
+
+[![專案操作影片](https://img.youtube.com/vi/lfzpw7sPqhI/maxresdefault.jpg)](https://www.youtube.com/watch?v=lfzpw7sPqhI)
+
+---
+
+## Key Features
+
+1.  **Multi-Market Data Tracking**: Supports tracking of US stock indices, popular Taiwan ETFs, individual stocks, and bond ETFs.
+2.  **Advanced Chip Analysis (New!)**:
+    *   **Taiwan Market**: Tracks net buy/sell data for the Three Institutional Investors (Foreign, Investment Trust, Dealer).
+    *   **US Market**: Monitors Short Float % and Short Ratio to identify potential short squeeze opportunities.
+    *   **Volume-Price Dynamic**: Integrates OBV (On-Balance Volume) to track professional money flow.
+3.  **Automated Technical Indicator Calculation**:
+    *   KD, BIAS, DMI, ADX, and Moving Averages.
+4.  **Visual Chart Generation**: Automatically generates professional K-line charts with a dual-axis design (Volume on Left, Price/Chips on Right) to prevent data overlapping.
+5.  **AI-Powered In-Depth Comprehensive Analysis**:
+    *   Crow - Flow Sentinel: Specialized persona for chip analysis and sentiment monitoring.
+    *   Atlas - Macro Strategist: Geopolitical risk and macroeconomic cycle interpretation.
+6.  **Professional-Grade Report Style**:
+    *   Strict No-Emoji Policy: No emojis are used in code logs or report content.
+    *   Taiwan Stock Market Convention: Adopts the red-for-up, green-for-down K-line color convention.
+7.  **Macroeconomic Indicator Monitoring**: Automatically tracks key US and Taiwan economic data.
+
+## 主要功能
+
+1.  **多市場數據追蹤**：支援追蹤美股指數、台股熱門 ETF、個股及債券 ETF。
+2.  **進階籌碼分析 (新功能!)**：
+    *   **台股市場**：追蹤三大法人（外資、投信、自營商）累計買賣超，掌握法人鎖碼動態。
+    *   **美股市場**：監控空單比率 (Short Float %) 與補空天數 (Short Ratio)，識別潛在軋空風險。
+    *   **量價動能**：整合 OBV 能量潮，追蹤大戶資金流向。
+3.  **自動化技術指標計算**：
+    *   包含 KD, BIAS, DMI, ADX, 以及各期移動平均線。
+4.  **視覺化圖表生成**：自動繪製專業 K 線圖，採用座標軸分離設計（左側成交量、右側價格/籌碼），防止數值重疊。
+5.  **AI 深度綜合分析**：
+    *   Crow (籌碼哨兵)：專精於籌碼面流向與市場情緒監控。
+    *   Atlas (宏觀策略師)：地緣政治風險與總經週期解讀。
+6.  **專業級報告風格**：
+    *   嚴格禁絕表情符號 (No-Emoji Policy)：確保報告輸出專業且簡潔。
+    *   台股配色慣例：採用紅漲綠跌 K 線配色。
+7. **總體經濟指標監控**：自動追蹤美台核心經濟數據 (GDP, CPI, PPI, M2, 失業率等)。
+
+---
+
+## Report Reading Guide: Chip Analysis
+
+### 1. Taiwan Flow (Three Institutional Investors)
+*   **Red Line (Investment Trust)**: Swing traders. Rising line indicates "Locked-in" stocks with strong momentum.
+*   **Blue Line (Foreign Investor)**: Long-term trend. Defines the valuation ceiling for weighted stocks.
+*   **Green Line (Dealer)**: Short-term speculators and hedging activities.
+
+### 2. US Sentiment Indicators
+*   **Short Float %**: Percentage of shares shorted. Values over 15% signal high bearish sentiment and potential Short Squeeze.
+*   **OBV (On-Balance Volume)**: Grey/Blue line in the 3rd panel. Rising OBV during price consolidation indicates accumulation by big money.
+
+---
+
+## ⚠️ Disclaimer
+The reports generated by this project are for research and reference purposes only and do not constitute any investment advice. Financial markets are unpredictable; please conduct your own thorough risk assessment before investing.
+
+## ⚠️ 免責聲明
+本專案生成的報告僅供研究與參考，不構成任何投資建議。金融市場變化莫測，投資前請務必自行審慎評估風險。

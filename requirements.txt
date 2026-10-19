@@ -1,0 +1,6 @@
+yfinance
+pandas
+matplotlib
+mplfinance
+pytz
+jinja2

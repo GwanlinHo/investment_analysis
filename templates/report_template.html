@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>綜合投資分析報告 | {{ date_str }}</title>
+    <!-- 
+    HIDDEN DATA FOR AI ANALYSIS
+    AI Agents should read technical_data.json instead.
+    -->
+    <script id="fundamental-data" type="application/json">{{ fundamental_json | tojson }}</script>
+    <script id="yield-data" type="application/json">{{ yield_json | tojson }}</script>
+    <script id="market-data" type="application/json">{{ market_json | tojson }}</script>
+    <!-- 速覽面板用的預算純量。Close 序列不發布(Yahoo ToS)，面板改讀這裡；見 publish_filter.build_panel_data -->
+    <script id="panel-data" type="application/json">{{ panel_json | tojson }}</script>
+    <!-- 總經速覽資料：由 update_report.py 於注入階段填入（現值 + 前值 + 變動日） -->
+    <script id="macro-data" type="application/json">{"US_MACRO": [], "TW_MACRO": []}</script>
+    <style>
+        :root {
+            --bg-color: #f4f6f8;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --card-bg: #ffffff;
+            --up-color: #e53935;
+            --down-color: #43a047;
+            --accent-color: #1a237e;
+            --border-color: #e0e0e0;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; background-color: var(--bg-color); color: var(--text-primary); line-height: 1.6; }
+        
+        /* Container */
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        
+        /* Header */
+        header { text-align: center; margin-bottom: 30px; padding: 20px 0; }
+        h1 { margin: 0; color: var(--accent-color); font-size: 28px; font-weight: 700; letter-spacing: 1px; }
+        .date-tag { display: inline-block; background: #e8eaf6; color: var(--accent-color); padding: 4px 12px; border-radius: 20px; font-size: 14px; margin-top: 10px; font-weight: 500; }
+
+        /* Market Summary Bar */
+        .summary-bar { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 40px; }
+        .summary-card { background: var(--card-bg); padding: 10px 15px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; border-bottom: 3px solid transparent; }
+        .summary-title { font-size: 12px; color: var(--text-secondary); font-weight: 600; margin-bottom: 3px; }
+        .summary-price { font-size: 16px; font-weight: 800; color: var(--text-primary); }
+        .summary-change { font-size: 12px; font-weight: 600; margin-top: 2px; }
+
+        /* Common Utils */
+        .text-up { color: var(--up-color); }
+        .text-down { color: var(--down-color); }
+        .card { background: var(--card-bg); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 20px; margin-bottom: 25px; overflow: hidden; }
+        
+        /* Group Section */
+        .group-section { margin-bottom: 50px; }
+        .group-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; border-bottom: 2px solid #eceff1; padding-bottom: 8px; flex-wrap: wrap; gap: 10px; }
+        .group-title { font-size: 22px; color: #2c3e50; border-left: 5px solid var(--accent-color); padding-left: 15px; margin: 0; font-weight: 700; }
+        .market-status { font-size: 13px; font-weight: 600; padding: 4px 10px; border-radius: 4px; display: flex; align-items: center; gap: 6px; }
+        .status-closed { background-color: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+        .status-open { background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+        
+        .subsection-title { text-align: center; font-size: 18px; color: var(--text-secondary); margin: 30px 0 20px; position: relative; }
+        .subsection-title:after { content: ''; display: block; width: 50px; height: 3px; background: #ddd; margin: 10px auto 0; }
+
+        /* Table Styles */
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; white-space: nowrap; }
+        th { background-color: #f8f9fa; color: #495057; font-weight: 600; padding: 8px 4px; text-align: right; border-bottom: 2px solid var(--border-color); }
+        th:first-child { text-align: left; }
+        th:nth-child(4) { text-align: center; width: 70px; }
+        td { padding: 8px 4px; border-bottom: 1px solid var(--border-color); text-align: right; }
+        td:first-child { text-align: left; font-weight: 600; color: var(--accent-color); }
+        tr:hover { background-color: #f1f3f5; }
+        
+        /* Badges */
+        .badge { padding: 4px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; color: white; display: inline-block; min-width: 64px; text-align: center; }
+        .bullish-strong { background-color: #e53935; }
+        .bullish-weak { background-color: #ef9a9a; color: #b71c1c; }
+        .bearish-strong { background-color: #43a047; }
+        .bearish-weak { background-color: #a5d6a7; color: #1b5e20; }
+        .neutral { background-color: #9e9e9e; }
+        .trend-cell { text-align: center; }
+
+        /* Navigation */
+        html { scroll-behavior: smooth; }
+        .nav-bar { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; }
+        .nav-btn { background: #fff; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 6px 14px; border-radius: 20px; text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.2s; display: flex; align-items: center; gap: 5px; }
+        .nav-btn:hover { background: var(--accent-color); color: white; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .back-to-top { position: fixed; bottom: 30px; right: 30px; background: var(--accent-color); color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; box-shadow: 0 4px 12px rgba(0,0,0,0.25); transition: transform 0.2s; z-index: 1000; font-size: 20px; opacity: 0.9; }
+        .back-to-top:hover { transform: scale(1.1); opacity: 1; }
+
+        /* Charts Grid */
+        .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 25px; }
+        .chart-card { padding: 15px; display: flex; flex-direction: column; align-items: center; }
+        .chart-header { width: 100%; text-align: left; font-weight: 700; font-size: 16px; margin-bottom: 10px; color: #34495e; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        img { max-width: 100%; height: auto; }
+
+        /* AI Content Sections */
+        .ai-section-container { margin-top: 40px; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); overflow: hidden; }
+        .ai-section-container h2 { color: var(--accent-color); border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 25px; font-size: 24px; font-weight: 700; margin-top: 0; }
+        
+        .tts-controls { display: flex; align-items: center; gap: 10px; }
+        .tts-btn { background: #f0f2f5; border: 1px solid #ddd; border-radius: 20px; padding: 5px 15px; font-size: 14px; font-weight: 600; color: #555; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
+        .tts-btn:hover { background: #e4e6e9; border-color: #ccc; }
+        .tts-btn.playing { background: #e8f5e9; color: #2e7d32; border-color: #c8e6c9; }
+        .tts-btn svg { width: 16px; height: 16px; fill: currentColor; }
+        
+        @media (max-width: 768px) {
+            .charts-grid { grid-template-columns: 1fr; }
+            .summary-bar { grid-template-columns: repeat(2, 1fr); }
+            .ai-section-container { padding: 20px; }
+        }
+
+        /* ===== 指標速覽浮動面板 ===== */
+        .ov-fab { position: fixed; bottom: 85px; right: 30px; z-index: 1000; background: #fff; color: var(--accent-color);
+                  border: 1px solid var(--accent-color); border-radius: 22px; height: 44px; padding: 0 16px; cursor: pointer;
+                  font-size: 14px; font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.2); opacity: 0.95; }
+        .ov-fab:hover { opacity: 1; transform: scale(1.04); }
+        .ov-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 1090; border: 0; }
+        .ov-panel { position: fixed; right: 24px; bottom: 24px; width: 440px; max-width: calc(100vw - 32px); max-height: 84vh;
+                    display: flex; flex-direction: column; background: var(--card-bg); border-radius: 14px;
+                    box-shadow: 0 12px 36px rgba(0,0,0,0.28); z-index: 1100; overflow: hidden; }
+        /* 作者樣式的 display 會蓋過瀏覽器對 [hidden] 的預設隱藏，必須顯式還原 */
+        .ov-panel[hidden], .ov-backdrop[hidden] { display: none; }
+        .ov-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px;
+                   background: var(--accent-color); color: #fff; flex: 0 0 auto; }
+        .ov-title { font-size: 16px; font-weight: 700; }
+        .ov-date { font-size: 12px; font-weight: 400; opacity: 0.85; margin-left: 8px; }
+        .ov-x { background: transparent; border: 0; color: #fff; font-size: 22px; line-height: 1; cursor: pointer; padding: 0 4px; }
+        .ov-highlight { padding: 10px 16px; background: #e8eaf6; color: #1a237e; font-size: 13px; font-weight: 600;
+                        border-bottom: 1px solid var(--border-color); flex: 0 0 auto; }
+        .ov-asof { font-size: 11px; font-weight: 500; color: #455a64; margin-bottom: 4px; }
+        .ov-asof-stale { color: #b71c1c; }
+        .ov-body { overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 4px 0 8px; }
+        .ov-sec { padding: 10px 16px 4px; }
+        .ov-sec + .ov-sec { border-top: 1px solid var(--border-color); }
+        .ov-sec-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px; }
+        .ov-sec-head h3 { margin: 0; font-size: 14px; font-weight: 700; color: var(--accent-color); }
+        .ov-sec-note { font-size: 11px; color: var(--text-secondary); font-weight: 400; margin-left: 6px; }
+        .ov-more { background: none; border: 0; color: var(--text-secondary); font-size: 12px; cursor: pointer;
+                   text-decoration: underline; padding: 0; }
+        .ov-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .ov-table th { font-size: 11px; color: var(--text-secondary); font-weight: 600; text-align: right; padding: 2px 4px; }
+        .ov-table th:first-child, .ov-table td:first-child { text-align: left; }
+        .ov-table td { padding: 4px; border-top: 1px solid #f0f0f0; white-space: nowrap; }
+        .ov-name { font-weight: 600; }
+        .ov-sub { display: block; font-size: 11px; color: var(--text-secondary); font-weight: 400; white-space: normal; }
+        .ov-num { text-align: right; font-variant-numeric: tabular-nums; }
+        .ov-up { color: var(--up-color); font-weight: 700; }
+        .ov-down { color: var(--down-color); font-weight: 700; }
+        .ov-flat { color: var(--text-secondary); }
+        .ov-tag { display: inline-block; font-size: 11px; padding: 1px 6px; border-radius: 10px; background: #eceff1;
+                  color: #37474f; margin: 1px 3px 1px 0; white-space: nowrap; }
+        .ov-tag-warn { background: #fdecea; color: #b71c1c; }
+        .ov-tag-good { background: #e8f5e9; color: #1b5e20; }
+        .ov-empty { font-size: 12px; color: var(--text-secondary); padding: 6px 0; }
+        .ov-foot { flex: 0 0 auto; padding: 8px 16px; font-size: 11px; color: var(--text-secondary);
+                   border-top: 1px solid var(--border-color); background: #fafafa; }
+
+        @media (max-width: 768px) {
+            /* 左右與下方留邊，四角圓角：讓它看起來是浮在報告之上的視窗，而不是貼齊螢幕的頁面區塊 */
+            .ov-panel { right: 12px; left: 12px; bottom: 12px; width: auto; max-width: none; max-height: 78vh;
+                        border-radius: 14px; }
+            .ov-fab { bottom: 80px; right: 20px; height: 40px; padding: 0 14px; font-size: 13px; }
+            .ov-table { font-size: 12px; }
+        }
+        @media (min-width: 769px) {
+            .ov-backdrop { display: none; }
+        }
+        /* 橫向手機等矮視窗：標題列、摘要與頁尾會吃掉大半高度，內容區只剩兩三列。
+           壓縮周邊留白並放寬高度上限，把空間讓給資料本身。 */
+        @media (max-height: 500px) {
+            .ov-panel { max-height: 94vh; right: 12px; bottom: 12px; }
+            .ov-head { padding: 7px 12px; }
+            .ov-title { font-size: 14px; }
+            .ov-highlight { padding: 5px 12px; font-size: 12px; line-height: 1.4; }
+            .ov-asof { margin-bottom: 2px; }
+            .ov-sec { padding: 6px 12px 2px; }
+            .ov-foot { padding: 4px 12px; line-height: 1.3; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header id="top">
+            <h1>綜合投資分析報告</h1>
+            <div class="date-tag">{{ date_str }}</div>
+        </header>
+
+        <div class="nav-bar">
+            <a href="#us-stocks" class="nav-btn">美股</a>
+            <a href="#tw-stocks" class="nav-btn">台股</a>
+            <a href="#bonds" class="nav-btn">債券</a>
+            <a href="#macro-analysis" class="nav-btn">總經資訊</a>
+            <a href="#weekly-news-focus" class="nav-btn">財經焦點</a>
+            <a href="#ai-analysis-report" class="nav-btn">AI分析</a>
+            <a href="https://gwanlinho.github.io/yt_podcast_analysis/" class="nav-btn" target="_blank">財經節目</a>
+        </div>
+
+        <div class="summary-bar">
+            {{ summary_html | safe }}
+        </div>
+
+        {% for group in report_data %}
+        <div id="{{ group.section_id }}" class="group-section">
+            <div class="group-header">
+                <h2 class="group-title">{{ group.title }}</h2>
+                {% if group.is_closed %}
+                <div class="market-status status-closed">
+                    <span>休市中 (Market Closed)</span>
+                    <span style="font-weight: normal; margin-left: 8px;">最後交易：{{ group.last_trading_date }}</span>
+                </div>
+                {% else %}
+                <div class="market-status status-open">
+                    <span>交易中 (Market Open)</span>
+                    <span style="font-weight: normal; margin-left: 8px;">截至：{{ group.last_trading_date }}</span>
+                </div>
+                {% endif %}
+            </div>
+            <div class="card table-card">
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>名稱</th>
+                                <th>價格</th>
+                                <th>漲跌%</th>
+                                <th>技術訊號</th>
+                                {% if group.show_vol %}
+                                <th>量比%</th>
+                                {% endif %}
+                                {% if group.chip_header_1 %}
+                                <th>{{ group.chip_header_1 }}</th>
+                                <th>{{ group.chip_header_2 }}</th>
+                                {% endif %}
+                                <th>K{{ kd_window }}</th>
+                                <th>D{{ kd_window }}</th>
+                                {% for period in bias_periods %}
+                                <th>{{ period }}日乖離</th>
+                                {% endfor %}
+                                <th>ADX</th>
+                                <th>+DI</th>
+                                <th>-DI</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{ group.table_rows | safe }}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <h3 class="subsection-title">K線圖概覽</h3>
+            <div class="charts-grid">
+                {% for symbol, b64_plot in group.plots.items() %}
+                <div class="card chart-card">
+                    <div class="chart-header">{{ symbol }}</div>
+                    <img src="data:image/png;base64,{{ b64_plot }}" alt="{{ symbol }} Plot" loading="lazy">
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+
+        <div class="ai-section-container card">
+            <h2 class="group-title">籌碼分析判讀教學</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                <div>
+                    <h4 style="color: var(--accent-color); margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 5px;">台股：三大法人鎖碼 (Flow)</h4>
+                    <ul style="font-size: 14px; padding-left: 20px; line-height: 1.8;">
+                        <li><strong style="color: #e53935;">紅線 (投信)</strong>：波段行情主力。若紅線持續陡峭上升，代表法人鎖碼，股價最具噴發力。</li>
+                        <li><strong style="color: #1976d2;">藍線 (外資)</strong>：長線趨勢基石。決定權值股長線天花板，藍線上揚代表長線資金進駐。</li>
+                        <li><strong style="color: #43a047;">綠線 (自營商)</strong>：短線客與避險動態。波動快且短，常用於判斷短線獲利了結壓力。</li>
+                        <li><strong>觀察重點</strong>：當紅藍線同步向上（土洋合作），是極強的多頭續攻訊號。</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="color: var(--accent-color); margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 5px;">美股：OBV 資金能量潮</h4>
+                    <ul style="font-size: 14px; padding-left: 20px; line-height: 1.8;">
+                        <li><strong style="color: #455a64;">灰/藍線 (OBV)</strong>：每日累計量能。反映資金流入與流出的淨值。</li>
+                        <li><strong>觀察重點</strong>：反映量價配合關係。當股價平盤但 OBV 持續墊高，通常代表大戶正在接刀或悄悄收貨。</li>
+                        <li><strong>籌碼背離</strong>：若股價創新高但 OBV 未同步創新高，需提防量能動能衰退。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="macro-analysis" class="group-section">
+            <h2 class="group-title">總體經濟指標</h2>
+            {% if yield_curve_plot_b64 %}
+            <div class="card chart-card" style="max-width: 900px; margin: 0 auto;">
+                 <div class="chart-header">美國長短期國庫券殖利率</div>
+                 <img src="data:image/png;base64,{{ yield_curve_plot_b64 }}" alt="Yield Curve Plot">
+                 <div style="text-align: center; margin-top: 10px; color: #555; font-size: 14px; font-weight: bold;">
+                    {% if yield_data %}
+                    Latest Yields: 3M: {{ "%.2f"|format(yield_data.get('3M', 0)) }}%, 
+                    10Y: {{ "%.2f"|format(yield_data.get('10Y', 0)) }}%, 
+                    30Y: {{ "%.2f"|format(yield_data.get('30Y', 0)) }}%
+                    {% endif %}
+                 </div>
+            </div>
+            {% endif %}
+            
+            <div class="card" style="margin-top: 25px; padding: 20px;">
+                <h3 class="subsection-title" style="margin-top: 0; margin-bottom: 20px;">美台重要經濟指標</h3>
+                <div style="margin-bottom: 30px;">
+                    <h4 style="color: #333; margin-bottom: 15px; border-left: 4px solid #1a237e; padding-left: 10px;"> 美國經濟指標</h4>
+                    <div class="table-responsive"><div id="us-macro-placeholder"></div></div>
+                </div>
+                <div>
+                    <h4 style="color: #333; margin-bottom: 15px; border-left: 4px solid #2e7d32; padding-left: 10px;"> 台灣經濟指標</h4>
+                    <div class="table-responsive"><div id="tw-macro-placeholder"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ai-section-container card">
+            <div class="group-header">
+                <h2 class="group-title">週報焦點 (Weekly News Focus)</h2>
+                <div class="tts-controls">
+                    <button id="btn-tts-news" class="tts-btn" onclick="toggleTTS('weekly-news-focus', 'btn-tts-news')">
+                        <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                        <span>朗讀新聞</span>
+                    </button>
+                </div>
+            </div>
+            <div id="weekly-news-focus"></div><!-- news-anchor -->
+        </div>
+
+        <div class="ai-section-container card">
+            <div class="group-header">
+                <h2 class="group-title">AI 深度分析 (AI Comprehensive Analysis)</h2>
+                <div class="tts-controls">
+                    <button id="btn-tts-ai" class="tts-btn" onclick="toggleTTS('ai-analysis-report', 'btn-tts-ai')">
+                        <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                        <span>朗讀分析</span>
+                    </button>
+                </div>
+            </div>
+            <div id="ai-analysis-report"></div><!-- ai-anchor -->
+        </div>
+
+        <footer style="text-align: center; margin-top: 50px; padding: 20px; color: #777; font-size: 12px; border-top: 1px solid #eee;">
+            <p>[Warning] 免責聲明：本報告為個人無償研究，非證券投資顧問事業，僅供研究參考，不構成任何投資建議。內容由 AI 自動收集與整理，可能包含錯誤或過時資訊，建議投資人與官方數據或其他來源交叉驗證。</p>
+            <p>&copy; 2026 本站內容保留所有權利。新聞與第三方資料之權利歸原權利人所有，詳見各則原文連結。</p>
+        </footer>
+        <a href="#top" class="back-to-top" title="回到頁首">↑</a>
+    </div>
+
+    <!-- ===== 指標速覽面板：刻意置於 .container 之外，避開 update_report.py 的注入區塊 =====
+         面板內每一格皆由前端從上方 JSON 標籤即時計算，不含任何伺服器端注入的 HTML，
+         因此重跑 update_report.py 不會影響本區塊。 -->
+    <button id="ov-fab" class="ov-fab" type="button" title="開啟指標速覽">速覽</button>
+    <div id="ov-backdrop" class="ov-backdrop" hidden></div>
+    <aside id="ov-panel" class="ov-panel" role="dialog" aria-label="指標速覽" aria-modal="false" hidden>
+        <div class="ov-head">
+            <div><span class="ov-title">指標速覽</span><span id="ov-date" class="ov-date"></span></div>
+            <button id="ov-close" class="ov-x" type="button" title="關閉" aria-label="關閉">&times;</button>
+        </div>
+        <div id="ov-highlight" class="ov-highlight"></div>
+        <div class="ov-body">
+            <section class="ov-sec">
+                <div class="ov-sec-head">
+                    <h3>總經<span class="ov-sec-note" id="ov-macro-note"></span></h3>
+                    <button class="ov-more" type="button" data-target="macro">展開全部</button>
+                </div>
+                <div id="ov-macro"></div>
+            </section>
+            <section class="ov-sec">
+                <div class="ov-sec-head">
+                    <h3>技術<span class="ov-sec-note">核心標的近期變化</span></h3>
+                    <button class="ov-more" type="button" data-target="tech">展開全部</button>
+                </div>
+                <div id="ov-tech"></div>
+            </section>
+            <section class="ov-sec">
+                <div class="ov-sec-head">
+                    <h3>情緒<span class="ov-sec-note">波動、籌碼與資金</span></h3>
+                    <button class="ov-more" type="button" data-target="senti">展開全部</button>
+                </div>
+                <div id="ov-senti"></div>
+            </section>
+            <section class="ov-sec">
+                <div class="ov-sec-head">
+                    <h3>基本面<span class="ov-sec-note">估值與獲利品質</span></h3>
+                    <button class="ov-more" type="button" data-target="fund">展開全部</button>
+                </div>
+                <div id="ov-fund"></div>
+            </section>
+        </div>
+        <div class="ov-foot">數據皆取自本報告已收集之資料，由瀏覽器即時彙整；僅供研究參考，不構成投資建議。</div>
+    </aside>
+
+    <script>
+        // ===== 指標速覽面板 =====
+        (function () {
+            'use strict';
+
+            function readJSON(id) {
+                var el = document.getElementById(id);
+                if (!el) return null;
+                var raw = el.textContent || el.innerText || 'null';
+                try {
+                    return JSON.parse(raw);
+                } catch (e) {
+                    // 保險：舊版資料可能含 pandas 的 NaN（Python 允許、JSON.parse 不允許）。
+                    // 產生端已於 investment_analysis.py 的 json_safe() 轉為 null，此處僅為向下相容。
+                    try {
+                        return JSON.parse(raw.replace(/\bNaN\b/g, 'null').replace(/\b-?Infinity\b/g, 'null'));
+                    } catch (e2) { return null; }
+                }
+            }
+
+            var MARKET = readJSON('market-data') || {};
+            var PANEL = readJSON('panel-data') || {};
+            var MACRO = readJSON('macro-data') || {};
+            var FUND = readJSON('fundamental-data') || [];
+            var dateEl = document.querySelector('.date-tag');
+            var REPORT_DATE = dateEl ? dateEl.textContent.trim() : '';
+
+            // 預設只顯示最關鍵的一小組，其餘一律收在「展開全部」裡——面板是速覽，不是第二份報告。
+            var CORE = ['加權指數', '台積電', '標普 500', '費城半導體'];
+            var MACRO_DEFAULT = 3;   // 殖利率三檔固定顯示之外，再列幾項最近更新的總經指標
+            var FUND_DEFAULT = 2;    // 基本面預設列數 (資料最完整者優先)
+            var BIAS_ALERT = 6;      // 20 日乖離達此值視為偏離過大
+            var ADX_TREND = 25;      // ADX 站上此值視為趨勢成形
+            var MACRO_RECENT_DAYS = 30;
+
+            function isNum(v) { return typeof v === 'number' && isFinite(v); }
+            function series(name) {
+                var rows = MARKET[name];
+                return (rows && rows.length) ? rows : null;
+            }
+            // Close 序列不發布(Yahoo ToS)，1/5/20 日漲跌與 VIX 百分位改由 publish_filter
+            // 在產出時算好放進 panel-data。這裡以標的名查表，語意與原本逐列相減完全相同。
+            function panelOf(name) { return PANEL[name] || {}; }
+            function pctChange(name, back) {
+                var v = panelOf(name)['d' + back];
+                return isNum(v) ? v : null;
+            }
+            function lastClose(name) {
+                var v = panelOf(name).close;
+                return isNum(v) ? v : null;
+            }
+            function fmtPct(v) { return v === null ? '-' : (v > 0 ? '+' : '') + v.toFixed(2) + '%'; }
+            function fmtNum(v, d) {
+                if (!isNum(v)) return '-';
+                return v.toLocaleString('zh-TW', { minimumFractionDigits: d, maximumFractionDigits: d });
+            }
+            function moveClass(v, inverse) {
+                if (v === null || v === 0) return 'ov-flat';
+                var up = v > 0;
+                if (inverse) up = !up;
+                return up ? 'ov-up' : 'ov-down';
+            }
+            function percentile(name) {
+                var v = panelOf(name).pctile;
+                return isNum(v) ? v : null;
+            }
+            function daysBetween(a, b) {
+                if (!a || !b) return null;
+                var d1 = Date.parse(a + 'T00:00:00'), d2 = Date.parse(b + 'T00:00:00');
+                if (isNaN(d1) || isNaN(d2)) return null;
+                return Math.round((d2 - d1) / 86400000);
+            }
+            function esc(s) {
+                return String(s === undefined || s === null ? '' : s)
+                    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            }
+            function tag(text, kind) {
+                var cls = kind === 'warn' ? 'ov-tag ov-tag-warn' : kind === 'good' ? 'ov-tag ov-tag-good' : 'ov-tag';
+                return '<span class="' + cls + '">' + esc(text) + '</span>';
+            }
+
+            // ---- 技術訊號判定 ----
+            function signals(rows, name) {
+                var out = [];
+                if (!rows || rows.length < 2) return out;
+                var a = rows[rows.length - 1], b = rows[rows.length - 2];
+                if (isNum(a.K) && isNum(a.D) && isNum(b.K) && isNum(b.D)) {
+                    if (b.K <= b.D && a.K > a.D) out.push(['KD 黃金交叉', 'good']);
+                    else if (b.K >= b.D && a.K < a.D) out.push(['KD 死亡交叉', 'warn']);
+                    else if (a.K >= 80) out.push(['KD 高檔 ' + a.K.toFixed(0), 'warn']);
+                    else if (a.K <= 20) out.push(['KD 低檔 ' + a.K.toFixed(0), 'good']);
+                }
+                if (isNum(a.MACD_Hist) && isNum(b.MACD_Hist)) {
+                    if (b.MACD_Hist <= 0 && a.MACD_Hist > 0) out.push(['MACD 柱轉正', 'good']);
+                    else if (b.MACD_Hist >= 0 && a.MACD_Hist < 0) out.push(['MACD 柱轉負', 'warn']);
+                }
+                var cross = panelOf(name).ma20;
+                if (cross === 'up') out.push(['站上 20MA', 'good']);
+                else if (cross === 'down') out.push(['跌破 20MA', 'warn']);
+                if (isNum(a.BIAS_20)) {
+                    if (a.BIAS_20 >= BIAS_ALERT) out.push(['20日乖離 +' + a.BIAS_20.toFixed(1) + '%', 'warn']);
+                    else if (a.BIAS_20 <= -BIAS_ALERT) out.push(['20日乖離 ' + a.BIAS_20.toFixed(1) + '%', 'good']);
+                }
+                if (isNum(a.ADX) && a.ADX >= ADX_TREND) {
+                    var dir = (isNum(a['+DI']) && isNum(a['-DI'])) ? (a['+DI'] > a['-DI'] ? '多方' : '空方') : '';
+                    out.push(['ADX ' + a.ADX.toFixed(0) + ' ' + dir + '趨勢', '']);
+                }
+                return out.slice(0, 2);
+            }
+
+            // ---- 技術面 ----
+            function techRows(all) {
+                var names = all ? Object.keys(MARKET).filter(function (k) {
+                    return k.indexOf('_institutional') < 0;
+                }) : CORE;
+                var rows = [];
+                names.forEach(function (name) {
+                    var s = series(name);
+                    if (!s) return;
+                    rows.push({
+                        name: name,
+                        close: lastClose(name),
+                        d1: pctChange(name, 1), d5: pctChange(name, 5), d20: pctChange(name, 20),
+                        sig: signals(s, name)
+                    });
+                });
+                return rows;
+            }
+            function renderTech(all) {
+                var rows = techRows(all);
+                if (!rows.length) return '<div class="ov-empty">無技術資料。</div>';
+                var inv = { '恐慌指數': true };
+                var html = '<table class="ov-table"><thead><tr><th>名稱</th><th>收盤</th><th>1日</th><th>5日</th><th>20日</th></tr></thead><tbody>';
+                rows.forEach(function (r) {
+                    var sub = r.sig.map(function (s) { return tag(s[0], s[1]); }).join('');
+                    html += '<tr><td><span class="ov-name">' + esc(r.name) + '</span>' +
+                        (sub ? '<span class="ov-sub">' + sub + '</span>' : '') + '</td>' +
+                        '<td class="ov-num">' + fmtNum(r.close, 2) + '</td>' +
+                        '<td class="ov-num ' + moveClass(r.d1, inv[r.name]) + '">' + fmtPct(r.d1) + '</td>' +
+                        '<td class="ov-num ' + moveClass(r.d5, inv[r.name]) + '">' + fmtPct(r.d5) + '</td>' +
+                        '<td class="ov-num ' + moveClass(r.d20, inv[r.name]) + '">' + fmtPct(r.d20) + '</td></tr>';
+                });
+                return html + '</tbody></table>';
+            }
+
+            // ---- 情緒面 ----
+            function instStreak(rows, key) {
+                if (!rows || !rows.length) return null;
+                var last = rows[rows.length - 1][key];
+                if (!isNum(last) || last === 0) return { last: last, days: 0, sign: 0 };
+                var sign = last > 0 ? 1 : -1, days = 0;
+                for (var i = rows.length - 1; i >= 0; i--) {
+                    var v = rows[i][key];
+                    if (!isNum(v) || v === 0 || (v > 0 ? 1 : -1) !== sign) break;
+                    days++;
+                }
+                return { last: last, days: days, sign: sign };
+            }
+            function macroFind(region, part) {
+                var list = MACRO[region] || [];
+                for (var i = 0; i < list.length; i++) {
+                    if ((list[i].name || '').indexOf(part) >= 0) return list[i];
+                }
+                return null;
+            }
+            function sentiRows(all) {
+                var rows = [];
+                if (series('恐慌指數')) {
+                    var p = percentile('恐慌指數');
+                    var kind = p === null ? '' : (p <= 20 ? 'warn' : p >= 80 ? 'good' : '');
+                    rows.push({
+                        name: '恐慌指數 VIX',
+                        value: fmtNum(lastClose('恐慌指數'), 2),
+                        change: fmtPct(pctChange('恐慌指數', 1)),
+                        changeCls: moveClass(pctChange('恐慌指數', 1), true),
+                        state: p === null ? '' : tag('60日第 ' + p + ' 百分位', kind)
+                    });
+                }
+                if (series('HYG高收益債') && all) {
+                    rows.push({
+                        name: '高收益債 HYG',
+                        value: fmtNum(lastClose('HYG高收益債'), 2),
+                        change: fmtPct(pctChange('HYG高收益債', 1)),
+                        changeCls: moveClass(pctChange('HYG高收益債', 1)),
+                        state: '<span class="ov-sub">風險偏好代理，5日 ' + fmtPct(pctChange('HYG高收益債', 5)) + '</span>'
+                    });
+                }
+                var instTargets = all
+                    ? Object.keys(MARKET).filter(function (k) { return k.indexOf('_institutional') > 0; })
+                    : ['台積電_institutional'];   // 預設只看台積電的外資動向，其餘展開才顯示
+                instTargets.forEach(function (key) {
+                    var rowsI = MARKET[key];
+                    if (!rowsI || !rowsI.length) return;
+                    var base = key.replace('_institutional', '');
+                    var flows = all ? [['Foreign_Investor', '外資'], ['Investment_Trust', '投信']]
+                                    : [['Foreign_Investor', '外資']];
+                    flows.forEach(function (pair) {
+                        var st = instStreak(rowsI, pair[0]);
+                        if (!st || !isNum(st.last)) return;
+                        rows.push({
+                            // FinMind 回傳單位為股，1 張 = 1000 股
+                            name: pair[1] + '買賣超 (' + base + ')',
+                            value: (st.last > 0 ? '+' : '') + fmtNum(st.last / 1000, 0) + ' 張',
+                            change: st.days > 1 ? (st.sign > 0 ? '連買 ' : '連賣 ') + st.days + ' 日' : '單日',
+                            changeCls: moveClass(st.last),
+                            state: ''
+                        });
+                    });
+                });
+                var margin = macroFind('TW_MACRO', '融資餘額');
+                var marginChg = macroFind('TW_MACRO', '融資單日變動');
+                if (margin) {
+                    rows.push({
+                        name: '融資餘額',
+                        value: esc(margin.value),
+                        change: marginChg ? esc(marginChg.value) : '-',
+                        changeCls: 'ov-flat',
+                        state: margin.prev ? '<span class="ov-sub">前值 ' + esc(margin.prev) + '</span>' : ''
+                    });
+                }
+                return rows;
+            }
+            function renderSenti(all) {
+                var rows = sentiRows(all);
+                if (!rows.length) return '<div class="ov-empty">無情緒面資料。</div>';
+                var html = '<table class="ov-table"><thead><tr><th>指標</th><th>現值</th><th>近期變化</th></tr></thead><tbody>';
+                rows.forEach(function (r) {
+                    html += '<tr><td><span class="ov-name">' + esc(r.name) + '</span>' +
+                        (r.state ? '<span class="ov-sub">' + r.state + '</span>' : '') + '</td>' +
+                        '<td class="ov-num">' + r.value + '</td>' +
+                        '<td class="ov-num ' + r.changeCls + '">' + r.change + '</td></tr>';
+                });
+                return html + '</tbody></table>';
+            }
+
+            // ---- 基本面 ----
+            // 資料來自 yfinance 的 .info（產生報告時本來就已抓取）。個股欄位最完整，
+            // ETF 多半只有本益比與殖利率，指數與期貨通常完全沒有——沒有的欄位一律不顯示，不推估。
+            function fundRows(all) {
+                var rows = [];
+                for (var i = 0; i < FUND.length; i++) {
+                    var f = FUND[i];
+                    if (!f) continue;
+                    var hasAny = isNum(f.pe) || isNum(f.roe) || isNum(f.dividend_yield) || isNum(f.pb);
+                    if (hasAny) rows.push(f);
+                }
+                // 有 ROE（通常代表個股、資料最完整）者優先顯示
+                rows.sort(function (a, b) { return (isNum(b.roe) ? 1 : 0) - (isNum(a.roe) ? 1 : 0); });
+                return all ? rows : rows.slice(0, FUND_DEFAULT);
+            }
+            function renderFund(all) {
+                var rows = fundRows(all);
+                if (!rows.length) {
+                    return '<div class="ov-empty">基本面數值不隨報告發布，相關解讀請見報告本文的 AI 分析段落。</div>';
+                }
+                var html = '<table class="ov-table"><thead><tr><th>名稱</th><th>本益比</th><th>殖利率</th></tr></thead><tbody>';
+                rows.forEach(function (f) {
+                    var tags = [];
+                    if (isNum(f.roe)) tags.push(tag('ROE ' + f.roe.toFixed(1) + '%', f.roe >= 15 ? 'good' : ''));
+                    if (isNum(f.gross_margin)) tags.push(tag('毛利率 ' + f.gross_margin.toFixed(1) + '%'));
+                    if (isNum(f.peg)) tags.push(tag('PEG ' + f.peg.toFixed(2), f.peg < 1 ? 'good' : f.peg > 2 ? 'warn' : ''));
+                    if (isNum(f.revenue_growth)) {
+                        tags.push(tag('營收 YoY ' + (f.revenue_growth > 0 ? '+' : '') + f.revenue_growth.toFixed(1) + '%',
+                            f.revenue_growth > 0 ? 'good' : 'warn'));
+                    }
+                    if (isNum(f.pb)) tags.push(tag('股價淨值比 ' + f.pb.toFixed(2)));
+                    html += '<tr><td><span class="ov-name">' + esc(f.name || f.symbol) + '</span>' +
+                        (tags.length ? '<span class="ov-sub">' + tags.join('') + '</span>' : '') + '</td>' +
+                        '<td class="ov-num">' + (isNum(f.pe) ? f.pe.toFixed(1) : '-') + '</td>' +
+                        '<td class="ov-num">' + (isNum(f.dividend_yield) ? f.dividend_yield.toFixed(2) + '%' : '-') + '</td></tr>';
+                });
+                return html + '</tbody></table>';
+            }
+
+            // ---- 總經 ----
+            // 殖利率曲線：固定以 3M -> 10Y -> 30Y 由短到長排列，倒掛才看得出來
+            var YIELD_ORDER = ['3 個月期公債', '10 年期公債', '30 年期公債'];
+            var YIELD_LABEL = { '3 個月期公債': '3M', '10 年期公債': '10Y', '30 年期公債': '30Y' };
+            function toNum(text) {
+                var m = String(text || '').match(/-?\d+(\.\d+)?/);
+                return m ? parseFloat(m[0]) : null;
+            }
+            function curveState(yieldRows) {
+                // 對應 CLAUDE.md 的殖利率監控規則：任兩者利差 < 25bps 視為平坦，< 0 為倒掛
+                var v = {};
+                yieldRows.forEach(function (r) { v[YIELD_LABEL[r.matchKey]] = toNum(r.value); });
+                if (!isNum(v['3M']) || !isNum(v['10Y']) || !isNum(v['30Y'])) return null;
+                var spreads = [v['10Y'] - v['3M'], v['30Y'] - v['10Y'], v['30Y'] - v['3M']];
+                var minSpread = Math.min.apply(null, spreads);
+                if (minSpread < 0) return ['殖利率曲線倒掛', 'warn'];
+                if (minSpread < 0.25) return ['殖利率曲線平坦（最小利差 ' + Math.round(minSpread * 100) + ' bps）', 'warn'];
+                return ['殖利率曲線正常（10Y-3M ' + Math.round((v['10Y'] - v['3M']) * 100) + ' bps）', 'good'];
+            }
+            var BRIEF_MAX = 20;
+            function briefNote(note) {
+                var s = String(note || '').split(/\s*[（(]/)[0].trim();
+                return s.length > BRIEF_MAX ? s.slice(0, BRIEF_MAX) : s;
+            }
+            function macroRows(all) {
+                var out = [];
+                [['US_MACRO', '美'], ['TW_MACRO', '台']].forEach(function (pair) {
+                    (MACRO[pair[0]] || []).forEach(function (it) {
+                        var age = daysBetween(it.changed_on, REPORT_DATE);
+                        out.push({
+                            region: pair[1], name: it.name, value: it.value, prev: it.prev,
+                            note: it.note, changed_on: it.changed_on, age: age,
+                            trend: it.trend
+                        });
+                    });
+                });
+                // 三檔公債殖利率抽出來，固定依 3M -> 10Y -> 30Y 連續排在最前面；
+                // 依「最近更新」排序會把它們打散，看不出曲線形狀。
+                var yields = [], others = [];
+                out.forEach(function (r) {
+                    var key = null;
+                    for (var i = 0; i < YIELD_ORDER.length; i++) {
+                        if (r.name.indexOf(YIELD_ORDER[i]) >= 0) { key = YIELD_ORDER[i]; break; }
+                    }
+                    if (key) { r.matchKey = key; yields.push(r); } else { others.push(r); }
+                });
+                yields.sort(function (a, b) {
+                    return YIELD_ORDER.indexOf(a.matchKey) - YIELD_ORDER.indexOf(b.matchKey);
+                });
+                if (yields.length) {
+                    var state = curveState(yields);
+                    yields[0].curveTag = state;                       // 曲線判讀掛在最短天期那一列
+                    yields.forEach(function (r) { r.termLabel = YIELD_LABEL[r.matchKey]; });
+                }
+                if (all) {
+                    return yields.concat(others);
+                }
+                var recent = others.filter(function (r) {
+                    return r.changed_on && r.age !== null && r.age <= MACRO_RECENT_DAYS;
+                });
+                recent.sort(function (a, b) { return (a.age || 0) - (b.age || 0); });
+                // 殖利率固定顯示（三檔一組），其餘取最近更新的 5 項
+                return yields.concat(recent.slice(0, MACRO_DEFAULT));
+            }
+            function renderMacro(all) {
+                var rows = macroRows(all);
+                var noteEl = document.getElementById('ov-macro-note');
+                if (noteEl) {
+                    noteEl.textContent = all ? '全部指標' : '近 ' + MACRO_RECENT_DAYS + ' 日更新';
+                }
+                if (!rows.length) {
+                    return '<div class="ov-empty">近期無總經指標更新（或歷史資料尚未累積）。</div>';
+                }
+                var html = '<table class="ov-table"><thead><tr><th>指標</th><th>現值</th><th>前值</th></tr></thead><tbody>';
+                rows.forEach(function (r) {
+                    var arrow = r.trend === 'up' ? '▲' : r.trend === 'down' ? '▼' : '-';
+                    var cls = r.trend === 'up' ? 'ov-up' : r.trend === 'down' ? 'ov-down' : 'ov-flat';
+                    // 備註本身已帶資料月份/發布日，當天更新時再寫一次「今日更新」只是噪音；
+                    // 只有隔了一天以上才需要提醒這是舊值。(age 可能為負：注入日晚於報告日期)
+                    var when = (r.changed_on && r.age > 1) ? r.age + ' 日前更新' : '';
+                    var label = r.termLabel ? '[' + esc(r.region) + '] ' + r.termLabel + '　' + esc(r.name)
+                                            : '[' + esc(r.region) + '] ' + esc(r.name);
+                    // 速覽只放一句短補充（上限 20 字）：取備註開頭的資料期間，查證細節留在本文總經表。
+                    var sub = esc(briefNote(r.note)) + (when ? '　' + esc(when) : '');
+                    if (r.curveTag) sub = tag(r.curveTag[0], r.curveTag[1]) + '<br>' + sub;
+                    html += '<tr><td><span class="ov-name">' + label + '</span>' +
+                        '<span class="ov-sub">' + sub + '</span></td>' +
+                        '<td class="ov-num ' + cls + '">' + esc(r.value) + ' <span style="font-size:10px;">' + arrow + '</span></td>' +
+                        '<td class="ov-num ov-flat">' + (r.prev ? esc(r.prev) : '-') + '</td></tr>';
+                });
+                return html + '</tbody></table>';
+            }
+
+            // ---- 重點摘要 ----
+            function lastDate(name) {
+                var s = series(name);
+                if (!s) return '';
+                return (s[s.length - 1].Date || '').slice(0, 10);
+            }
+            function renderAsOf() {
+                // 休市時報告日期不等於資料日期（例如週末、國定假日、08:00 retry），
+                // 報告本體各區塊已標示「最後交易日」，面板也必須標，否則會讓人誤以為是當日行情。
+                var tw = lastDate('加權指數'), us = lastDate('標普 500');
+                var parts = [];
+                if (tw) parts.push('台股 ' + tw);
+                if (us) parts.push('美股 ' + us);
+                if (!parts.length) return '';
+                var stale = (tw && tw !== REPORT_DATE) || (us && us !== REPORT_DATE);
+                return '<div class="ov-asof' + (stale ? ' ov-asof-stale' : '') + '">資料截至　' +
+                    esc(parts.join('　|　')) + (stale ? '（非報告日，該市場休市）' : '') + '</div>';
+            }
+            function renderHighlight() {
+                var bits = [];
+                if (series('加權指數')) bits.push('加權指數 ' + fmtNum(lastClose('加權指數'), 2) + '（' + fmtPct(pctChange('加權指數', 1)) + '）');
+                if (series('恐慌指數')) {
+                    var p = percentile('恐慌指數');
+                    bits.push('VIX ' + fmtNum(lastClose('恐慌指數'), 2) + (p === null ? '' : '，60日第 ' + p + ' 百分位'));
+                }
+                var fresh = macroRows(true).filter(function (r) { return r.age !== null && r.age <= 7; }).length;
+                if (fresh) bits.push('近 7 日總經更新 ' + fresh + ' 項');
+                var body = bits.length ? esc(bits.join('　|　')) : '本報告資料不足，無法產生摘要。';
+                return renderAsOf() + body;
+            }
+
+            // ---- 顯示控制 ----
+            var expanded = { macro: false, tech: false, senti: false, fund: false };
+            var panel = document.getElementById('ov-panel');
+            var backdrop = document.getElementById('ov-backdrop');
+            var fab = document.getElementById('ov-fab');
+
+            function paint() {
+                document.getElementById('ov-macro').innerHTML = renderMacro(expanded.macro);
+                document.getElementById('ov-tech').innerHTML = renderTech(expanded.tech);
+                document.getElementById('ov-senti').innerHTML = renderSenti(expanded.senti);
+                document.getElementById('ov-fund').innerHTML = renderFund(expanded.fund);
+                document.getElementById('ov-highlight').innerHTML = renderHighlight();
+                var d = document.getElementById('ov-date');
+                if (d) d.textContent = REPORT_DATE;
+            }
+
+            function safeStore() {
+                try {
+                    var s = window.localStorage;
+                    s.setItem('__ov_probe', '1'); s.removeItem('__ov_probe');
+                    return s;
+                } catch (e) { return null; }   // file:// 或隱私模式下不可用時退化為每次都跳
+            }
+            var STORE = safeStore();
+            var SEEN_KEY = 'ovSeen:' + REPORT_DATE;
+
+            function open() {
+                panel.hidden = false;
+                backdrop.hidden = false;
+                if (STORE) { try { STORE.setItem(SEEN_KEY, '1'); } catch (e) { } }
+            }
+            function close() {
+                panel.hidden = true;
+                backdrop.hidden = true;
+            }
+
+            fab.addEventListener('click', function () { panel.hidden ? open() : close(); });
+            document.getElementById('ov-close').addEventListener('click', close);
+            backdrop.addEventListener('click', close);
+            document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !panel.hidden) close(); });
+            Array.prototype.forEach.call(document.querySelectorAll('.ov-more'), function (btn) {
+                btn.addEventListener('click', function () {
+                    var t = btn.getAttribute('target') || btn.getAttribute('data-target');
+                    expanded[t] = !expanded[t];
+                    btn.textContent = expanded[t] ? '收合' : '展開全部';
+                    paint();
+                });
+            });
+
+            paint();
+            var seen = STORE ? STORE.getItem(SEEN_KEY) : null;
+            if (!seen) open();
+        })();
+    </script>
+
+    <script>
+        // Web Speech API Controller
+        const synth = window.speechSynthesis;
+        let currentUtterance = null;
+        let activeBtnId = null;
+
+        // 螢幕保持與音訊保活（比照多益單字卡驗證過的定案作法）
+        let wakeLock = null;
+        let audioCtx = null;
+        let keepAliveNode = null;
+
+        async function acquireWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                }
+            } catch (e) { /* 不支援或被拒時朗讀仍可進行，只是螢幕會照常熄滅 */ }
+        }
+
+        function releaseWakeLock() {
+            try {
+                if (wakeLock) { wakeLock.release(); wakeLock = null; }
+            } catch (e) { wakeLock = null; }
+        }
+
+        function ensureAudioCtx() {
+            try {
+                if (!audioCtx) {
+                    const AC = window.AudioContext || window.webkitAudioContext;
+                    if (!AC) return null;
+                    audioCtx = new AC();
+                }
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                return audioCtx;
+            } catch (e) { return null; }
+        }
+
+        // 無聲保活：極低頻、極小音量，聽不到但讓 iOS 音訊通道常開，避免每段語音開頭被切掉
+        function startAudioKeepAlive() {
+            const ctx = ensureAudioCtx();
+            if (!ctx || keepAliveNode) return;
+            try {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                gain.gain.value = 0.0001; // 約 -80dB，實質無聲
+                osc.frequency.value = 20; // 極低頻
+                osc.connect(gain).connect(ctx.destination);
+                osc.start();
+                keepAliveNode = { osc: osc, gain: gain };
+            } catch (e) { /* 忽略 */ }
+        }
+
+        function stopAudioKeepAlive() {
+            try {
+                if (keepAliveNode) {
+                    keepAliveNode.osc.stop();
+                    keepAliveNode.osc.disconnect();
+                    keepAliveNode = null;
+                }
+                if (audioCtx && audioCtx.state === 'running') audioCtx.suspend();
+            } catch (e) { /* 忽略 */ }
+        }
+
+        function toggleTTS(elementId, btnId) {
+            if (synth.speaking && activeBtnId === btnId) {
+                stopTTS();
+                return;
+            }
+            
+            if (synth.speaking) {
+                stopTTS();
+            }
+
+            const element = document.getElementById(elementId);
+            if (!element) return;
+
+            // Extract text and clean it
+            const text = element.innerText || element.textContent;
+            const cleanedText = text.replace(/\s+/g, ' ').trim();
+            
+            if (!cleanedText) return;
+
+            activeBtnId = btnId;
+            const btn = document.getElementById(btnId);
+            if (btn) btn.classList.add('playing');
+
+            // 朗讀期間保持螢幕亮、音訊通道常開
+            acquireWakeLock();
+            startAudioKeepAlive();
+
+            // Split text into chunks to prevent Web Speech API issues with long text
+            const chunks = cleanedText.match(/[^。！？；]+[。！？；]?/g) || [cleanedText];
+            let currentChunk = 0;
+
+            function speakChunk() {
+                if (currentChunk >= chunks.length || !activeBtnId) {
+                    stopTTS();
+                    return;
+                }
+
+                const utterance = new SpeechSynthesisUtterance(chunks[currentChunk]);
+                currentUtterance = utterance;
+
+                // Detect platform and set voice
+                const voices = synth.getVoices();
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                const isAndroid = /Android/.test(navigator.userAgent);
+                
+                // Content detection for language
+                const hasChinese = /[\u4E00-\u9FFF]/.test(chunks[currentChunk]);
+                
+                if (hasChinese) {
+                    // Taiwan Chinese Voice Selection
+                    let voice = null;
+                    if (isIOS) {
+                        // Priority: Siri -> Mei-Jia -> Ting-Ting
+                        voice = voices.find(v => v.lang.includes('zh-TW') && v.name.includes('Siri')) || 
+                                voices.find(v => v.lang.includes('zh-TW') && (v.name.includes('Mei-Jia') || v.name.includes('Ting-Ting')));
+                    } else if (isAndroid) {
+                        voice = voices.find(v => v.lang.includes('zh-TW') && v.name.includes('Google'));
+                    }
+                    if (!voice) {
+                        voice = voices.find(v => v.lang.includes('zh-TW')) || voices.find(v => v.lang.includes('zh'));
+                    }
+                    if (voice) utterance.voice = voice;
+                    utterance.lang = 'zh-TW';
+                } else {
+                    // English default
+                    utterance.lang = 'en-US';
+                }
+
+                utterance.onend = () => {
+                    currentChunk++;
+                    speakChunk();
+                };
+
+                utterance.onerror = () => {
+                    stopTTS();
+                };
+
+                synth.speak(utterance);
+            }
+
+            speakChunk();
+        }
+
+        function stopTTS() {
+            synth.cancel();
+            if (activeBtnId) {
+                const btn = document.getElementById(activeBtnId);
+                if (btn) btn.classList.remove('playing');
+            }
+            activeBtnId = null;
+            currentUtterance = null;
+            releaseWakeLock();
+            stopAudioKeepAlive();
+        }
+
+        // Handle page visibility change
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) stopTTS();
+        });
+
+        // Initialize voices
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = () => synth.getVoices();
+        }
+    </script>
+</body>
+</html>
