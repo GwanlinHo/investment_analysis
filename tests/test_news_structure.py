@@ -1,4 +1,4 @@
-"""news.html 格式檢查：每則恰一個原文連結、摘要漢字上限、總則數上限。"""
+"""news.html 格式檢查：每則恰一個原文連結、摘要漢字上限、總則數上限、來源分散。"""
 
 import update_report as ur
 
@@ -14,8 +14,49 @@ def _doc(*items):
     return "<ul>\n" + "\n".join(items) + "\n</ul>"
 
 
+DOMAINS = ["https://news.cnyes.com/news/id/{}", "https://www.reuters.com/markets/{}",
+           "https://www.cnbc.com/2026/11/03/{}.html", "https://www.cna.com.tw/news/afe/{}.aspx",
+           "https://www.bloomberg.com/news/articles/{}"]
+
+
+def _diverse(n):
+    """n 則、輪流分配到 5 個網域（每網域至多 4 則，符合上限）。"""
+    return [_item(href=DOMAINS[i % len(DOMAINS)].format(i)) for i in range(n)]
+
+
 def test_valid_passes():
-    assert ur.validate_news_structure(_doc(*[_item()] * ur.NEWS_MAX_ITEMS)) == []
+    assert ur.validate_news_structure(_doc(*_diverse(ur.NEWS_MAX_ITEMS))) == []
+
+
+def test_source_key_normalizes_subdomains():
+    assert ur.news_source_key("https://news.cnyes.com/news/id/1") == "cnyes.com"
+    assert ur.news_source_key("https://m.cnyes.com/news/id/1") == "cnyes.com"
+    assert ur.news_source_key("https://www.cna.com.tw/news/1.aspx") == "cna.com.tw"
+    assert ur.news_source_key("https://www.bbc.co.uk/news/1") == "bbc.co.uk"
+    assert ur.news_source_key("https://money.udn.com/money/story/1") == "udn.com"
+
+
+def test_single_source_cap():
+    items = _diverse(15) + [_item(href=f"https://m.cnyes.com/news/id/x{i}") for i in range(3)]
+    errs = ur.validate_news_structure(_doc(*items))  # cnyes 3 + 3 = 6 則
+    assert any("cnyes.com" in e and "上限" in e for e in errs)
+
+
+def test_all_one_source_rejected():
+    """2026-10-28 起的實況：20 則全來自鉅亨網，必須被擋下。"""
+    errs = ur.validate_news_structure(_doc(*[_item()] * ur.NEWS_MAX_ITEMS))
+    assert any("上限" in e and "cnyes.com" in e for e in errs)
+    assert any("不同來源" in e for e in errs)
+
+
+def test_min_sources():
+    items = [_item(href=DOMAINS[i % 3].format(i)) for i in range(12)]  # 3 來源各 4 則
+    assert any("不同來源" in e for e in ur.validate_news_structure(_doc(*items)))
+
+
+def test_few_items_need_distinct_sources():
+    assert ur.validate_news_structure(_doc(*_diverse(3))) == []
+    assert any("不同來源" in e for e in ur.validate_news_structure(_doc(_item(), _item())))
 
 
 def test_missing_link_rejected():
