@@ -10,6 +10,9 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 ## 更新紀錄 (Changelog)
 
+- **2026-11-04 (v3.4.1)**:
+  - **財經焦點來源分散**：10-28 起 20 則新聞全來自鉅亨網。`validate_news_structure()` 新增來源檢查：以原文連結的註冊網域計來源（`news_source_key()`），單一來源最多 5 則、至少 4 個不同來源，違反即拒絕注入。CLAUDE.md 同步新增 Source Diversity 規範、國際題目改以英文搜尋、轉述外電須改引原始出處。測試見 `tests/test_news_structure.py`。
+
 - **2026-10-18 (v3.4.0)**:
   - **財經焦點改為短摘要 + 原文連結（版權）**：原本每則 170~410 字逐篇改寫且不附出處連結，有改作之虞。改為每則「[來源] 標題（連到原文）(日期)」+ 80 字內自寫摘要；`update_report.py` 新增 `validate_news_structure()`，缺連結、多連結、非 http 網址、摘要超過 80 漢字或超過 20 則即拒絕注入。測試見 `tests/test_news_structure.py`。
   - **`market-data` 改白名單發布**：v3.2 拿掉 Close 後，`5MA × (1 + BIAS_5/100)` 仍可精確還原每日收盤。新增 `publish_filter.minimize_market()`，只發布速覽面板實際讀取的欄位（K、D、MACD_Hist 取最後 2 筆；BIAS_20、ADX、±DI、Date 取最後 1 筆），三大法人只留外資、投信兩欄（連買連賣天數需整段序列）。頁面約少 0.9 MB，K 線圖為伺服器端 PNG 不受影響。

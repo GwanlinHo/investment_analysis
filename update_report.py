@@ -274,6 +274,19 @@ def validate_ai_structure(content):
 # 改為短摘要 + 原文連結，讀者要細節自行點原文。
 NEWS_MAX_ITEMS = 20
 NEWS_SUMMARY_MAX_ZH = 80
+# 2026-11-04 使用者要求來源分散：10-28 起 20 則全來自鉅亨網。以原文連結的網域計來源，
+# 任一來源最多 5 則、至少 4 個不同來源（則數不足 4 則時，要求每則來源皆不同）。
+NEWS_MAX_PER_SOURCE = 5
+NEWS_MIN_SOURCES = 4
+# 這些二級網域後面還要再多取一層才是註冊網域（例：cna.com.tw、bbc.co.uk）
+_SECOND_LEVEL = {"com", "net", "org", "gov", "edu", "co", "ac"}
+
+def news_source_key(url):
+    """把原文網址正規化成來源鍵（註冊網域），news.cnyes.com 與 m.cnyes.com 視為同一來源。"""
+    host = re.sub(r'^https?://', '', url).split('/')[0].split(':')[0].lower()
+    labels = host.split('.')
+    n = 3 if len(labels) >= 3 and labels[-2] in _SECOND_LEVEL and len(labels[-1]) == 2 else 2
+    return '.'.join(labels[-n:])
 
 def validate_news_structure(content):
     """回傳錯誤訊息清單；空清單代表通過。"""
@@ -297,6 +310,18 @@ def validate_news_structure(content):
         n = len(re.findall(r'[\u4e00-\u9fff]', re.sub(r'<[^>]+>', '', parts[1])))
         if n > NEWS_SUMMARY_MAX_ZH:
             errors.append(f"第 {i} 則摘要 {n} 字，超過上限 {NEWS_SUMMARY_MAX_ZH} 字")
+    sources = {}
+    for item in items:
+        hrefs = re.findall(r'<a\b[^>]*\bhref\s*=\s*"(https?://[^"]+)"', item)
+        if len(hrefs) == 1:
+            key = news_source_key(hrefs[0])
+            sources[key] = sources.get(key, 0) + 1
+    for key, cnt in sorted(sources.items(), key=lambda kv: -kv[1]):
+        if cnt > NEWS_MAX_PER_SOURCE:
+            errors.append(f"來源 {key} 共 {cnt} 則，超過單一來源上限 {NEWS_MAX_PER_SOURCE} 則")
+    need = min(NEWS_MIN_SOURCES, len(items))
+    if items and len(sources) < need:
+        errors.append(f"不同來源僅 {len(sources)} 個，至少需要 {need} 個")
     return errors
 
 def is_mostly_chinese(text):
