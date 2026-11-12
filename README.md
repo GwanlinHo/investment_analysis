@@ -10,6 +10,9 @@ This is an investment assistance tool that combines **Python automation scripts*
 
 ## 更新紀錄 (Changelog)
 
+- **2026-11-12 (v3.4.2)**:
+  - **總經表格第三欄改為「前值」**：原「日期/備註」欄直接顯示整段查證備註（100~380 字），改為只顯示上一期數值、上限 10 字。前值來源依序為 `macro_cache.json` 的 `prev`（AI 依官方最新公布填寫，含修正後數值）→ `macro_history.json` 上一個「資料期間不同」的版本（同期初值→終值不算）→ `-`；表格與速覽面板共用 `macro_history.resolve_prev()`。`prev` 超過 10 字即拒絕注入；歷史前值超過 10 字則顯示 `-`，不截斷。`MacroParser` 依表頭辨識新舊報告第三欄，回填不會把前值誤當備註。測試見 `tests/test_macro_prev.py`。
+
 - **2026-11-04 (v3.4.1)**:
   - **財經焦點來源分散**：10-28 起 20 則新聞全來自鉅亨網。`validate_news_structure()` 新增來源檢查：以原文連結的註冊網域計來源（`news_source_key()`），單一來源最多 5 則、至少 4 個不同來源，違反即拒絕注入。CLAUDE.md 同步新增 Source Diversity 規範、國際題目改以英文搜尋、轉述外電須改引原始出處。測試見 `tests/test_news_structure.py`。
 

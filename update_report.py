@@ -3,6 +3,7 @@ import datetime
 import json
 import re
 import shutil
+from html import escape as html_escape
 from html.parser import HTMLParser
 
 # --- Constants ---
@@ -19,12 +20,19 @@ class MacroParser(HTMLParser):
         self.td_index = 0
         self.capture = False
         self.text_buffer = ""
+        # 第三欄的意義依表頭決定：舊報告為「日期/備註」(note)，2026-11-12 起為「前值」(prev)
+        self.third_key = "note"
+        self.in_th = False
 
     def handle_starttag(self, tag, attrs):
         attr_dict = dict(attrs)
         if tag == "table":
             if attr_dict.get("id") == "us-macro-table": self.current_region = "US_MACRO"
             elif attr_dict.get("id") == "tw-macro-table": self.current_region = "TW_MACRO"
+            self.third_key = "note"
+        elif tag == "th" and self.current_region:
+            self.in_th = True
+            self.text_buffer = ""
         elif tag == "tr" and self.current_region:
             self.current_row = {}
             self.td_index = 0
@@ -33,10 +41,14 @@ class MacroParser(HTMLParser):
             self.text_buffer = ""
 
     def handle_data(self, data):
-        if self.capture: self.text_buffer += data
+        if self.capture or self.in_th: self.text_buffer += data
 
     def handle_endtag(self, tag):
-        if tag == "td" and self.current_region:
+        if tag == "th" and self.current_region:
+            self.in_th = False
+            if self.text_buffer.strip() == "前值":
+                self.third_key = "prev"
+        elif tag == "td" and self.current_region:
             self.capture = False
             self.td_index += 1
             val = self.text_buffer.strip()
@@ -44,7 +56,7 @@ class MacroParser(HTMLParser):
             elif self.td_index == 2:
                 self.current_row["value"] = val.replace("▲", "").replace("▼", "").replace("-", "").strip()
                 self.current_row["trend"] = "up" if "▲" in self.text_buffer else "down" if "▼" in self.text_buffer else "neutral"
-            elif self.td_index == 3: self.current_row["note"] = val
+            elif self.td_index == 3: self.current_row[self.third_key] = val
         elif tag == "tr" and self.current_region:
             if self.current_row and "name" in self.current_row and self.current_row["name"] != "指標名稱":
                 self.results[self.current_region].append(self.current_row)
@@ -199,21 +211,23 @@ def validate_numerical_integrity(content, context):
     return True
 
 def generate_macro_table(data, region_id):
-    html = f'<table class="macro-table" id="{region_id}"><thead><tr><th style="text-align:left;">指標名稱</th><th style="text-align:right;">數值</th><th style="text-align:right;">日期/備註</th></tr></thead><tbody>'
+    """總經表格：指標名稱 / 數值 / 前值。
+
+    data 為 build_macro_payload() 的列（含已決定的 prev）。2026-11-12 使用者指示：第三欄
+    原本塞整段查證備註，改為只顯示上一期數值、上限 10 字；備註仍保留在 macro_cache.json。
+    """
+    html = f'<table class="macro-table" id="{region_id}"><thead><tr><th style="text-align:left;">指標名稱</th><th style="text-align:right;">數值</th><th style="text-align:right;">前值</th></tr></thead><tbody>'
     for item in data:
+        prev = html_escape((item.get("prev") or "").strip()) or "-"
         trend_icon = "▲" if item.get('trend') == "up" else "▼" if item.get('trend') == "down" else "-"
         trend_class = "text-up" if item.get('trend') == "up" else "text-down" if item.get('trend') == "down" else "text-secondary"
         val_cell = f'<span class="{trend_class}"><strong>{item["value"]}</strong> <span style="font-size:10px;">{trend_icon}</span></span>'
-        html += f'<tr><td style="text-align:left;">{item["name"]}</td><td style="text-align:right;">{val_cell}</td><td style="text-align:right; font-size: 12px; color: #666;">{item["note"]}</td></tr>'
+        html += f'<tr><td style="text-align:left;">{item["name"]}</td><td style="text-align:right;">{val_cell}</td><td style="text-align:right; color: #666;">{prev}</td></tr>'
     html += '</tbody></table>'
     return html
 
-def inject_macro_payload(content, macro_cache):
-    """把總經現值 + 前值寫進 <script id="macro-data"> 供速覽面板前端使用。
-
-    只替換這個 script 標籤的「內容」，前後標籤保留；不使用 <script.*?id= 這種會跨標籤
-    吞噬的寫法（2026-07-29 曾因類似正則毀掉整份報告）。
-    """
+def build_macro_payload(macro_cache):
+    """總經現值 + 前值（報告表格與速覽面板共用），並把今日值併入 macro_history.json。"""
     try:
         import macro_history
         today = datetime.datetime.now().strftime("%Y-%m-%d")
@@ -224,9 +238,19 @@ def inject_macro_payload(content, macro_cache):
             print(f"[*] macro_history.json 新增 {added} 筆指標版本。")
     except Exception as e:
         print(f"[Warning] 總經歷史處理失敗，速覽面板將只顯示現值: {e}")
-        payload = {"US_MACRO": macro_cache.get("US_MACRO", []),
-                   "TW_MACRO": macro_cache.get("TW_MACRO", [])}
+        # 歷史不可用時仍採 macro_cache.json 的 prev，沒有就顯示 '-'
+        payload = {r: [dict(it, prev=(it.get("prev") or "").strip())
+                       for it in macro_cache.get(r, [])]
+                   for r in ("US_MACRO", "TW_MACRO")}
+    return payload
 
+
+def inject_macro_payload(content, payload):
+    """把 build_macro_payload() 的結果寫進 <script id="macro-data"> 供速覽面板前端使用。
+
+    只替換這個 script 標籤的「內容」，前後標籤保留；不使用 <script.*?id= 這種會跨標籤
+    吞噬的寫法（2026-07-29 曾因類似正則毀掉整份報告）。
+    """
     # </script> 不會出現在 JSON 數值中，但仍依慣例轉義，避免提早關閉標籤
     payload_json = json.dumps(payload, ensure_ascii=False).replace("</", "<\\/")
     pattern = r'(<script id="macro-data" type="application/json">).*?(</script>)'
@@ -371,6 +395,15 @@ def main():
             print("[Abort] news.html 格式或篇幅不符規範，停止報告更新。請修改 news.html 後重跑本腳本。")
             raise SystemExit(1)
 
+    import macro_history
+    prev_errors = macro_history.explicit_prev_errors(macro_cache)
+    if prev_errors:
+        for e in prev_errors:
+            print(f"[Critical Error] {e}")
+        print("[Abort] macro_cache.json 的 prev（前值）超過字數上限，停止報告更新。"
+              "請精簡 macro_cache.json 的 prev 後重跑本腳本。")
+        raise SystemExit(1)
+
     # 執行強化版校驗
     if not validate_numerical_integrity(ai_content, context):
         print("[Abort] 由於內容校驗失敗，停止報告更新。")
@@ -379,8 +412,9 @@ def main():
     ai_content = apply_tags(ai_content, context)
 
     with open(report_file, "r", encoding="utf-8") as f: content = f.read()
-    us_table = generate_macro_table(macro_cache.get("US_MACRO", []), "us-macro-table")
-    tw_table = generate_macro_table(macro_cache.get("TW_MACRO", []), "tw-macro-table")
+    macro_payload = build_macro_payload(macro_cache)
+    us_table = generate_macro_table(macro_payload.get("US_MACRO", []), "us-macro-table")
+    tw_table = generate_macro_table(macro_payload.get("TW_MACRO", []), "tw-macro-table")
     
     # 支援占位符與現有表格的替換。
     # 注意：開頭標籤內的 id 必須用 [^>]* 匹配，不可用 .*?——DOTALL 下 <table.*?id= 會從
@@ -390,7 +424,7 @@ def main():
     content = re.sub(r'<div id="tw-macro-placeholder"></div>|<table[^>]*id="tw-macro-table">.*?</table>', tw_table, content, flags=re.DOTALL)
 
     # 指標速覽面板所需的總經資料（現值 + 前值）
-    content = inject_macro_payload(content, macro_cache)
+    content = inject_macro_payload(content, macro_payload)
 
     if news_html is not None:
         pattern_news = r'(<div id="weekly-news-focus">).*?(?=<!-- news-anchor -->)'

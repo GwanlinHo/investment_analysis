@@ -53,10 +53,13 @@ def upsert(history, region, items, seen_date):
         if not name or name == "指標名稱":
             continue
         value = (item.get("value") or "").strip()
+        has_note = "note" in item  # 2026-11-12 起報告表格第三欄改為前值，回填解析不到備註
         note = (item.get("note") or "").strip()
         if not value:
             continue
         entries = bucket.setdefault(name, [])
+        if entries and not has_note and _norm(entries[-1].get("value")) == _norm(value):
+            continue  # 只有數值可比對：數值未變就視為同一版本，不覆寫既有備註
         if entries and _norm(entries[-1].get("value")) == _norm(value) \
                 and _norm(entries[-1].get("note")) == _norm(note):
             # 只是裝飾差異（解析器移除了 '-'、'▲'）：以較精確的來源字串就地更新，
@@ -149,8 +152,59 @@ def _norm(value):
     return ("-" + s) if neg else s
 
 
+PREV_MAX_LEN = 10  # 報告總經表「前值」欄字數上限（2026-11-12 使用者指示）
+
+
+def data_period(note):
+    """note 開頭的資料期間（第一個 '(' / '（' 之前），例如 '2026-09'、'2026-10-31 當週'。"""
+    return re.split(r"[(（]", note or "", maxsplit=1)[0].strip()
+
+
+def compact_prev(text):
+    """把歷史前值壓到 PREV_MAX_LEN 以內；壓不下時回傳空字串（表格顯示 '-'）。"""
+    text = (text or "").strip()
+    if len(text) <= PREV_MAX_LEN:
+        return text
+    text = re.sub(r"\s+", "", text)
+    text = re.sub(r"%-", "-", text)          # 3.75%-4.00% -> 3.75-4.00%
+    return text if len(text) <= PREV_MAX_LEN else ""
+
+
+def explicit_prev_errors(macro_cache):
+    """macro_cache.json 中 AI 填寫的 prev 欄位超過字數上限者，回傳錯誤訊息清單。"""
+    errors = []
+    for region in REGIONS:
+        for item in macro_cache.get(region, []):
+            prev = (item.get("prev") or "").strip()
+            if len(prev) > PREV_MAX_LEN:
+                errors.append(f"{region} 「{item.get('name', '')}」 prev={prev!r} 共 {len(prev)} 字，"
+                              f"超過 {PREV_MAX_LEN} 字上限")
+    return errors
+
+
+def resolve_prev(item, hist_prev_value, hist_prev_note):
+    """決定報告要顯示的前值。
+
+    1. macro_cache.json 的 prev（AI 依官方最新公布填寫的上一期數值，含修正後數值）。
+    2. 歷史紀錄的上一個版本，但僅在其資料期間與現值不同時採用——同一期的初值→終值、
+       或只是備註改寫，都不算「上一期」。數值相同但期間不同（例如利率維持不變）仍算。
+    3. 都沒有就回傳空字串。
+    """
+    explicit = (item.get("prev") or "").strip()
+    if explicit:
+        return explicit
+    cur_period = data_period(item.get("note"))
+    prev_period = data_period(hist_prev_note)
+    if hist_prev_value and prev_period and prev_period != cur_period:
+        return compact_prev(hist_prev_value)
+    return ""
+
+
 def build_payload(macro_cache, history):
-    """組出前端速覽面板要用的總經資料：現值 + 前值 + 變動日期。"""
+    """組出前端速覽面板要用的總經資料：現值 + 前值 + 變動日期。
+
+    prev 經 resolve_prev() 決定，報告內文的總經表格與速覽面板共用同一個值。
+    """
     payload = {}
     for region in REGIONS:
         rows = []
@@ -176,7 +230,7 @@ def build_payload(macro_cache, history):
                 "value": value,
                 "trend": item.get("trend", "neutral"),
                 "note": (item.get("note") or "").strip(),
-                "prev": prev_value,
+                "prev": resolve_prev(item, prev_value, prev_note),
                 "prev_note": prev_note,
                 "changed_on": changed_on,
             })
